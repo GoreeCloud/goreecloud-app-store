@@ -88,7 +88,7 @@ Wardveil owns package/security trust outcomes. Before installation is enabled, t
 
 ### Privacy Shield
 
-Privacy Shield owns consent, minimization, data-use, retention, sharing, and user-control policy. Store analytics are off in the bootstrap. Any future recommendations, diagnostics, personalization telemetry, search history, or cross-device library data must have a documented purpose and Privacy Shield treatment before collection.
+Privacy Shield owns consent, minimization, data-use, retention, sharing, and user-control policy. Store analytics are off in the development client. Any future recommendations, diagnostics, personalization telemetry, search history, or cross-device library data must have a documented purpose and Privacy Shield treatment before collection.
 
 ### Everkeep
 
@@ -109,7 +109,11 @@ The product should provide:
 - detailed product pages with version/channel, compatibility, release notes, privacy, permissions, security/provenance, continuity state, source/license information, and support links where authoritative data exists;
 - clear account switching with no cross-account metadata leakage;
 - accessible adaptive layouts for phones, tablets, foldables, desktop-class Android windows, and other supported Android form factors as validated;
+- compact-width and enlarged-text behavior that keeps navigation, account affordances, section headings, counts, release/status capsules, and metadata readable without overlap or pathological single-character vertical wrapping;
+- layout priority rules that give primary descriptive text flexible space while preserving bounded controls and status capsules, using truncation or vertical label/value presentation where horizontal pairing would become unreadable;
 - clear negative/unknown states rather than fabricated positive badges.
+
+Real-device screenshots are acceptance inputs for responsive behavior, but a single device or screenshot set does not establish Glaze UI or form-factor conformance across the supported matrix.
 
 ## Release and production gates
 
@@ -126,6 +130,6 @@ Stable qualification requires all of the following for the exact release revisio
 - Everkeep application-specific protection/recovery contract and required evidence;
 - GoreeCloud Mesh integration where applicable to the accepted release scope;
 - current Glaze UI consumer conformance evidence;
-- Android device/runtime validation for supported API levels/form factors;
+- Android device/runtime validation for supported API levels, font scales, and form factors;
 - documented installation/update rollback and failure behavior;
 - canonical project specification, changelog, README, and user documentation reconciled to the validated revision.

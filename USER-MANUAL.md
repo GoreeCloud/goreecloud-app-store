@@ -4,7 +4,7 @@
 
 GoreeCloud App Store is currently an **active-development Android application**. It is not production-ready and does not yet install applications or open GoreeCloud services.
 
-The present application validates the native store experience, multi-user catalog behavior, first-party GoreeCloud artwork consumption, and GoreeCloud platform integration boundaries before real distribution is enabled.
+The present application validates the native store experience, multi-user catalog behavior, first-party GoreeCloud artwork consumption, responsive store presentation, and GoreeCloud platform integration boundaries before real distribution is enabled.
 
 `productionAcceptance` remains `false`.
 
@@ -18,7 +18,7 @@ Current development/debug builds use:
 
 - application ID `com.goreecloud.appstore.dev`;
 - Android label **GoreeCloud App Store Dev**;
-- development version line `0.1.1-dev` / version code `2` at this checkpoint;
+- development version line `0.1.2-dev` / version code `3` at this checkpoint;
 - the repository-managed, development-only signing certificate documented in `development/signing/README.md`.
 
 The development package is intentionally separate from the reserved future production application ID `com.goreecloud.appstore`. The development signing identity is non-production test material and must never sign the production package or a Stable artifact.
@@ -41,11 +41,15 @@ These are not real GoreeCloud accounts, groups, or production roles. They are lo
 
 Changing the development identity immediately recalculates which catalog entries are visible and returns the current section to its top. An entry for which the active session is not entitled is concealed from visible lists and search results.
 
+On compact screens, a long active development identity name may be ellipsized in the persistent header so the account icon and menu affordance remain usable. The complete identity names remain available in the account menu.
+
 ## Store sections
 
 ### Discover
 
 Shows all development catalog entries currently available to the active development identity. A compact development-status notice is shown instead of embedding platform diagnostics throughout the catalog.
+
+The available-item count is presented below the section heading so compact-width and larger-text layouts do not force the count over the heading. Singular and plural labels are handled separately.
 
 ### Apps
 
@@ -75,15 +79,25 @@ Where approved assets exist, the Android client uses native VectorDrawable deriv
 
 The branding repository remains authoritative. Copies in this App Store repository are implementation derivatives only. See `BRANDING.md` for the exact canonical asset and Git-blob mappings.
 
+## Catalog cards and release channels
+
+Catalog cards show artwork, name, summary, type/category metadata, release channel, and a product-navigation affordance.
+
+The card layout gives the primary type/category metadata flexible width while keeping the release-channel capsule on one line. On compact widths, long metadata is ellipsized rather than squeezing labels such as **Development** into vertical single-character wrapping. Product titles may use up to two lines when needed.
+
 ## Product details
 
 Select an application or service card to open its store-style development detail sheet. The sheet can show approved artwork, type/category, development release channel, version information, access state, and the unavailable primary action.
+
+Detail metadata uses vertically stacked label/value presentation so long values remain readable on compact widths instead of competing with their labels in one horizontal row.
 
 The **Install** or **Open** action remains disabled because package/service delivery is not yet trusted or connected.
 
 ## Development status and integral GoreeCloud systems
 
 Open the account menu and choose **Development status**, or use the development-status affordance on Discover, to inspect current integration boundaries. These diagnostics are development state, not production trust badges.
+
+Status names are given flexible width while state capsules remain single-line so compact layouts do not force status text into unreadable vertical wrapping.
 
 The status surface covers:
 
@@ -105,6 +119,8 @@ Client-side catalog filtering is not the future sole authorization boundary. Pro
 ## Current limitations
 
 The application currently has no production login, server-authoritative production catalog service, APK download/install flow, service-launch flow, production update delivery, installed-library reconciliation, production signing, Wardveil package-verification acceptance, Privacy Shield runtime acceptance, Everkeep runtime recovery acceptance, Mesh runtime event transport, or Stable Glaze UI conformance acceptance.
+
+The compact-width corrections described above are source-validated but still require continued real-device review across supported screen sizes and font-scale/accessibility settings before any form-factor or Glaze UI conformance claim is made.
 
 These limitations are deliberate fail-closed boundaries, not hidden features.
 
