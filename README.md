@@ -25,9 +25,17 @@ The current development branch establishes:
 - explicit source boundaries for GoreeCloud Identity, Wardveil Security, Privacy Shield, Everkeep, and GoreeCloud Mesh;
 - a machine-readable platform-integration record;
 - unit tests that prevent implicit administrator bypass of catalog audience rules;
-- exact-source Android CI for tests, lint, APK assembly, package/application-label validation, SHA-256 evidence, and development artifact publication.
+- exact-source Android CI for tests, lint, APK assembly, package/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
 
 The current interface has been iterated using real-device screenshots from the Android development build. That review removed oversized internal diagnostic panels from ordinary store browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets.
+
+## Development APK identity
+
+CI/debug builds install as `com.goreecloud.appstore.dev` with the Android label **GoreeCloud App Store Dev**. They are signed with one repository-managed development-only certificate so successive development builds can update each other instead of receiving a new ephemeral Android debug identity from every CI runner.
+
+The reserved future production application ID remains `com.goreecloud.appstore`. The development signing key MUST NOT sign that production package or any artifact represented as production-approved or Stable. See `development/signing/README.md` for the explicit boundary and certificate fingerprint.
+
+Older bootstrap APKs used `com.goreecloud.appstore` with ephemeral runner-generated debug certificates. Those builds cannot be upgraded in place by later CI APKs and should be removed from test devices before using the new development package.
 
 ## Important acceptance boundary
 
@@ -74,7 +82,7 @@ A Gradle wrapper is not yet committed. With JDK 17 and Gradle 9.5.0 installed:
 gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
 
-CI installs the pinned Gradle distribution directly, checks out and records the exact source revision, validates the generated development APK package/application label, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
+CI installs the pinned Gradle distribution directly, checks out and records the exact source revision, validates the generated development APK package/application label and development signing certificate, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
 
 ## Repository records
 
@@ -85,6 +93,7 @@ CI installs the pinned Gradle distribution directly, checks out and records the 
 - `COMPETITIVE-OBJECTIVES.md` — inspiration translated into GoreeCloud-native objectives
 - `BRANDING.md` — canonical branding-consumer mappings
 - `USER-MANUAL.md` — current user/developer behavior and limitations
+- `development/signing/README.md` — development package/signing boundary
 - `contracts/platform-integrations.json` — machine-readable current integration truth
 - `app/src/main/assets/catalog/development-catalog.json` — non-authoritative development fixture catalog
 
