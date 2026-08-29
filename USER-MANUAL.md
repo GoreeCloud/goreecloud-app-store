@@ -12,13 +12,13 @@ The present application validates the native store experience, multi-user catalo
 
 There is no production or Stable end-user App Store release yet.
 
-The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/application-label verification, development signing-certificate verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
+The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/version/application-label verification, development signing-certificate verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
 
 Current development/debug builds use:
 
 - application ID `com.goreecloud.appstore.dev`;
 - Android label **GoreeCloud App Store Dev**;
-- development version line `0.1.2-dev` / version code `3` at this checkpoint;
+- development version line `0.1.3-dev` / version code `4` at this checkpoint;
 - the repository-managed, development-only signing certificate documented in `development/signing/README.md`.
 
 The development package is intentionally separate from the reserved future production application ID `com.goreecloud.appstore`. The development signing identity is non-production test material and must never sign the production package or a Stable artifact.
@@ -31,23 +31,25 @@ If the device still shows the large **Development identity adapter** panel, lett
 
 Remove that older bootstrap from the test device, or leave it installed only if you intentionally want to compare it. Install and launch **GoreeCloud App Store Dev** for current testing. The `.dev` package can coexist with the old package because they have different Android application IDs.
 
-Future development artifacts are intended to retain the same development package and signing identity so they can update earlier `.dev` installations, subject to normal Android version-code rules.
+Validated `.dev` artifacts retain the same development package and signing identity so a newer build can update an earlier `.dev` installation when its Android version code advances normally.
 
 ## Development account switcher
 
-The persistent account control in the App Store header offers development-only identities such as **Standard demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
+The account menu offers development-only identities such as **Standard demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
 
 These are not real GoreeCloud accounts, groups, or production roles. They are local fixtures used to demonstrate how different logins can receive different App Store catalogs while production GoreeCloud Identity integration is still pending.
 
 Changing the development identity immediately recalculates which catalog entries are visible and returns the current section to its top. An entry for which the active session is not entitled is concealed from visible lists and search results.
 
-On compact screens, a long active development identity name may be ellipsized in the persistent header so the account icon and menu affordance remain usable. The complete identity names remain available in the account menu.
+For compact phone headers, the active fixture is presented with a shorter label such as **Standard**, **Administrator**, or **Developer**. The complete fixture names remain visible in the account menu. This keeps the account icon and menu affordance readable without changing the underlying identity session.
 
 ## Store sections
 
 ### Discover
 
 Shows all development catalog entries currently available to the active development identity. A compact development-status notice is shown instead of embedding platform diagnostics throughout the catalog.
+
+The Discover hero is intentionally compact so catalog content appears sooner while still identifying the store and showing the number of entries available to the active development identity.
 
 The available-item count is presented below the section heading so compact-width and larger-text layouts do not force the count over the heading. Singular and plural labels are handled separately.
 
@@ -69,9 +71,15 @@ Shows a dedicated development unavailable state. Per-identity installed/library 
 
 ## Search
 
-Use **Search your available catalog** to filter the current entitled section by application/service name, summary, or category.
-
 Search operates only on entries already available to the active development identity. It does not reveal entries that were filtered out by entitlement rules.
+
+The prompt is section-specific in the current build:
+
+- Discover: **Search apps and services**
+- Apps: **Search apps**
+- Services: **Search services**
+
+Search matches the visible catalog by application/service name, summary, or category.
 
 ## Application and service artwork
 
@@ -81,13 +89,15 @@ The branding repository remains authoritative. Copies in this App Store reposito
 
 ## Catalog cards and release channels
 
-Catalog cards show artwork, name, summary, type/category metadata, release channel, and a product-navigation affordance.
+Catalog-list cards show artwork, name, summary, type/category metadata, and a product-navigation affordance.
 
-The card layout gives the primary type/category metadata flexible width while keeping the release-channel capsule on one line. On compact widths, long metadata is ellipsized rather than squeezing labels such as **Development** into vertical single-character wrapping. Product titles may use up to two lines when needed.
+The development release channel is no longer repeated as a capsule on every list card. That channel is already implicit in the development environment and the repeated capsule consumed horizontal space needed for useful type/category metadata on compact phones. Release channel remains available in the product-detail sheet where it is materially useful.
+
+Product titles may use up to two lines when needed; summaries and metadata use bounded truncation instead of single-character vertical wrapping.
 
 ## Product details
 
-Select an application or service card to open its store-style development detail sheet. The sheet can show approved artwork, type/category, development release channel, version information, access state, and the unavailable primary action.
+Select an application or service card to open its store-style development detail sheet. The sheet shows approved artwork where available, type/category, development release channel, version information, access state, and the unavailable primary action.
 
 Detail metadata uses vertically stacked label/value presentation so long values remain readable on compact widths instead of competing with their labels in one horizontal row.
 
@@ -97,7 +107,7 @@ The **Install** or **Open** action remains disabled because package/service deli
 
 Open the account menu and choose **Development status**, or use the development-status affordance on Discover, to inspect current integration boundaries. These diagnostics are development state, not production trust badges.
 
-Status names are given flexible width while state capsules remain single-line so compact layouts do not force status text into unreadable vertical wrapping.
+The current status sheet keeps its **Development status** heading and explicit **Close** action visible while the diagnostic body scrolls. Status names receive flexible width while state capsules remain bounded and single-line.
 
 The status surface covers:
 
@@ -120,7 +130,7 @@ Client-side catalog filtering is not the future sole authorization boundary. Pro
 
 The application currently has no production login, server-authoritative production catalog service, APK download/install flow, service-launch flow, production update delivery, installed-library reconciliation, production signing, Wardveil package-verification acceptance, Privacy Shield runtime acceptance, Everkeep runtime recovery acceptance, Mesh runtime event transport, or Stable Glaze UI conformance acceptance.
 
-The compact-width corrections described above are source-validated but still require continued real-device review across supported screen sizes and font-scale/accessibility settings before any form-factor or Glaze UI conformance claim is made.
+The responsive corrections are being validated from real-device screenshot review, but the current phone screenshots do not establish acceptance across the supported screen-size, orientation, font-scale, accessibility, or Android runtime matrix.
 
 These limitations are deliberate fail-closed boundaries, not hidden features.
 
