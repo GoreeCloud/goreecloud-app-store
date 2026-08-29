@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "environment": "development-fixture",
   "authoritative": false,
-  "notice": "Audience assignments, versions, package identities, and endpoints in this file are non-production fixtures. Package names and endpoints remain blank until approved release/service metadata is ingested.",
+  "notice": "Audience assignments, versions, package identities, endpoints, and release channels in this file are non-production fixtures. Package names and endpoints remain blank until approved release/service metadata is ingested.",
   "items": [
     {
       "id": "goreecloud.browser",
@@ -11,7 +11,7 @@
       "type": "application",
       "category": "Internet",
       "version": "development",
-      "releaseChannel": "stable",
+      "releaseChannel": "development",
       "packageName": "",
       "serviceUrl": "",
       "access": {
@@ -26,7 +26,7 @@
       "type": "application",
       "category": "Communication",
       "version": "development",
-      "releaseChannel": "stable",
+      "releaseChannel": "development",
       "packageName": "",
       "serviceUrl": "",
       "access": {
@@ -41,7 +41,7 @@
       "type": "application",
       "category": "Location",
       "version": "development",
-      "releaseChannel": "stable",
+      "releaseChannel": "development",
       "packageName": "",
       "serviceUrl": "",
       "access": {
@@ -56,7 +56,7 @@
       "type": "application",
       "category": "Administration",
       "version": "development",
-      "releaseChannel": "stable",
+      "releaseChannel": "development",
       "packageName": "",
       "serviceUrl": "",
       "access": {
@@ -71,7 +71,7 @@
       "type": "service",
       "category": "Identity",
       "version": "development",
-      "releaseChannel": "stable",
+      "releaseChannel": "development",
       "packageName": "",
       "serviceUrl": "",
       "access": {

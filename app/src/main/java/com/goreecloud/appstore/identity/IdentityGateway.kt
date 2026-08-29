@@ -7,6 +7,7 @@ import com.goreecloud.appstore.domain.IdentitySession
  *
  * The development adapter below exists only to exercise entitlement behavior while the
  * production GoreeCloud Identity application-facing runtime remains unaccepted.
+ * Audience names here are fixtures and do not define production GoreeCloud Identity policy.
  */
 interface IdentityGateway {
     val availableSessions: List<IdentitySession>
@@ -18,7 +19,7 @@ object DevelopmentIdentityGateway : IdentityGateway {
         IdentitySession(
             subjectId = "dev:family",
             displayName = "Family demo",
-            audiences = setOf("audience:family", "channel:stable"),
+            audiences = setOf("audience:family"),
             isAuthenticated = true,
         ),
         IdentitySession(
@@ -27,18 +28,13 @@ object DevelopmentIdentityGateway : IdentityGateway {
             audiences = setOf(
                 "audience:family",
                 "audience:administrator",
-                "channel:stable",
-                "channel:internal",
             ),
             isAuthenticated = true,
         ),
         IdentitySession(
             subjectId = "dev:developer",
             displayName = "Developer demo",
-            audiences = setOf(
-                "audience:developer",
-                "channel:development",
-            ),
+            audiences = setOf("audience:developer"),
             isAuthenticated = true,
         ),
         IdentitySession(
