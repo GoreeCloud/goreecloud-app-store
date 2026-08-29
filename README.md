@@ -6,21 +6,28 @@ This repository is an **original native GoreeCloud implementation**. Google Play
 
 ## Current checkpoint
 
-Status: **Active Development — native Android bootstrap**  
+Status: **Active Development — native Android application**  
 Production acceptance: **false**
 
 The current development branch establishes:
 
-- a native Android/Jetpack Compose application shell;
-- a Glaze UI 2.0.0 consumer target with tangible surfaces, capsule navigation, responsive Compose layout, 48dp-class interactive controls, and effects-free behavior;
+- a native Android/Jetpack Compose store application;
+- a Glaze UI 2.0.0 consumer target with layered native surfaces, capsule controls, light/dark adaptation, accessible interaction sizing, and effects-free behavior;
+- a persistent App Store/account header and Material bottom navigation;
 - a per-session entitlement engine that filters the catalog before presentation;
 - development-only multi-user identity fixtures behind an explicit `IdentityGateway` boundary;
 - distinct application and service catalog entries;
 - Discover, Apps, Services, Updates, and Library surfaces;
+- search constrained to the already-entitled catalog;
+- store-style application/service cards and product-detail bottom sheets;
+- approved first-party artwork derivatives tied to canonical assets in `GoreeCloud/goreecloud-branding-assets`;
+- development-status diagnostics separated from ordinary catalog browsing;
 - explicit source boundaries for GoreeCloud Identity, Wardveil Security, Privacy Shield, Everkeep, and GoreeCloud Mesh;
 - a machine-readable platform-integration record;
 - unit tests that prevent implicit administrator bypass of catalog audience rules;
-- Android CI for tests, lint, and debug APK assembly.
+- exact-source Android CI for tests, lint, APK assembly, package/application-label validation, SHA-256 evidence, and development artifact publication.
+
+The current interface has been iterated using real-device screenshots from the Android development build. That review removed oversized internal diagnostic panels from ordinary store browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets.
 
 ## Important acceptance boundary
 
@@ -28,7 +35,7 @@ The account switcher is **not** a production GoreeCloud Identity login. It uses 
 
 The development catalog also does not assert production package identities, service endpoints, versions, or audience taxonomy. Those values must come from approved authoritative release, service, and Identity metadata.
 
-Package download, APK installation, service launch, update delivery, Wardveil package verification, production Privacy Shield policy evaluation, Everkeep library recovery, and Mesh lifecycle transport are deliberately unavailable until their real integrations are implemented and validated. The UI must not imply otherwise.
+Package download, APK installation, service launch, production update delivery, Wardveil package-verification acceptance, production Privacy Shield policy evaluation, Everkeep library recovery, and Mesh lifecycle transport are deliberately unavailable until their real integrations are implemented and validated. The UI must not imply otherwise.
 
 ## Authorization model
 
@@ -40,15 +47,24 @@ The App Store separates three decisions:
 
 No role receives an undocumented superuser bypass. Administrative access must be explicitly granted by policy.
 
+## Branding contract
+
+`GoreeCloud/goreecloud-branding-assets` is the canonical branding repository. Android VectorDrawable copies in this repository are consumer derivatives only and do not become new branding authorities.
+
+See `BRANDING.md` for the exact canonical asset paths and Git-blob mappings currently consumed for Browser, Messenger, Location, Identity, and Manager artwork.
+
+No App Store-specific official icon/logo is established here. Any future official App Store artwork must originate in the canonical branding repository first.
+
 ## Build foundation
 
-The bootstrap is pinned to current stable Android tooling as of August 29, 2026:
+The application is pinned to current stable Android tooling as of August 29, 2026:
 
 - Android Gradle Plugin 9.3.0
 - Gradle 9.5.0
 - JDK 17
 - compileSdk 37
 - targetSdk 36
+- minSdk 26
 - Kotlin / Compose compiler plugin 2.4.10
 - Jetpack Compose BOM 2026.08.00
 
@@ -58,7 +74,7 @@ A Gradle wrapper is not yet committed. With JDK 17 and Gradle 9.5.0 installed:
 gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
 
-CI installs the pinned Gradle distribution directly.
+CI installs the pinned Gradle distribution directly, checks out and records the exact source revision, validates the generated development APK package/application label, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
 
 ## Repository records
 
@@ -67,6 +83,7 @@ CI installs the pinned Gradle distribution directly.
 - `FEATURES.md` — implemented and planned capabilities
 - `BENEFITS.md` — intended user/platform value
 - `COMPETITIVE-OBJECTIVES.md` — inspiration translated into GoreeCloud-native objectives
+- `BRANDING.md` — canonical branding-consumer mappings
 - `USER-MANUAL.md` — current user/developer behavior and limitations
 - `contracts/platform-integrations.json` — machine-readable current integration truth
 - `app/src/main/assets/catalog/development-catalog.json` — non-authoritative development fixture catalog
