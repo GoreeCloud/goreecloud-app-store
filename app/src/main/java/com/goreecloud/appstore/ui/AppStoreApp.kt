@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -110,10 +112,14 @@ fun GoreeCloudAppStore() {
             StoreTab.SERVICES -> entitled.filter { it.type == StoreItemType.SERVICE }
             StoreTab.UPDATES, StoreTab.LIBRARY -> emptyList()
         }
-        if (query.isBlank()) tabItems else tabItems.filter {
-            it.name.contains(query, ignoreCase = true) ||
-                it.summary.contains(query, ignoreCase = true) ||
-                it.category.contains(query, ignoreCase = true)
+        if (query.isBlank()) {
+            tabItems
+        } else {
+            tabItems.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                    it.summary.contains(query, ignoreCase = true) ||
+                    it.category.contains(query, ignoreCase = true)
+            }
         }
     }
 
@@ -156,10 +162,11 @@ fun GoreeCloudAppStore() {
                         item {
                             StoreSectionHeading(
                                 title = "Available to you",
-                                subtitle = "${visible.size} items in this development catalog",
+                                subtitle = catalogCountLabel(visible.size),
                             )
                         }
                     }
+
                     StoreTab.APPS -> {
                         item {
                             TabIntro(
@@ -169,6 +176,7 @@ fun GoreeCloudAppStore() {
                         }
                         item { StoreSearch(query = query, onQueryChanged = { query = it }) }
                     }
+
                     StoreTab.SERVICES -> {
                         item {
                             TabIntro(
@@ -178,6 +186,7 @@ fun GoreeCloudAppStore() {
                         }
                         item { StoreSearch(query = query, onQueryChanged = { query = it }) }
                     }
+
                     StoreTab.UPDATES -> {
                         item {
                             TabIntro(
@@ -194,6 +203,7 @@ fun GoreeCloudAppStore() {
                             )
                         }
                     }
+
                     StoreTab.LIBRARY -> {
                         item {
                             TabIntro(
@@ -212,7 +222,11 @@ fun GoreeCloudAppStore() {
                     }
                 }
 
-                if (selectedTab == StoreTab.DISCOVER || selectedTab == StoreTab.APPS || selectedTab == StoreTab.SERVICES) {
+                if (
+                    selectedTab == StoreTab.DISCOVER ||
+                    selectedTab == StoreTab.APPS ||
+                    selectedTab == StoreTab.SERVICES
+                ) {
                     if (visible.isEmpty()) {
                         item {
                             EmptyCatalogState(
@@ -257,20 +271,31 @@ private fun StoreTopBar(
                 .statusBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("GoreeCloud", style = MaterialTheme.typography.labelLarge)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        "GoreeCloud",
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                    )
                     Surface(
                         shape = GlazeCapsuleShape,
                         color = MaterialTheme.colorScheme.secondaryContainer,
                     ) {
                         Text(
                             "Development",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            maxLines = 1,
                         )
                     }
                 }
@@ -278,17 +303,28 @@ private fun StoreTopBar(
                     "App Store",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
             }
 
-            Box {
+            Box(
+                modifier = Modifier.widthIn(min = 138.dp, max = 172.dp),
+            ) {
                 TextButton(
-                    modifier = Modifier.height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
                     onClick = { expanded = true },
                 ) {
                     Icon(Icons.Rounded.AccountCircle, contentDescription = null)
-                    Spacer(Modifier.size(6.dp))
-                    Text(session.displayName, maxLines = 1)
+                    Spacer(Modifier.size(5.dp))
+                    Text(
+                        session.displayName,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     Icon(Icons.Rounded.ExpandMore, contentDescription = null)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -330,8 +366,15 @@ private fun DevelopmentStatusStrip(onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Rounded.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
                 Text(
                     "Simulated accounts are active",
                     fontWeight = FontWeight.SemiBold,
@@ -343,7 +386,11 @@ private fun DevelopmentStatusStrip(onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
-            Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Icon(
+                Icons.Rounded.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
         }
     }
 }
@@ -356,7 +403,10 @@ private fun StoreHero(visibleCount: Int) {
         color = MaterialTheme.colorScheme.primaryContainer,
         tonalElevation = 2.dp,
     ) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
             Surface(
                 modifier = Modifier.size(52.dp),
                 shape = GlazeSmallCardShape,
@@ -388,6 +438,7 @@ private fun StoreHero(visibleCount: Int) {
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
                 )
             }
         }
@@ -397,8 +448,16 @@ private fun StoreHero(visibleCount: Int) {
 @Composable
 private fun TabIntro(title: String, body: String) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -411,19 +470,32 @@ private fun StoreSearch(query: String, onQueryChanged: (String) -> Unit) {
         singleLine = true,
         shape = GlazeCapsuleShape,
         leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
-        placeholder = { Text("Search your available catalog") },
+        placeholder = {
+            Text(
+                "Search your available catalog",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
     )
 }
 
 @Composable
 private fun StoreSectionHeading(title: String, subtitle: String) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -434,21 +506,26 @@ private fun StoreItemCard(item: StoreItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = GlazeCardShape,
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            StoreArtwork(item = item, size = 72.dp)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            StoreArtwork(item = item, size = 64.dp)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
                 Text(
                     item.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
@@ -458,28 +535,43 @@ private fun StoreItemCard(item: StoreItem, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         "${item.type.label()} · ${item.category}",
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     ReleaseChannelPill(item.releaseChannel)
                 }
             }
-            Icon(Icons.Rounded.ChevronRight, contentDescription = "View ${item.name}")
+            Icon(
+                Icons.Rounded.ChevronRight,
+                contentDescription = "View ${item.name}",
+            )
         }
     }
 }
 
 @Composable
 private fun ReleaseChannelPill(channel: ReleaseChannel) {
-    Surface(shape = GlazeCapsuleShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+    Surface(
+        shape = GlazeCapsuleShape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
         Text(
             channel.label(),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Clip,
         )
     }
 }
@@ -507,8 +599,18 @@ private fun EmptyCatalogState(authenticated: Boolean, hasQuery: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-            Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                body,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -537,12 +639,29 @@ private fun UnavailableState(
                 color = MaterialTheme.colorScheme.primaryContainer,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(34.dp), tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(34.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-            Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            TextButton(onClick = onDetails) { Text("Development status") }
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                body,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = onDetails) {
+                Text("Development status")
+            }
         }
     }
 }
@@ -559,7 +678,7 @@ private fun StoreNavigation(selected: StoreTab, onSelected: (StoreTab) -> Unit) 
                 selected = selected == tab,
                 onClick = { onSelected(tab) },
                 icon = { Icon(tab.icon, contentDescription = null) },
-                label = { Text(tab.title) },
+                label = { Text(tab.title, maxLines = 1) },
             )
         }
     }
@@ -567,7 +686,10 @@ private fun StoreNavigation(selected: StoreTab, onSelected: (StoreTab) -> Unit) 
 
 @Composable
 private fun StoreItemSheet(item: StoreItem, onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -576,10 +698,20 @@ private fun StoreItemSheet(item: StoreItem, onDismiss: () -> Unit) {
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                StoreArtwork(item = item, size = 84.dp)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(item.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StoreArtwork(item = item, size = 80.dp)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                    Text(
+                        item.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
                     Text(
                         "${item.type.label()} · ${item.category}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -591,17 +723,29 @@ private fun StoreItemSheet(item: StoreItem, onDismiss: () -> Unit) {
 
             Text(item.summary, style = MaterialTheme.typography.bodyLarge)
 
-            Surface(shape = GlazeSmallCardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Surface(
+                shape = GlazeSmallCardShape,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     item.version?.let { MetadataLine(label = "Version", value = it) }
                     MetadataLine(label = "Channel", value = item.releaseChannel.label())
-                    MetadataLine(label = "Access", value = "Available to this development identity")
+                    MetadataLine(
+                        label = "Access",
+                        value = "Available to this development identity",
+                    )
                 }
             }
 
-            val actionAvailable = item.type == StoreItemType.APPLICATION && UnavailablePackageDeliveryGateway.isAvailable
+            val actionAvailable =
+                item.type == StoreItemType.APPLICATION && UnavailablePackageDeliveryGateway.isAvailable
             Button(
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
                 enabled = actionAvailable,
                 onClick = {},
             ) {
@@ -630,15 +774,29 @@ private fun StoreItemSheet(item: StoreItem, onDismiss: () -> Unit) {
 
 @Composable
 private fun MetadataLine(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }
 
 @Composable
 private fun PlatformStatusSheet(onDismiss: () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -647,7 +805,11 @@ private fun PlatformStatusSheet(onDismiss: () -> Unit) {
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Development status", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(
+                "Development status",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
             Text(
                 "These diagnostics describe current implementation boundaries. They are not production trust or acceptance badges.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -658,24 +820,42 @@ private fun PlatformStatusSheet(onDismiss: () -> Unit) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(integration.system, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Surface(shape = GlazeCapsuleShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            integration.system,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Surface(
+                            shape = GlazeCapsuleShape,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                        ) {
                             Text(
                                 integration.state.label(),
                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
                             )
                         }
                     }
-                    Text(integration.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        integration.detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                if (index != PlatformIntegrationRegistry.current.lastIndex) HorizontalDivider()
+                if (index != PlatformIntegrationRegistry.current.lastIndex) {
+                    HorizontalDivider()
+                }
             }
 
-            Surface(shape = GlazeSmallCardShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+            Surface(
+                shape = GlazeSmallCardShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+            ) {
                 Text(
                     "Production acceptance remains false for this App Store build.",
                     modifier = Modifier.padding(16.dp),
@@ -707,7 +887,11 @@ private fun StoreArtwork(item: StoreItem, size: Dp) {
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    if (item.type == StoreItemType.APPLICATION) Icons.Rounded.Apps else Icons.Rounded.Cloud,
+                    if (item.type == StoreItemType.APPLICATION) {
+                        Icons.Rounded.Apps
+                    } else {
+                        Icons.Rounded.Cloud
+                    },
                     contentDescription = item.name,
                     modifier = Modifier.size(size * 0.46f),
                     tint = MaterialTheme.colorScheme.primary,
@@ -715,6 +899,11 @@ private fun StoreArtwork(item: StoreItem, size: Dp) {
             }
         }
     }
+}
+
+private fun catalogCountLabel(count: Int): String = when (count) {
+    1 -> "1 item in this development catalog"
+    else -> "$count items in this development catalog"
 }
 
 private fun StoreItem.artworkResource(): Int? = when (id) {
