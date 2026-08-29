@@ -12,6 +12,21 @@ The App Store must be original GoreeCloud-owned native software. Store patterns 
 
 The first client is a native Android application written in Kotlin with Jetpack Compose. Android framework, Jetpack, Kotlin, Gradle, and mature cryptographic/transport primitives are supporting foundations, not substitute product implementations.
 
+## Development package and signing boundary
+
+The Android namespace remains `com.goreecloud.appstore`. The application identities have distinct development and production responsibilities:
+
+- `com.goreecloud.appstore.dev` is the development/debug installation identity used by CI and device-review APKs.
+- `com.goreecloud.appstore` is reserved for a future production-approved application and must not be signed with the repository-managed development key.
+
+Development APKs use one stable repository-managed PKCS12 development certificate so successive CI artifacts do not receive unrelated ephemeral Android debug identities. This development private key is intentionally non-production test material and is not a production security authority.
+
+The development signing certificate SHA-256 fingerprint is recorded in `development/signing/README.md`. CI must verify the expected development package ID, label, version metadata, APK SHA-256, and signing certificate before publishing a development artifact.
+
+Development version codes must advance when required for Android upgrade semantics. A future production release requires a separate controlled signing identity, custody and recovery policy, explicit signing provenance, and production acceptance. Development signing material must never be promoted into that boundary.
+
+Older bootstrap APKs that used `com.goreecloud.appstore` with ephemeral CI debug certificates are not an accepted update lineage and may require removal from test devices.
+
 ## Multi-user and entitlement requirements
 
 - Every production user session must originate from GoreeCloud Identity or an explicitly approved local/offline identity path.
@@ -102,6 +117,7 @@ Stable qualification requires all of the following for the exact release revisio
 
 - reproducible or otherwise controlled build provenance;
 - passing CI, unit/integration tests, lint, and package validation;
+- a controlled production application-signing identity distinct from development signing;
 - real GoreeCloud Identity integration and entitlement enforcement acceptance;
 - authenticated production catalog delivery;
 - backend re-authorization for protected artifact/service access;

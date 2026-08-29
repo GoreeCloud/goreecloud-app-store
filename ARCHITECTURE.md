@@ -59,6 +59,27 @@ A production catalog service should provide an authenticated snapshot containing
 
 For privacy and security, a user should preferably receive only entitled entries rather than downloading a complete secret catalog and hiding items locally.
 
+## Development artifact identity and signing
+
+Development/device-review APKs are intentionally isolated from the future production package lineage.
+
+```text
+Development CI artifact
+  package: com.goreecloud.appstore.dev
+  label:   GoreeCloud App Store Dev
+  signer:  repository-managed development-only certificate
+
+Future production artifact
+  package: com.goreecloud.appstore
+  signer:  separate controlled production identity (not yet established)
+```
+
+The stable development certificate prevents each CI runner from generating a mutually incompatible Android debug signature. Its private key is intentionally repository-managed non-production test material and creates no production signing authority.
+
+CI verifies the `.dev` package identity, application label, version metadata, APK digest, and development certificate fingerprint before artifact publication. Production signing must later use distinct protected key custody, provenance, recovery, and acceptance processes.
+
+The early bootstrap lineage that used `com.goreecloud.appstore` with ephemeral runner debug certificates is not the production lineage and is not expected to upgrade in place. Those old installations may be removed from test devices.
+
 ## Package-delivery boundary
 
 No installer permission is requested in the bootstrap. Before Android installation is enabled, the implementation needs:
@@ -81,8 +102,8 @@ A service catalog entry may expose an approved HTTPS/deep-link destination, but 
 
 A future offline cache may show a previously authorized catalog only within a defined freshness window and must clearly distinguish cached state from current authority. Protected downloads, new service grants, or stale elevated access must not be inferred solely from cached authorization.
 
-## Current bootstrap boundary
+## Current development boundary
 
-Implemented now: native Android shell, development catalog loader, development identity adapter, entitlement filtering, application/service views, explicit platform status, tests, CI.
+Implemented now: native Android application, development catalog loader, development Identity adapter, entitlement filtering, application/service views, dedicated development platform-status surface, canonical artwork derivatives, stable `.dev` installation identity and signing certificate, tests, lint, exact-source CI, and development APK evidence publication.
 
-Not connected now: production Identity, production catalog service, package download/install, service launch, updates, installed library, Wardveil runtime, Privacy Shield runtime, Everkeep runtime, Mesh runtime. `productionAcceptance` therefore remains `false`.
+Not connected now: production Identity, production catalog service, package download/install, service launch, production updates, installed library, Wardveil runtime acceptance, Privacy Shield runtime acceptance, Everkeep runtime acceptance, Mesh runtime, production signing, or Stable Glaze UI conformance. `productionAcceptance` therefore remains `false`.

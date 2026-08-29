@@ -12,7 +12,26 @@ The present application validates the native store experience, multi-user catalo
 
 There is no production or Stable end-user App Store release yet.
 
-The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/application-label verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
+The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/application-label verification, development signing-certificate verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
+
+Current development/debug builds use:
+
+- application ID `com.goreecloud.appstore.dev`;
+- Android label **GoreeCloud App Store Dev**;
+- development version line `0.1.1-dev` / version code `2` at this checkpoint;
+- the repository-managed, development-only signing certificate documented in `development/signing/README.md`.
+
+The development package is intentionally separate from the reserved future production application ID `com.goreecloud.appstore`. The development signing identity is non-production test material and must never sign the production package or a Stable artifact.
+
+### If an older bootstrap is still installed
+
+Early bootstrap CI APKs used the production-reserved package name `com.goreecloud.appstore` while Android CI generated a different ephemeral debug certificate on each runner. Android therefore cannot replace one of those old bootstrap installations with a later CI APK signed by another runner.
+
+If the device still shows the large **Development identity adapter** panel, letter-only G/I/M artwork, text-glyph bottom navigation, **Search what is available to you**, or the large **Platform integration checkpoint** inside normal browsing, that is the old bootstrap application.
+
+Remove that older bootstrap from the test device, or leave it installed only if you intentionally want to compare it. Install and launch **GoreeCloud App Store Dev** for current testing. The `.dev` package can coexist with the old package because they have different Android application IDs.
+
+Future development artifacts are intended to retain the same development package and signing identity so they can update earlier `.dev` installations, subject to normal Android version-code rules.
 
 ## Development account switcher
 
@@ -91,7 +110,7 @@ These limitations are deliberate fail-closed boundaries, not hidden features.
 
 ## Build requirements for developers
 
-The bootstrap is configured for JDK 17, Gradle 9.5.0, Android Gradle Plugin 9.3.0, compileSdk 37, targetSdk 36, minSdk 26, Kotlin/Compose compiler plugin 2.4.10, and Jetpack Compose BOM 2026.08.00.
+The application is configured for JDK 17, Gradle 9.5.0, Android Gradle Plugin 9.3.0, compileSdk 37, targetSdk 36, minSdk 26, Kotlin/Compose compiler plugin 2.4.10, and Jetpack Compose BOM 2026.08.00.
 
 A Gradle wrapper is not yet committed. With the required SDK and Gradle available, validate with:
 
