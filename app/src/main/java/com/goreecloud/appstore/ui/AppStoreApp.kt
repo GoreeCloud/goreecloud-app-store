@@ -1,5 +1,6 @@
 package com.goreecloud.appstore.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,13 +17,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.LibraryBooks
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Storefront
+import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -31,31 +49,40 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.goreecloud.appstore.R
 import com.goreecloud.appstore.data.CatalogJsonLoader
+import com.goreecloud.appstore.domain.EntitlementEngine
 import com.goreecloud.appstore.domain.IdentitySession
+import com.goreecloud.appstore.domain.ReleaseChannel
 import com.goreecloud.appstore.domain.StoreItem
 import com.goreecloud.appstore.domain.StoreItemType
-import com.goreecloud.appstore.domain.EntitlementEngine
 import com.goreecloud.appstore.identity.DevelopmentIdentityGateway
+import com.goreecloud.appstore.platform.IntegrationState
 import com.goreecloud.appstore.platform.PlatformIntegrationRegistry
 import com.goreecloud.appstore.platform.UnavailablePackageDeliveryGateway
 
-enum class StoreTab(val title: String, val glyph: String) {
-    DISCOVER("Discover", "◆"),
-    APPS("Apps", "▦"),
-    SERVICES("Services", "◈"),
-    UPDATES("Updates", "↻"),
-    LIBRARY("Library", "▤"),
+enum class StoreTab(val title: String, val icon: ImageVector) {
+    DISCOVER("Discover", Icons.Rounded.Home),
+    APPS("Apps", Icons.Rounded.Apps),
+    SERVICES("Services", Icons.Rounded.Cloud),
+    UPDATES("Updates", Icons.Rounded.Update),
+    LIBRARY("Library", Icons.Rounded.LibraryBooks),
 }
 
 @Composable
@@ -63,10 +90,13 @@ fun GoreeCloudAppStore() {
     val context = LocalContext.current
     val allItems = remember { CatalogJsonLoader.load(context) }
     val identityGateway = remember { DevelopmentIdentityGateway }
+    val listState = rememberLazyListState()
+
     var session by remember { mutableStateOf(identityGateway.initialSession) }
     var selectedTab by remember { mutableStateOf(StoreTab.DISCOVER) }
     var query by remember { mutableStateOf("") }
     var selectedItem by remember { mutableStateOf<StoreItem?>(null) }
+    var showPlatformStatus by remember { mutableStateOf(false) }
 
     val entitled = remember(session, allItems) {
         EntitlementEngine.visibleItems(session, allItems)
@@ -85,127 +115,197 @@ fun GoreeCloudAppStore() {
         }
     }
 
+    LaunchedEffect(selectedTab, session.subjectId) {
+        query = ""
+        listState.scrollToItem(0)
+    }
+
     GlazeTheme {
         Scaffold(
+            topBar = {
+                StoreTopBar(
+                    session = session,
+                    sessions = identityGateway.availableSessions,
+                    onSessionSelected = { session = it },
+                    onShowPlatformStatus = { showPlatformStatus = true },
+                )
+            },
             bottomBar = {
-                StoreNavigationCapsule(
+                StoreNavigation(
                     selected = selectedTab,
                     onSelected = { selectedTab = it },
                 )
             },
+            containerColor = MaterialTheme.colorScheme.background,
         ) { scaffoldPadding ->
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(scaffoldPadding)
-                    .statusBarsPadding(),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    .padding(scaffoldPadding),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                item {
-                    StoreHeader(
-                        session = session,
-                        sessions = identityGateway.availableSessions,
-                        onSessionSelected = { session = it },
-                    )
-                }
-                item { DevelopmentBoundaryBanner() }
-                item { StoreHero(visibleCount = entitled.size) }
-                item {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = GlazeCapsuleShape,
-                        label = { Text("Search what is available to you") },
-                    )
-                }
-                item {
-                    Text(
-                        text = selectedTab.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                when (selectedTab) {
+                    StoreTab.DISCOVER -> {
+                        item { DevelopmentStatusStrip(onClick = { showPlatformStatus = true }) }
+                        item { StoreHero(visibleCount = entitled.size) }
+                        item { StoreSearch(query = query, onQueryChanged = { query = it }) }
+                        item {
+                            StoreSectionHeading(
+                                title = "Available to you",
+                                subtitle = "${visible.size} items in this development catalog",
+                            )
+                        }
+                    }
+                    StoreTab.APPS -> {
+                        item {
+                            TabIntro(
+                                title = "Apps",
+                                body = "GoreeCloud applications available to the active development identity.",
+                            )
+                        }
+                        item { StoreSearch(query = query, onQueryChanged = { query = it }) }
+                    }
+                    StoreTab.SERVICES -> {
+                        item {
+                            TabIntro(
+                                title = "Services",
+                                body = "GoreeCloud services available to the active development identity.",
+                            )
+                        }
+                        item { StoreSearch(query = query, onQueryChanged = { query = it }) }
+                    }
+                    StoreTab.UPDATES -> {
+                        item {
+                            TabIntro(
+                                title = "Updates",
+                                body = "Application updates will appear here when production release delivery is connected.",
+                            )
+                        }
+                        item {
+                            UnavailableState(
+                                icon = Icons.Rounded.Update,
+                                title = "Updates are unavailable in this development build",
+                                body = "The update feed remains disabled until authenticated release metadata and package-delivery integration are accepted.",
+                                onDetails = { showPlatformStatus = true },
+                            )
+                        }
+                    }
+                    StoreTab.LIBRARY -> {
+                        item {
+                            TabIntro(
+                                title = "Library",
+                                body = "Installed and previously available GoreeCloud applications will be managed here.",
+                            )
+                        }
+                        item {
+                            UnavailableState(
+                                icon = Icons.Rounded.LibraryBooks,
+                                title = "Library history is unavailable in this development build",
+                                body = "Per-identity install history and recoverable library state remain disabled until the Everkeep-backed library contract is connected.",
+                                onDetails = { showPlatformStatus = true },
+                            )
+                        }
+                    }
                 }
 
-                if (selectedTab == StoreTab.UPDATES) {
-                    item {
-                        EmptyState(
-                            title = "Updates are not connected yet",
-                            body = "The update feed will become available after signed catalog and package-delivery integration is accepted.",
-                        )
-                    }
-                } else if (selectedTab == StoreTab.LIBRARY) {
-                    item {
-                        EmptyState(
-                            title = "Library history is not connected yet",
-                            body = "Installed-app history and recoverable library state will be added through the Everkeep-backed library boundary.",
-                        )
-                    }
-                } else if (visible.isEmpty()) {
-                    item {
-                        EmptyState(
-                            title = if (session.isAuthenticated) "Nothing available here" else "Sign in to see your catalog",
-                            body = if (session.isAuthenticated) {
-                                "This development identity has no matching catalog entries for the current view."
-                            } else {
-                                "Production sign-in will be provided by GoreeCloud Identity."
-                            },
-                        )
-                    }
-                } else {
-                    items(visible, key = { it.id }) { item ->
-                        StoreItemCard(item = item, onClick = { selectedItem = item })
+                if (selectedTab == StoreTab.DISCOVER || selectedTab == StoreTab.APPS || selectedTab == StoreTab.SERVICES) {
+                    if (visible.isEmpty()) {
+                        item {
+                            EmptyCatalogState(
+                                authenticated = session.isAuthenticated,
+                                hasQuery = query.isNotBlank(),
+                            )
+                        }
+                    } else {
+                        items(visible, key = { it.id }) { item ->
+                            StoreItemCard(item = item, onClick = { selectedItem = item })
+                        }
                     }
                 }
 
-                item {
-                    PlatformBoundaryCard()
-                }
+                item { Spacer(Modifier.height(8.dp)) }
             }
         }
 
         selectedItem?.let { item ->
-            StoreItemDialog(item = item, onDismiss = { selectedItem = null })
+            StoreItemSheet(item = item, onDismiss = { selectedItem = null })
+        }
+
+        if (showPlatformStatus) {
+            PlatformStatusSheet(onDismiss = { showPlatformStatus = false })
         }
     }
 }
 
 @Composable
-private fun StoreHeader(
+private fun StoreTopBar(
     session: IdentitySession,
     sessions: List<IdentitySession>,
     onSessionSelected: (IdentitySession) -> Unit,
+    onShowPlatformStatus: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column {
-            Text("GoreeCloud", style = MaterialTheme.typography.labelLarge)
-            Text(
-                "App Store",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        Box {
-            TextButton(
-                modifier = Modifier.height(48.dp),
-                onClick = { expanded = true },
-            ) {
-                Text("${session.displayName}  ▾")
+
+    Surface(tonalElevation = 2.dp, color = MaterialTheme.colorScheme.surface) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("GoreeCloud", style = MaterialTheme.typography.labelLarge)
+                    Surface(
+                        shape = GlazeCapsuleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                    ) {
+                        Text(
+                            "Development",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                }
+                Text(
+                    "App Store",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
             }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                sessions.forEach { candidate ->
+
+            Box {
+                TextButton(
+                    modifier = Modifier.height(48.dp),
+                    onClick = { expanded = true },
+                ) {
+                    Icon(Icons.Rounded.AccountCircle, contentDescription = null)
+                    Spacer(Modifier.size(6.dp))
+                    Text(session.displayName, maxLines = 1)
+                    Icon(Icons.Rounded.ExpandMore, contentDescription = null)
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    sessions.forEach { candidate ->
+                        DropdownMenuItem(
+                            text = { Text(candidate.displayName) },
+                            onClick = {
+                                onSessionSelected(candidate)
+                                expanded = false
+                            },
+                        )
+                    }
+                    HorizontalDivider()
                     DropdownMenuItem(
-                        text = { Text(candidate.displayName) },
+                        text = { Text("Development status") },
+                        leadingIcon = { Icon(Icons.Rounded.Info, contentDescription = null) },
                         onClick = {
-                            onSessionSelected(candidate)
                             expanded = false
+                            onShowPlatformStatus()
                         },
                     )
                 }
@@ -215,18 +315,33 @@ private fun StoreHeader(
 }
 
 @Composable
-private fun DevelopmentBoundaryBanner() {
+private fun DevelopmentStatusStrip(onClick: () -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = GlazeCardShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = GlazeSmallCardShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text("Development identity adapter", fontWeight = FontWeight.SemiBold)
-            Text(
-                "The account switcher uses non-production fixtures to exercise multi-user entitlements. It does not claim live GoreeCloud Identity integration.",
-                style = MaterialTheme.typography.bodyMedium,
-            )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Rounded.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "Simulated accounts are active",
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                Text(
+                    "Tap for platform and integration status.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
         }
     }
 }
@@ -236,164 +351,392 @@ private fun StoreHero(visibleCount: Int) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = GlazeCardShape,
-        tonalElevation = 6.dp,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        tonalElevation = 2.dp,
     ) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = GlazeSmallCardShape,
+                color = MaterialTheme.colorScheme.surface,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Rounded.Storefront,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
             Text(
                 "Your GoreeCloud, in one place.",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             Text(
-                "Discover applications and services authorized for the active GoreeCloud identity.",
+                "Discover applications and services that this development identity is authorized to see.",
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
-            Text(
-                "$visibleCount development catalog entries available",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Surface(shape = GlazeCapsuleShape, color = MaterialTheme.colorScheme.surface) {
+                Text(
+                    "$visibleCount available",
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TabIntro(title: String, body: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun StoreSearch(query: String, onQueryChanged: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChanged,
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        shape = GlazeCapsuleShape,
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+        placeholder = { Text("Search your available catalog") },
+    )
+}
+
+@Composable
+private fun StoreSectionHeading(title: String, subtitle: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun StoreItemCard(item: StoreItem, onClick: () -> Unit) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = GlazeCardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
     ) {
         Row(
-            modifier = Modifier.padding(18.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
-                modifier = Modifier.size(64.dp),
-                shape = GlazeCardShape,
-                color = MaterialTheme.colorScheme.primaryContainer,
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        item.name.take(1),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(item.name, fontWeight = FontWeight.SemiBold)
+            StoreArtwork(item = item, size = 72.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Text(
                     item.summary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    "${item.type.label()} · ${item.category} · ${item.releaseChannel.name.lowercase()}",
-                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-            Text("›", style = MaterialTheme.typography.headlineSmall)
-        }
-    }
-}
-
-@Composable
-private fun EmptyState(title: String, body: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = GlazeCardShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(title, fontWeight = FontWeight.SemiBold)
-            Text(body, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
-
-@Composable
-private fun PlatformBoundaryCard() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = GlazeCardShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Platform integration checkpoint", fontWeight = FontWeight.SemiBold)
-            PlatformIntegrationRegistry.current.forEach { integration ->
-                Column {
-                    Text(integration.system, style = MaterialTheme.typography.labelLarge)
-                    Text(integration.detail, style = MaterialTheme.typography.bodySmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${item.type.label()} · ${item.category}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    ReleaseChannelPill(item.releaseChannel)
                 }
             }
+            Icon(Icons.Rounded.ChevronRight, contentDescription = "View ${item.name}")
         }
     }
 }
 
 @Composable
-private fun StoreNavigationCapsule(selected: StoreTab, onSelected: (StoreTab) -> Unit) {
-    Surface(tonalElevation = 8.dp) {
-        NavigationBar(
-            modifier = Modifier.navigationBarsPadding(),
-            containerColor = MaterialTheme.colorScheme.surface,
+private fun ReleaseChannelPill(channel: ReleaseChannel) {
+    Surface(shape = GlazeCapsuleShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+        Text(
+            channel.label(),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun EmptyCatalogState(authenticated: Boolean, hasQuery: Boolean) {
+    val title = when {
+        hasQuery -> "No matching results"
+        authenticated -> "Nothing is available here"
+        else -> "Sign in to see your catalog"
+    }
+    val body = when {
+        hasQuery -> "Try a different search term within the catalog available to this identity."
+        authenticated -> "This development identity has no matching entries in the current section."
+        else -> "Production sign-in will be provided by GoreeCloud Identity."
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = GlazeCardShape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Column(
+            modifier = Modifier.padding(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            StoreTab.entries.forEach { tab ->
-                NavigationBarItem(
-                    selected = selected == tab,
-                    onClick = { onSelected(tab) },
-                    icon = { Text(tab.glyph) },
-                    label = { Text(tab.title) },
-                )
-            }
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+            Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-private fun StoreItemDialog(item: StoreItem, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(item.name) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text(item.summary)
-                Text("Type: ${item.type.label()}")
-                Text("Category: ${item.category}")
-                item.version?.let { Text("Version: $it") }
-                Text("Channel: ${item.releaseChannel.name.lowercase()}")
-                Text("This entry is visible because the active development session satisfies its catalog audience rule.")
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    if (item.type == StoreItemType.APPLICATION) {
-                        "Package installation is intentionally unavailable until artifact provenance and Wardveil verification are connected."
-                    } else {
-                        "Service launch is intentionally unavailable until production Identity authorization and endpoint policy are connected."
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                )
+private fun UnavailableState(
+    icon: ImageVector,
+    title: String,
+    body: String,
+    onDetails: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = GlazeCardShape,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(68.dp),
+                shape = GlazeSmallCardShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(34.dp), tint = MaterialTheme.colorScheme.primary)
+                }
             }
-        },
-        confirmButton = {
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+            Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TextButton(onClick = onDetails) { Text("Development status") }
+        }
+    }
+}
+
+@Composable
+private fun StoreNavigation(selected: StoreTab, onSelected: (StoreTab) -> Unit) {
+    NavigationBar(
+        modifier = Modifier.navigationBarsPadding(),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp,
+    ) {
+        StoreTab.entries.forEach { tab ->
+            NavigationBarItem(
+                selected = selected == tab,
+                onClick = { onSelected(tab) },
+                icon = { Icon(tab.icon, contentDescription = null) },
+                label = { Text(tab.title) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun StoreItemSheet(item: StoreItem, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                StoreArtwork(item = item, size = 84.dp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(item.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${item.type.label()} · ${item.category}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    ReleaseChannelPill(item.releaseChannel)
+                }
+            }
+
+            Text(item.summary, style = MaterialTheme.typography.bodyLarge)
+
+            Surface(shape = GlazeSmallCardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item.version?.let { MetadataLine(label = "Version", value = it) }
+                    MetadataLine(label = "Channel", value = item.releaseChannel.label())
+                    MetadataLine(label = "Access", value = "Available to this development identity")
+                }
+            }
+
+            val actionAvailable = item.type == StoreItemType.APPLICATION && UnavailablePackageDeliveryGateway.isAvailable
             Button(
-                enabled = UnavailablePackageDeliveryGateway.isAvailable,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                enabled = actionAvailable,
                 onClick = {},
             ) {
-                Text(if (item.type == StoreItemType.APPLICATION) "Install" else "Open")
+                Text(
+                    if (item.type == StoreItemType.APPLICATION) {
+                        if (actionAvailable) "Install" else "Install unavailable"
+                    } else {
+                        "Open unavailable"
+                    },
+                )
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
+
+            Text(
+                if (item.type == StoreItemType.APPLICATION) {
+                    "Installation remains disabled until approved release metadata, artifact provenance, Wardveil verification, and package delivery are connected."
+                } else {
+                    "Service launch remains disabled until production GoreeCloud Identity authorization and approved endpoint policy are connected."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun MetadataLine(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun PlatformStatusSheet(onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("Development status", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(
+                "These diagnostics describe current implementation boundaries. They are not production trust or acceptance badges.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            PlatformIntegrationRegistry.current.forEachIndexed { index, integration ->
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(integration.system, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Surface(shape = GlazeCapsuleShape, color = MaterialTheme.colorScheme.surfaceVariant) {
+                            Text(
+                                integration.state.label(),
+                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+                    Text(integration.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (index != PlatformIntegrationRegistry.current.lastIndex) HorizontalDivider()
+            }
+
+            Surface(shape = GlazeSmallCardShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+                Text(
+                    "Production acceptance remains false for this App Store build.",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun StoreArtwork(item: StoreItem, size: Dp) {
+    val resource = item.artworkResource()
+    if (resource != null) {
+        Image(
+            painter = painterResource(resource),
+            contentDescription = item.name,
+            modifier = Modifier
+                .size(size)
+                .clip(GlazeArtworkShape),
+        )
+    } else {
+        Surface(
+            modifier = Modifier.size(size),
+            shape = GlazeArtworkShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    if (item.type == StoreItemType.APPLICATION) Icons.Rounded.Apps else Icons.Rounded.Cloud,
+                    contentDescription = item.name,
+                    modifier = Modifier.size(size * 0.46f),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+}
+
+private fun StoreItem.artworkResource(): Int? = when (id) {
+    "goreecloud.browser" -> R.drawable.goreecloud_browser_icon
+    "goreecloud.messenger" -> R.drawable.goreecloud_messenger_icon
+    "goreecloud.location" -> R.drawable.goreecloud_location_icon
+    "goreecloud.manager" -> R.drawable.goreecloud_manager_icon
+    "goreecloud.identity-center" -> R.drawable.goreecloud_identity_icon
+    else -> null
 }
 
 private fun StoreItemType.label(): String = when (this) {
     StoreItemType.APPLICATION -> "Application"
     StoreItemType.SERVICE -> "Service"
+}
+
+private fun ReleaseChannel.label(): String = when (this) {
+    ReleaseChannel.STABLE -> "Stable"
+    ReleaseChannel.BETA -> "Beta"
+    ReleaseChannel.DEVELOPMENT -> "Development"
+}
+
+private fun IntegrationState.label(): String = when (this) {
+    IntegrationState.TARGETED -> "Targeted"
+    IntegrationState.SOURCE_BOUNDARY -> "Boundary ready"
+    IntegrationState.NOT_CONNECTED -> "Not connected"
 }
