@@ -9,7 +9,7 @@ This repository is an **original native GoreeCloud implementation**. Google Play
 Status: **Active Development — native Android bootstrap**  
 Production acceptance: **false**
 
-The current branch establishes:
+The current development branch establishes:
 
 - a native Android/Jetpack Compose application shell;
 - a Glaze UI 2.0.0 consumer target with tangible surfaces, capsule navigation, responsive Compose layout, 48dp-class interactive controls, and effects-free behavior;
@@ -25,6 +25,8 @@ The current branch establishes:
 ## Important acceptance boundary
 
 The account switcher is **not** a production GoreeCloud Identity login. It uses development fixtures only so multi-user entitlement behavior can be built and tested while the application-facing GoreeCloud Identity runtime remains unaccepted.
+
+The development catalog also does not assert production package identities, service endpoints, versions, or audience taxonomy. Those values must come from approved authoritative release, service, and Identity metadata.
 
 Package download, APK installation, service launch, update delivery, Wardveil package verification, production Privacy Shield policy evaluation, Everkeep library recovery, and Mesh lifecycle transport are deliberately unavailable until their real integrations are implemented and validated. The UI must not imply otherwise.
 
@@ -65,6 +67,7 @@ CI installs the pinned Gradle distribution directly.
 - `FEATURES.md` — implemented and planned capabilities
 - `BENEFITS.md` — intended user/platform value
 - `COMPETITIVE-OBJECTIVES.md` — inspiration translated into GoreeCloud-native objectives
+- `USER-MANUAL.md` — current user/developer behavior and limitations
 - `contracts/platform-integrations.json` — machine-readable current integration truth
 - `app/src/main/assets/catalog/development-catalog.json` — non-authoritative development fixture catalog
 

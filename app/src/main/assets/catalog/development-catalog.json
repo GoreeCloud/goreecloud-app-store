@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "environment": "development-fixture",
   "authoritative": false,
-  "notice": "Audience assignments in this file are development fixtures only and are not production GoreeCloud Identity policy.",
+  "notice": "Audience assignments, versions, package identities, and endpoints in this file are non-production fixtures. Package names and endpoints remain blank until approved release/service metadata is ingested.",
   "items": [
     {
       "id": "goreecloud.browser",
@@ -12,7 +12,7 @@
       "category": "Internet",
       "version": "development",
       "releaseChannel": "stable",
-      "packageName": "com.goreecloud.browser",
+      "packageName": "",
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
@@ -27,7 +27,7 @@
       "category": "Communication",
       "version": "development",
       "releaseChannel": "stable",
-      "packageName": "com.goreecloud.messenger",
+      "packageName": "",
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
@@ -42,7 +42,7 @@
       "category": "Location",
       "version": "development",
       "releaseChannel": "stable",
-      "packageName": "com.goreecloud.location",
+      "packageName": "",
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
@@ -57,7 +57,7 @@
       "category": "Administration",
       "version": "development",
       "releaseChannel": "stable",
-      "packageName": "com.goreecloud.manager",
+      "packageName": "",
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
@@ -73,7 +73,7 @@
       "version": "development",
       "releaseChannel": "stable",
       "packageName": "",
-      "serviceUrl": "https://identity.goreecloud.com",
+      "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
         "anyAudience": ["audience:family", "audience:administrator"]
