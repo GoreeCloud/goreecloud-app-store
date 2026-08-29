@@ -14,9 +14,9 @@ At this checkpoint there is no official end-user APK release from this repositor
 
 ## Development account switcher
 
-The account control in the top-right corner offers development-only identities such as **Family demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
+The account control in the top-right corner offers development-only identities such as **Standard demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
 
-These are not real GoreeCloud accounts. They are local fixtures used to demonstrate how different logins can receive different App Store catalogs while production GoreeCloud Identity integration is still pending.
+These are not real GoreeCloud accounts, groups, or production roles. They are local fixtures used to demonstrate how different logins can receive different App Store catalogs while production GoreeCloud Identity integration is still pending.
 
 Changing the development identity immediately recalculates which catalog entries are visible. An entry for which the active session is not entitled is concealed from the visible list and search results.
 

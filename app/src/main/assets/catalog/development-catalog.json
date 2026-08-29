@@ -16,7 +16,7 @@
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
-        "anyAudience": ["audience:family", "audience:administrator"]
+        "anyAudience": ["audience:standard", "audience:administrator"]
       }
     },
     {
@@ -31,7 +31,7 @@
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
-        "anyAudience": ["audience:family", "audience:administrator"]
+        "anyAudience": ["audience:standard", "audience:administrator"]
       }
     },
     {
@@ -46,7 +46,7 @@
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
-        "anyAudience": ["audience:family", "audience:administrator"]
+        "anyAudience": ["audience:standard", "audience:administrator"]
       }
     },
     {
@@ -76,7 +76,7 @@
       "serviceUrl": "",
       "access": {
         "requireSignedIn": true,
-        "anyAudience": ["audience:family", "audience:administrator"]
+        "anyAudience": ["audience:standard", "audience:administrator"]
       }
     },
     {

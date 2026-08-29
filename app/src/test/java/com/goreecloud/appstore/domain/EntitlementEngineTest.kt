@@ -18,10 +18,10 @@ class EntitlementEngineTest {
         val session = IdentitySession(
             "subject",
             "User",
-            setOf("audience:family"),
+            setOf("audience:standard"),
             true,
         )
-        val rule = AccessRule(anyAudience = setOf("audience:family"))
+        val rule = AccessRule(anyAudience = setOf("audience:standard"))
 
         assertTrue(EntitlementEngine.canView(session, rule))
     }

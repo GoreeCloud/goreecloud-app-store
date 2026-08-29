@@ -17,16 +17,16 @@ interface IdentityGateway {
 object DevelopmentIdentityGateway : IdentityGateway {
     override val availableSessions = listOf(
         IdentitySession(
-            subjectId = "dev:family",
-            displayName = "Family demo",
-            audiences = setOf("audience:family"),
+            subjectId = "dev:standard",
+            displayName = "Standard demo",
+            audiences = setOf("audience:standard"),
             isAuthenticated = true,
         ),
         IdentitySession(
             subjectId = "dev:administrator",
             displayName = "Administrator demo",
             audiences = setOf(
-                "audience:family",
+                "audience:standard",
                 "audience:administrator",
             ),
             isAuthenticated = true,
