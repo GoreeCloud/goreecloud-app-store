@@ -2,29 +2,31 @@
 
 ## Current status
 
-GoreeCloud App Store is currently an **active-development Android bootstrap**. It is not production-ready and does not yet install applications or open GoreeCloud services.
+GoreeCloud App Store is currently an **active-development Android application**. It is not production-ready and does not yet install applications or open GoreeCloud services.
 
-The present application exists to validate the native store experience, multi-user catalog behavior, and GoreeCloud platform integration boundaries before real distribution is enabled.
+The present application validates the native store experience, multi-user catalog behavior, first-party GoreeCloud artwork consumption, and GoreeCloud platform integration boundaries before real distribution is enabled.
 
-## Starting the app
+`productionAcceptance` remains `false`.
 
-Build and install the debug application from the current development source, then launch **GoreeCloud App Store** from Android.
+## Development APKs
 
-At this checkpoint there is no official end-user APK release from this repository. A successful release or installable artifact must not be assumed until the repository CI and release process explicitly produce and validate one.
+There is no production or Stable end-user App Store release yet.
+
+The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/application-label verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
 
 ## Development account switcher
 
-The account control in the top-right corner offers development-only identities such as **Standard demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
+The persistent account control in the App Store header offers development-only identities such as **Standard demo**, **Administrator demo**, **Developer demo**, and **Signed out**.
 
 These are not real GoreeCloud accounts, groups, or production roles. They are local fixtures used to demonstrate how different logins can receive different App Store catalogs while production GoreeCloud Identity integration is still pending.
 
-Changing the development identity immediately recalculates which catalog entries are visible. An entry for which the active session is not entitled is concealed from the visible list and search results.
+Changing the development identity immediately recalculates which catalog entries are visible and returns the current section to its top. An entry for which the active session is not entitled is concealed from visible lists and search results.
 
 ## Store sections
 
 ### Discover
 
-Shows all development catalog entries currently available to the active development identity.
+Shows all development catalog entries currently available to the active development identity. A compact development-status notice is shown instead of embedding platform diagnostics throughout the catalog.
 
 ### Apps
 
@@ -32,35 +34,39 @@ Shows only entitled installable-application entries. Installation is currently d
 
 ### Services
 
-Shows only entitled GoreeCloud service entries. Opening services is currently disabled until production Identity authorization and approved service-endpoint policy are connected.
+Shows only entitled GoreeCloud service entries. Opening services is currently disabled until production GoreeCloud Identity authorization and approved service-endpoint policy are connected.
 
 ### Updates
 
-Currently displays an unavailable state. Update discovery and delivery have not yet been connected.
+Shows a dedicated development unavailable state. Update discovery and delivery have not yet been connected.
 
 ### Library
 
-Currently displays an unavailable state. Per-identity installed/library history and Everkeep-backed recovery have not yet been connected.
+Shows a dedicated development unavailable state. Per-identity installed/library history and Everkeep-backed recovery have not yet been connected.
 
 ## Search
 
-Use **Search what is available to you** to filter the current entitled section by application/service name, summary, or category.
+Use **Search your available catalog** to filter the current entitled section by application/service name, summary, or category.
 
 Search operates only on entries already available to the active development identity. It does not reveal entries that were filtered out by entitlement rules.
 
+## Application and service artwork
+
+Where approved assets exist, the Android client uses native VectorDrawable derivatives tied to canonical assets in `GoreeCloud/goreecloud-branding-assets`.
+
+The branding repository remains authoritative. Copies in this App Store repository are implementation derivatives only. See `BRANDING.md` for the exact canonical asset and Git-blob mappings.
+
 ## Product details
 
-Select an application or service card to view its development details. The **Install** or **Open** action is visibly disabled because package/service delivery is not yet trusted or connected.
+Select an application or service card to open its store-style development detail sheet. The sheet can show approved artwork, type/category, development release channel, version information, access state, and the unavailable primary action.
 
-## Privacy and security behavior
+The **Install** or **Open** action remains disabled because package/service delivery is not yet trusted or connected.
 
-The bootstrap does not collect analytics. Cleartext application traffic is disabled. It does not request Android package-install authority.
+## Development status and integral GoreeCloud systems
 
-The development account selector, audience labels, versions, catalog package names, and service endpoints are not production policy or release metadata. Production package identities and endpoints will be populated only from approved authoritative sources.
+Open the account menu and choose **Development status**, or use the development-status affordance on Discover, to inspect current integration boundaries. These diagnostics are development state, not production trust badges.
 
-## Integral GoreeCloud systems
-
-The app displays a platform integration checkpoint for:
+The status surface covers:
 
 - **Glaze UI** — current design-system target is 2.0.0; conformance is not yet claimed.
 - **GoreeCloud Identity** — production authentication/authorization integration is not connected.
@@ -69,9 +75,17 @@ The app displays a platform integration checkpoint for:
 - **Everkeep** — library/history recovery integration is not connected.
 - **GoreeCloud Mesh** — lifecycle/catalog coordination transport is not connected.
 
+## Privacy and security behavior
+
+The development client does not collect analytics. Cleartext application traffic is disabled. It does not request Android package-install authority.
+
+The development account selector, audience labels, versions, catalog package names, and service endpoints are not production policy or release metadata. Production package identities and endpoints will be populated only from approved authoritative sources.
+
+Client-side catalog filtering is not the future sole authorization boundary. Production artifact access and service launch must be re-authorized by the responsible backend.
+
 ## Current limitations
 
-The application currently has no production login, production catalog service, APK download/install flow, service-launch flow, updates, installed library, production signing, Wardveil package scan/verification, Privacy Shield runtime policy, Everkeep runtime recovery, Mesh runtime event transport, or Stable Glaze UI acceptance.
+The application currently has no production login, server-authoritative production catalog service, APK download/install flow, service-launch flow, production update delivery, installed-library reconciliation, production signing, Wardveil package-verification acceptance, Privacy Shield runtime acceptance, Everkeep runtime recovery acceptance, Mesh runtime event transport, or Stable Glaze UI conformance acceptance.
 
 These limitations are deliberate fail-closed boundaries, not hidden features.
 
@@ -87,4 +101,4 @@ gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 
 ## Support boundary
 
-Until a GoreeCloud App Store release is formally accepted, this manual describes the development bootstrap only. Production installation, upgrade, account, recovery, and service-access instructions will be added only when those behaviors actually exist and are validated.
+Until a GoreeCloud App Store release is formally accepted, this manual describes the development build only. Production installation, upgrade, account, recovery, and service-access instructions will be added only when those behaviors actually exist and are validated.
