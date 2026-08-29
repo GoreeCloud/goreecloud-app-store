@@ -22,19 +22,21 @@ The current development branch establishes:
 - store-style application/service cards and product-detail bottom sheets;
 - approved first-party artwork derivatives tied to canonical assets in `GoreeCloud/goreecloud-branding-assets`;
 - development-status diagnostics separated from ordinary catalog browsing;
-- compact-width safeguards for account controls, catalog headings, item metadata, release-channel labels, detail metadata, and platform-status rows;
+- compact-width safeguards for account controls, catalog headings, item metadata, detail metadata, and platform-status rows;
 - explicit source boundaries for GoreeCloud Identity, Wardveil Security, Privacy Shield, Everkeep, and GoreeCloud Mesh;
 - a machine-readable platform-integration record;
 - unit tests that prevent implicit administrator bypass of catalog audience rules;
-- exact-source Android CI for tests, lint, APK assembly, package/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
+- exact-source Android CI for tests, lint, APK assembly, package/version/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
 
-The interface is being iterated with real-device screenshots from Android development builds. The first review removed oversized internal diagnostics from normal browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets. A second compact-phone review then exposed width-allocation defects: catalog counts could overlap section headings, long metadata could squeeze the Development channel into a vertical single-character stack, and account/status metadata could compete for insufficient horizontal space. The current source constrains those elements explicitly, gives primary text flexible width, keeps status/channel capsules single-line, and uses vertical metadata presentation where horizontal pairing is not resilient.
+The interface is being iterated using real-device screenshots from Android development builds. The first review removed oversized internal diagnostics from normal browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets. The second review corrected pathological compact-width wrapping and section-count overlap. The complete follow-up screenshot set for `0.1.2-dev` then confirmed that the stable `.dev` update lineage and multi-user catalog behavior were functioning, while identifying remaining presentation pressure in the header and catalog cards.
+
+The current `0.1.3-dev` source introduces a refined Compose experience: compact account labels are used in the persistent header while complete fixture names remain in the account menu; the full **Development** environment indicator is preserved; Discover uses a shorter editorial hero; search prompts are section-specific; redundant release-channel capsules are removed from list cards and retained in product details; and the Development status sheet keeps its title and Close action fixed while diagnostics scroll. The superseded Compose screen implementation was removed after the refined experience became the activity entrypoint.
 
 ## Development APK identity
 
 CI/debug builds install as `com.goreecloud.appstore.dev` with the Android label **GoreeCloud App Store Dev**. They are signed with one repository-managed development-only certificate so successive development builds can update each other instead of receiving a new ephemeral Android debug identity from every CI runner.
 
-The current development version line is `0.1.2-dev` with version code `3`.
+The current development version line is `0.1.3-dev` with version code `4`.
 
 The reserved future production application ID remains `com.goreecloud.appstore`. The development signing key MUST NOT sign that production package or any artifact represented as production-approved or Stable. See `development/signing/README.md` for the explicit boundary and certificate fingerprint.
 
