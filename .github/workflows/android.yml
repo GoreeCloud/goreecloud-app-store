@@ -47,11 +47,16 @@ jobs:
           sha256sum "$APK" | tee build-evidence/app-debug.apk.sha256
 
           AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
           test -n "$AAPT"
-          "$AAPT" dump badging "$APK" | tee build-evidence/app-debug.badging.txt
+          test -n "$APKSIGNER"
 
-          grep -Fq "package: name='com.goreecloud.appstore'" build-evidence/app-debug.badging.txt
-          grep -Fq "application-label:'GoreeCloud App Store'" build-evidence/app-debug.badging.txt
+          "$AAPT" dump badging "$APK" | tee build-evidence/app-debug.badging.txt
+          "$APKSIGNER" verify --print-certs "$APK" | tee build-evidence/app-debug.signing.txt
+
+          grep -Fq "package: name='com.goreecloud.appstore.dev' versionCode='2' versionName='0.1.1-dev'" build-evidence/app-debug.badging.txt
+          grep -Fq "application-label:'GoreeCloud App Store Dev'" build-evidence/app-debug.badging.txt
+          grep -Fiq "Signer #1 certificate SHA-256 digest: 38d543bbc137dbf4e7a299ff2d2dd06555a5c20d110a9ada4de5e9e0d9055145" build-evidence/app-debug.signing.txt
       - name: Upload development APK evidence
         uses: actions/upload-artifact@v4
         with:
@@ -61,5 +66,6 @@ jobs:
             build-evidence/source-commit.txt
             build-evidence/app-debug.apk.sha256
             build-evidence/app-debug.badging.txt
+            build-evidence/app-debug.signing.txt
           if-no-files-found: error
           retention-days: 14

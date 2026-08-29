@@ -7,14 +7,36 @@ android {
     namespace = "com.goreecloud.appstore"
     compileSdk = 37
 
+    signingConfigs {
+        create("development") {
+            storeFile = rootProject.file("development/signing/goreecloud-development.p12")
+            storePassword = "goreecloud-development-only"
+            keyAlias = "goreecloud-development"
+            keyPassword = "goreecloud-development-only"
+            storeType = "PKCS12"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.goreecloud.appstore"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-dev"
+        versionCode = 2
+        versionName = "0.1.1-dev"
+        manifestPlaceholders["appLabel"] = "GoreeCloud App Store"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders["appLabel"] = "GoreeCloud App Store Dev"
+            signingConfig = signingConfigs.getByName("development")
+        }
+        getByName("release") {
+            manifestPlaceholders["appLabel"] = "GoreeCloud App Store"
+        }
     }
 
     buildFeatures {
