@@ -60,13 +60,15 @@ jobs:
           python3 scripts/validate_catalog.py | tee .artifacts/linux/catalog-validation.txt
           python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/linux/glaze-ui-adoption.txt
 
-      - name: Resolve exact Rust dependencies
+      - name: Verify pinned Rust dependency graph
         shell: bash
         run: |
           set -euo pipefail
-          cargo generate-lockfile --manifest-path linux/Cargo.toml
+          test -f linux/Cargo.lock
+          cargo metadata --manifest-path linux/Cargo.toml --locked --no-deps > /dev/null
           rustc --version --verbose | tee .artifacts/linux/rustc-version.txt
           cargo --version | tee .artifacts/linux/cargo-version.txt
+          sha256sum linux/Cargo.lock | tee .artifacts/linux/cargo-lock.sha256
           cp linux/Cargo.lock .artifacts/linux/Cargo.lock
 
       - name: Format, test, lint, and build native Linux client
@@ -144,6 +146,7 @@ jobs:
           GoreeCloud Mesh production transport: not connected.
           Glaze UI 2.1 application conformance: not accepted.
           Official App Store product icon/logo: not approved.
+          Flatpak repository AppStream composition: deferred until approved product icon exists.
           EOF
 
       - name: Upload Linux development packages and evidence
