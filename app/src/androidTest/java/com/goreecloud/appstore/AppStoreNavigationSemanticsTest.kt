@@ -2,6 +2,7 @@ package com.goreecloud.appstore
 
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -21,11 +22,16 @@ class AppStoreNavigationSemanticsTest {
             .targetContext.resources.displayMetrics.density
 
         listOf("Discover", "Apps", "Services", "Updates", "Library").forEach { label ->
-            val interaction = composeRule.onNode(hasText(label) and hasClickAction())
+            val interaction = composeRule.onNode(hasText(label))
             interaction
                 .assertExists()
                 .assertIsDisplayed()
-                .assertHasClickAction()
+
+            if (label == "Discover") {
+                interaction.assertIsSelected()
+            } else {
+                interaction.assertHasClickAction()
+            }
 
             val bounds = interaction.fetchSemanticsNode().boundsInRoot
             val widthDp = bounds.width / density
@@ -57,6 +63,7 @@ class AppStoreNavigationSemanticsTest {
         expectations.forEach { (label, expectedContent) ->
             composeRule.onNode(hasText(label) and hasClickAction()).performClick()
             composeRule.waitForIdle()
+            composeRule.onNode(hasText(label)).assertIsSelected()
             composeRule.onNode(hasText(expectedContent)).assertExists().assertIsDisplayed()
         }
     }
