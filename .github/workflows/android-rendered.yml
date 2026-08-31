@@ -11,7 +11,7 @@ permissions:
 jobs:
   android-rendered-emulator:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Check out exact source revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -60,11 +60,11 @@ jobs:
           echo "553c78f50dafcd54d65b9a444649057857469edf836431389695608536d6b746  /tmp/gradle-9.5.0-bin.zip" | sha256sum --check --strict
           unzip -q /tmp/gradle-9.5.0-bin.zip -d /tmp
           echo "/tmp/gradle-9.5.0/bin" >> "$GITHUB_PATH"
-      - name: Build exact development APK
+      - name: Build exact development APK and native test APK
         shell: bash
         env:
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+        run: gradle :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --stacktrace
       - name: Create deterministic App Store emulator
         shell: bash
         run: |
@@ -148,10 +148,22 @@ jobs:
           adb shell settings put global animator_duration_scale 0
           adb install -r "$APK_PATH"
           adb shell pm path com.goreecloud.appstore.dev | grep -F 'package:'
+      - name: Run Compose-native navigation semantics acceptance
+        shell: bash
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
+        run: |
+          set -euo pipefail
+          adb shell wm size 390x844
+          adb shell wm density 160
+          adb shell settings put system font_scale 1.0
+          adb shell cmd uimode night no
+          gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
       - name: Run rendered/native acceptance
         shell: bash
         env:
           APP_STORE_SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+          APP_STORE_COMPOSE_NAV_ACCEPTED: "true"
         run: python3 scripts/validate_android_rendered_runtime.py
       - name: Upload rendered acceptance evidence
         if: ${{ success() }}
@@ -160,6 +172,9 @@ jobs:
           name: goreecloud-app-store-android-rendered-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            app/build/outputs/androidTest-results/connected/**
+            app/build/reports/androidTests/connected/**
             contracts/glaze-ui-adoption.json
             build-evidence/rendered-source-commit.txt
             build-evidence/rendered-glaze-ui-adoption.txt
