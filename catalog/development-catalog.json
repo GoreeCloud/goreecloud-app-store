@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "environment": "development-fixture",
+  "authoritative": false,
+  "shareUrl": "",
+  "notice": "Audience assignments, versions, package identities, service endpoints, release channels, and Linux artifact locations in this file are non-production fixtures. Download actions remain unavailable until approved release metadata supplies HTTPS artifact locations, immutable source revisions, digests, signing/provenance expectations, and required Wardveil acceptance.",
+  "items": [
+    {
+      "id": "goreecloud.browser",
+      "name": "GoreeCloud Browser",
+      "summary": "A GoreeCloud browsing experience with platform privacy, security, sync, and identity integration targets.",
+      "type": "application",
+      "category": "Internet",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"application","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"application","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:standard", "audience:administrator"]}
+    },
+    {
+      "id": "goreecloud.messenger",
+      "name": "GoreeCloud Messenger",
+      "summary": "Messaging for authorized GoreeCloud identities and devices.",
+      "type": "application",
+      "category": "Communication",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"application","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"application","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:standard", "audience:administrator"]}
+    },
+    {
+      "id": "goreecloud.location",
+      "name": "GoreeCloud Location",
+      "summary": "Location capabilities and controls for approved GoreeCloud workflows.",
+      "type": "application",
+      "category": "Location",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"application","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"application","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:standard", "audience:administrator"]}
+    },
+    {
+      "id": "goreecloud.manager",
+      "name": "GoreeCloud Manager",
+      "summary": "Administrative management surfaces for authorized GoreeCloud operators.",
+      "type": "application",
+      "category": "Administration",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"application","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"application","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:administrator"]}
+    },
+    {
+      "id": "goreecloud.identity-center",
+      "name": "Identity Center",
+      "summary": "Account, authentication, session, device, and authorization management for GoreeCloud Identity.",
+      "type": "service",
+      "category": "Identity",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"service-client","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"service-client","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:standard", "audience:administrator"]}
+    },
+    {
+      "id": "goreecloud.mesh-center",
+      "name": "Mesh Center",
+      "summary": "Inspection and administration for GoreeCloud Mesh coordination and platform capabilities.",
+      "type": "service",
+      "category": "Platform",
+      "version": "development",
+      "releaseChannel": "development",
+      "packageName": "",
+      "serviceUrl": "",
+      "artifacts": {
+        "linux": [
+          {"format":"deb","role":"service-client","status":"unpublished","architecture":"amd64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false},
+          {"format":"flatpak","role":"service-client","status":"unpublished","architecture":"x86_64","packageId":"","downloadUrl":"","sha256":"","sourceRevision":"","signed":false,"wardveilAccepted":false}
+        ]
+      },
+      "access": {"requireSignedIn": true, "anyAudience": ["audience:administrator", "audience:developer"]}
+    }
+  ]
+}

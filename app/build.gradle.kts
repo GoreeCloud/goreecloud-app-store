@@ -39,6 +39,12 @@ android {
         }
     }
 
+    sourceSets {
+        getByName("main") {
+            assets.srcDir(rootProject.file("catalog"))
+        }
+    }
+
     buildFeatures {
         compose = true
     }

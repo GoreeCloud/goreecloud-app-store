@@ -1,0 +1,61 @@
+.glaze-header {
+  background-color: alpha(@window_bg_color, 0.94);
+  border-bottom: 1px solid alpha(@borders, 0.55);
+}
+
+.glaze-navigation {
+  background-color: alpha(@accent_bg_color, 0.07);
+  border: 1px solid alpha(@accent_bg_color, 0.14);
+  border-radius: 22px;
+  padding: 16px;
+}
+
+.glaze-search {
+  min-height: 44px;
+  border-radius: 16px;
+}
+
+.store-card {
+  background-color: @card_bg_color;
+  border: 1px solid alpha(@borders, 0.55);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.artifact-row {
+  background-color: alpha(@accent_bg_color, 0.055);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.status-pill {
+  background-color: alpha(@accent_bg_color, 0.12);
+  color: @accent_color;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.development-notice {
+  background-color: alpha(@warning_bg_color, 0.10);
+  border: 1px solid alpha(@warning_bg_color, 0.22);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.accent {
+  color: @accent_color;
+}
+
+.success {
+  color: @success_color;
+}
+
+.navigation-sidebar row {
+  border-radius: 12px;
+}
+
+.navigation-sidebar row:selected {
+  background-color: alpha(@accent_bg_color, 0.16);
+}
