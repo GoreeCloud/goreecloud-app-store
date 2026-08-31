@@ -1,4 +1,6 @@
-use crate::catalog::{development_sessions, ArtifactStatus, Catalog, IdentitySession, StoreItem, StoreItemType};
+use crate::catalog::{
+    development_sessions, ArtifactStatus, Catalog, IdentitySession, StoreItem, StoreItemType,
+};
 use adw::prelude::*;
 use gtk::{gdk, gio};
 use std::cell::RefCell;
@@ -68,7 +70,10 @@ pub fn build(app: &adw::Application, catalog: Catalog) {
     }
     header.pack_end(&share_button);
 
-    let session_names: Vec<&str> = sessions.iter().map(|session| session.display_name).collect();
+    let session_names: Vec<&str> = sessions
+        .iter()
+        .map(|session| session.display_name)
+        .collect();
     let session_model = gtk::StringList::new(&session_names);
     let identity_selector = gtk::DropDown::builder()
         .model(&session_model)
@@ -245,17 +250,22 @@ fn render_catalog(
 
     let subtitle = match state.section {
         Section::Packages => format!(
-            "{} visible products · Debian and Flatpak publication state",
-            filtered.len()
+            "{} visible products · Debian and Flatpak publication state · {} schema {}",
+            filtered.len(),
+            catalog.environment,
+            catalog.schema_version
         ),
         _ => format!(
-            "{} available to {} · catalog filtered before presentation",
+            "{} available to {} · {} schema {} · catalog filtered before presentation",
             filtered.len(),
-            session.display_name
+            session.display_name,
+            catalog.environment,
+            catalog.schema_version
         ),
     };
     let subtitle_label = gtk::Label::new(Some(&subtitle));
     subtitle_label.set_xalign(0.0);
+    subtitle_label.set_wrap(true);
     subtitle_label.add_css_class("dim-label");
     intro.append(&subtitle_label);
     content.append(&intro);
@@ -311,6 +321,7 @@ fn store_card(item: &StoreItem, package_focus: bool) -> gtk::Box {
     card.set_margin_bottom(2);
     card.set_margin_start(2);
     card.set_margin_end(2);
+    card.set_tooltip_text(Some(&format!("Catalog identity: {}", item.id)));
     card.add_css_class("store-card");
 
     let title_row = gtk::Box::new(gtk::Orientation::Horizontal, 10);
@@ -329,7 +340,10 @@ fn store_card(item: &StoreItem, package_focus: bool) -> gtk::Box {
     title_row.append(&type_badge);
     card.append(&title_row);
 
-    let metadata = gtk::Label::new(Some(&format!("{} · {}", item.category, item.release_channel)));
+    let metadata = gtk::Label::new(Some(&format!(
+        "{} · {}",
+        item.category, item.release_channel
+    )));
     metadata.set_xalign(0.0);
     metadata.add_css_class("caption");
     metadata.add_css_class("dim-label");
@@ -344,9 +358,21 @@ fn store_card(item: &StoreItem, package_focus: bool) -> gtk::Box {
     if !item.version.is_empty() || !item.package_name.is_empty() || !item.service_url.is_empty() {
         let details = gtk::Label::new(Some(&format!(
             "Version: {}{}{}",
-            if item.version.is_empty() { "unknown" } else { &item.version },
-            if item.package_name.is_empty() { "" } else { " · package identity available" },
-            if item.service_url.is_empty() { "" } else { " · service endpoint available" },
+            if item.version.is_empty() {
+                "unknown"
+            } else {
+                &item.version
+            },
+            if item.package_name.is_empty() {
+                ""
+            } else {
+                " · package identity available"
+            },
+            if item.service_url.is_empty() {
+                ""
+            } else {
+                " · service endpoint available"
+            },
         )));
         details.set_xalign(0.0);
         details.set_wrap(true);
@@ -392,11 +418,13 @@ fn artifact_row(artifact: &crate::catalog::LinuxArtifact) -> gtk::Box {
     detail_label.set_xalign(0.0);
     detail_label.set_wrap(true);
     detail_label.add_css_class("caption");
-    detail_label.add_css_class(if artifact.status == ArtifactStatus::Published && artifact.is_download_ready() {
-        "success"
-    } else {
-        "dim-label"
-    });
+    detail_label.add_css_class(
+        if artifact.status == ArtifactStatus::Published && artifact.is_download_ready() {
+            "success"
+        } else {
+            "dim-label"
+        },
+    );
     labels.append(&detail_label);
     row.append(&labels);
 
@@ -405,10 +433,9 @@ fn artifact_row(artifact: &crate::catalog::LinuxArtifact) -> gtk::Box {
         button.add_css_class("suggested-action");
         let url = artifact.download_url.clone();
         button.connect_clicked(move |_| {
-            if let Err(error) = gio::AppInfo::launch_default_for_uri(
-                &url,
-                None::<&gio::AppLaunchContext>,
-            ) {
+            if let Err(error) =
+                gio::AppInfo::launch_default_for_uri(&url, None::<&gio::AppLaunchContext>)
+            {
                 eprintln!("Unable to open package download: {error}");
             }
         });
