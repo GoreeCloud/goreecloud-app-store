@@ -1,4 +1,4 @@
-name: Android bootstrap validation
+name: Android development validation
 
 on:
   pull_request:
@@ -24,6 +24,11 @@ jobs:
           test "$ACTUAL_SHA" = "$EXPECTED_SHA"
           mkdir -p build-evidence
           printf '%s\n' "$ACTUAL_SHA" | tee build-evidence/source-commit.txt
+      - name: Validate Glaze UI 2.1 adoption contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_glaze_ui_adoption.py | tee build-evidence/glaze-ui-adoption.txt
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -54,7 +59,7 @@ jobs:
           "$AAPT" dump badging "$APK" | tee build-evidence/app-debug.badging.txt
           "$APKSIGNER" verify --print-certs "$APK" | tee build-evidence/app-debug.signing.txt
 
-          grep -Fq "package: name='com.goreecloud.appstore.dev' versionCode='4' versionName='0.1.3-dev'" build-evidence/app-debug.badging.txt
+          grep -Fq "package: name='com.goreecloud.appstore.dev' versionCode='5' versionName='0.1.4-dev'" build-evidence/app-debug.badging.txt
           grep -Fq "application-label:'GoreeCloud App Store Dev'" build-evidence/app-debug.badging.txt
           grep -Fiq "certificate SHA-256 digest: 38d543bbc137dbf4e7a299ff2d2dd06555a5c20d110a9ada4de5e9e0d9055145" build-evidence/app-debug.signing.txt
       - name: Upload development APK evidence
@@ -63,7 +68,9 @@ jobs:
           name: goreecloud-app-store-development-apk-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             app/build/outputs/apk/debug/app-debug.apk
+            contracts/glaze-ui-adoption.json
             build-evidence/source-commit.txt
+            build-evidence/glaze-ui-adoption.txt
             build-evidence/app-debug.apk.sha256
             build-evidence/app-debug.badging.txt
             build-evidence/app-debug.signing.txt

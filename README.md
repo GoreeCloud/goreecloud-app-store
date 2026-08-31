@@ -7,12 +7,14 @@ This repository is an **original native GoreeCloud implementation**. Google Play
 ## Current checkpoint
 
 Status: **Active Development — native Android application**  
-Production acceptance: **false**
+Production acceptance: **false**  
+Glaze UI status: **2.1.0 Stable adoption candidate; application conformance not accepted**
 
 The current development branch establishes:
 
 - a native Android/Jetpack Compose store application;
-- a Glaze UI 2.0.0 consumer target with layered native surfaces, capsule controls, light/dark adaptation, accessible interaction sizing, and effects-free behavior;
+- a repository-local Glaze UI 2.1.0 Stable adoption contract pinned to release `v2.1.0` / revision `c49113eb8b93c267613fdf1bbca1f814495acad7`;
+- a native Glaze 2.1 material-role mapping that keeps content on Canvas/Surface roles and maps interaction/status chrome to Glaze roles without claiming downstream conformance;
 - a persistent App Store/account header and Material bottom navigation;
 - a per-session entitlement engine that filters the catalog before presentation;
 - development-only multi-user identity fixtures behind an explicit `IdentityGateway` boundary;
@@ -24,19 +26,31 @@ The current development branch establishes:
 - development-status diagnostics separated from ordinary catalog browsing;
 - compact-width safeguards for account controls, catalog headings, item metadata, detail metadata, and platform-status rows;
 - explicit source boundaries for GoreeCloud Identity, Wardveil Security, Privacy Shield, Everkeep, and GoreeCloud Mesh;
-- a machine-readable platform-integration record;
+- machine-readable platform-integration and Glaze adoption records;
 - unit tests that prevent implicit administrator bypass of catalog audience rules;
-- exact-source Android CI for tests, lint, APK assembly, package/version/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
+- exact-source Android CI for Glaze adoption validation, tests, lint, APK assembly, package/version/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
 
-The interface is being iterated using real-device screenshots from Android development builds. The first review removed oversized internal diagnostics from normal browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets. The second review corrected pathological compact-width wrapping and section-count overlap. The complete follow-up screenshot set for `0.1.2-dev` then confirmed that the stable `.dev` update lineage and multi-user catalog behavior were functioning, while identifying remaining presentation pressure in the header and catalog cards.
+The interface is being iterated using real-device screenshots from Android development builds. Earlier review removed oversized internal diagnostics from normal browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, corrected pathological compact-width wrapping, and moved item details to store-style sheets. The complete follow-up screenshot set for `0.1.2-dev` confirmed that the stable `.dev` update lineage and multi-user catalog behavior were functioning, while identifying remaining presentation pressure in the header and catalog cards.
 
-The current `0.1.3-dev` source introduces a refined Compose experience: compact account labels are used in the persistent header while complete fixture names remain in the account menu; the full **Development** environment indicator is preserved; Discover uses a shorter editorial hero; search prompts are section-specific; redundant release-channel capsules are removed from list cards and retained in product details; and the Development status sheet keeps its title and Close action fixed while diagnostics scroll. The superseded Compose screen implementation was removed after the refined experience became the activity entrypoint.
+The `0.1.3-dev` iteration introduced compact account labels, preserved the full **Development** environment indicator, reduced Discover hero height, added section-specific search prompts, removed redundant release-channel capsules from list cards, and fixed the Development status title/Close affordance while diagnostics scroll. The current `0.1.4-dev` line adds the Glaze UI 2.1 adoption contract and current-Stable material mapping without upgrading the application to a conformance or production-ready state by declaration.
+
+## Glaze UI 2.1 adoption
+
+Glaze UI **2.1.0** is the current Stable design-system target for GoreeCloud-controlled user-facing applications. The App Store pins the reviewed Stable release at:
+
+- release tag: `v2.1.0`;
+- release revision: `c49113eb8b93c267613fdf1bbca1f814495acad7`;
+- repository-local evidence: `contracts/glaze-ui-adoption.json` and `docs/GLAZE_UI_ADOPTION.md`.
+
+The App Store is an **adoption candidate**, not an aligned/current-conformant consumer. Existing 2.0-era App Store work is retained only as migration history. Rendered acceptance, native accessibility acceptance, Deep Dark, Reduced Transparency/Solid behavior, Increased Contrast, 200% Large Text, Touch Assistance, supported-form-factor validation, and representative physical-device evidence remain pending.
+
+`scripts/validate_glaze_ui_adoption.py` fails closed if the current target, release anchor, native mapping, application version, platform integration record, or acceptance boundary drifts. CI runs that contract before Android build validation and includes its output with build evidence.
 
 ## Development APK identity
 
 CI/debug builds install as `com.goreecloud.appstore.dev` with the Android label **GoreeCloud App Store Dev**. They are signed with one repository-managed development-only certificate so successive development builds can update each other instead of receiving a new ephemeral Android debug identity from every CI runner.
 
-The current development version line is `0.1.3-dev` with version code `4`.
+The current development version line is `0.1.4-dev` with version code `5`.
 
 The reserved future production application ID remains `com.goreecloud.appstore`. The development signing key MUST NOT sign that production package or any artifact represented as production-approved or Stable. See `development/signing/README.md` for the explicit boundary and certificate fingerprint.
 
@@ -64,9 +78,9 @@ No role receives an undocumented superuser bypass. Administrative access must be
 
 `GoreeCloud/goreecloud-branding-assets` is the canonical branding repository. Android VectorDrawable copies in this repository are consumer derivatives only and do not become new branding authorities.
 
-See `BRANDING.md` for the exact canonical asset paths and Git-blob mappings currently consumed for Browser, Messenger, Location, Identity, and Manager artwork.
+See `BRANDING.md` for the exact canonical asset and Git-blob mappings currently consumed for Browser, Messenger, Location, Identity, and Manager artwork.
 
-No App Store-specific official icon/logo is established here. Any future official App Store artwork must originate in the canonical branding repository first.
+An approved product-specific GoreeCloud App Store icon/logo has **not yet been established**. Under GoreeCloud repository policy, that is an outstanding branding and production-readiness defect. The official App Store identity must be approved through the canonical branding path first, then stored in this application repository and used by manifests, launchers, release packaging, documentation, and other applicable surfaces. No placeholder is represented as official identity.
 
 ## Build foundation
 
@@ -84,10 +98,11 @@ The application is pinned to current stable Android tooling as of August 29, 202
 A Gradle wrapper is not yet committed. With JDK 17 and Gradle 9.5.0 installed:
 
 ```bash
+python3 scripts/validate_glaze_ui_adoption.py
 gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
 
-CI installs the pinned Gradle distribution directly, checks out and records the exact source revision, validates the generated development APK package/version/application label and development signing certificate, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
+CI checks out and records the exact source revision, validates the Glaze UI 2.1 adoption contract, validates the generated development APK package/version/application label and development signing certificate, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
 
 ## Repository records
 
@@ -96,9 +111,11 @@ CI installs the pinned Gradle distribution directly, checks out and records the 
 - `FEATURES.md` — implemented and planned capabilities
 - `BENEFITS.md` — intended user/platform value
 - `COMPETITIVE-OBJECTIVES.md` — inspiration translated into GoreeCloud-native objectives
-- `BRANDING.md` — canonical branding-consumer mappings
+- `BRANDING.md` — canonical branding-consumer mappings and current App Store identity gap
 - `USER-MANUAL.md` — current user/developer behavior and limitations
+- `docs/GLAZE_UI_ADOPTION.md` — current Stable 2.1 repository-local adoption mapping and acceptance boundary
 - `development/signing/README.md` — development package/signing boundary
+- `contracts/glaze-ui-adoption.json` — machine-readable Glaze UI 2.1 adoption evidence
 - `contracts/platform-integrations.json` — machine-readable current integration truth
 - `app/src/main/assets/catalog/development-catalog.json` — non-authoritative development fixture catalog
 

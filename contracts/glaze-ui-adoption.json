@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "application": "goreecloud-app-store",
+  "lifecycle": "development",
+  "status": "adoption-candidate",
+  "targetVersion": "2.1.0",
+  "requiredTargetVersion": "2.1.0",
+  "canonicalRepository": "GoreeCloud/goreecloud-glaze-ui",
+  "stableReleaseTag": "v2.1.0",
+  "stableReleaseRevision": "c49113eb8b93c267613fdf1bbca1f814495acad7",
+  "stableContract": "GLAZE_UI_2_1_STABLE.md",
+  "consumerRegistry": "consumers/registry.json",
+  "governingRules": [
+    "Make interaction feel tangible.",
+    "Content is solid. Interaction is glazed.",
+    "Nothing teleports."
+  ],
+  "materialMapping": {
+    "contentRoles": ["Canvas", "Surface"],
+    "interactionRoles": ["Soft Glaze", "Glaze", "Deep Glaze", "Live Glaze"],
+    "nativeTheme": "app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt"
+  },
+  "nativeMapping": {
+    "platform": "Android",
+    "framework": "Jetpack Compose Material 3",
+    "generalTargetFloorDp": 48,
+    "touchAssistanceTargetFloorDp": 56,
+    "implementedAppearanceProfiles": ["Light", "Dark"],
+    "deepDark": "pending",
+    "reducedTransparencySolidFallback": "pending-acceptance",
+    "increasedContrast": "pending-acceptance",
+    "largeText200Percent": "pending-acceptance",
+    "touchAssistance": "pending-acceptance",
+    "glazeMotion": "not-consumed"
+  },
+  "acceptance": {
+    "automatedContract": true,
+    "exactRevisionBuild": "required",
+    "renderedAcceptance": "pending",
+    "nativeAccessibilityAcceptance": "pending",
+    "representativePhysicalDeviceAcceptance": "pending",
+    "supportedFormFactorAcceptance": "pending",
+    "productionEligible": false,
+    "conformanceAccepted": false
+  }
+}

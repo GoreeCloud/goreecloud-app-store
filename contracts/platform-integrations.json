@@ -5,7 +5,12 @@
   "nativeApplication": true,
   "integrations": {
     "glazeUi": {
-      "target": "2.0.0",
+      "target": "2.1.0",
+      "stableReleaseTag": "v2.1.0",
+      "stableReleaseRevision": "c49113eb8b93c267613fdf1bbca1f814495acad7",
+      "adoptionStatus": "adoption-candidate",
+      "adoptionEvidence": "contracts/glaze-ui-adoption.json",
+      "automatedContract": true,
       "conformanceAccepted": false
     },
     "goreecloudIdentity": {

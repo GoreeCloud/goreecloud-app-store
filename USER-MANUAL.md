@@ -4,7 +4,7 @@
 
 GoreeCloud App Store is currently an **active-development Android application**. It is not production-ready and does not yet install applications or open GoreeCloud services.
 
-The present application validates the native store experience, multi-user catalog behavior, first-party GoreeCloud artwork consumption, responsive store presentation, and GoreeCloud platform integration boundaries before real distribution is enabled.
+The present application validates the native store experience, multi-user catalog behavior, first-party GoreeCloud artwork consumption, responsive store presentation, current Glaze UI adoption, and GoreeCloud platform integration boundaries before real distribution is enabled.
 
 `productionAcceptance` remains `false`.
 
@@ -12,13 +12,13 @@ The present application validates the native store experience, multi-user catalo
 
 There is no production or Stable end-user App Store release yet.
 
-The repository CI can produce a development/debug APK for an exact source revision after unit tests, Android lint, APK assembly, package/version/application-label verification, development signing-certificate verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
+The repository CI can produce a development/debug APK for an exact source revision after Glaze UI adoption contract validation, unit tests, Android lint, APK assembly, package/version/application-label verification, development signing-certificate verification, SHA-256 evidence generation, and artifact publication succeed. Treat those artifacts as test builds only.
 
 Current development/debug builds use:
 
 - application ID `com.goreecloud.appstore.dev`;
 - Android label **GoreeCloud App Store Dev**;
-- development version line `0.1.3-dev` / version code `4` at this checkpoint;
+- development version line `0.1.4-dev` / version code `5` at this checkpoint;
 - the repository-managed, development-only signing certificate documented in `development/signing/README.md`.
 
 The development package is intentionally separate from the reserved future production application ID `com.goreecloud.appstore`. The development signing identity is non-production test material and must never sign the production package or a Stable artifact.
@@ -73,7 +73,7 @@ Shows a dedicated development unavailable state. Per-identity installed/library 
 
 Search operates only on entries already available to the active development identity. It does not reveal entries that were filtered out by entitlement rules.
 
-The prompt is section-specific in the current build:
+The prompt is section-specific:
 
 - Discover: **Search apps and services**
 - Apps: **Search apps**
@@ -85,13 +85,15 @@ Search matches the visible catalog by application/service name, summary, or cate
 
 Where approved assets exist, the Android client uses native VectorDrawable derivatives tied to canonical assets in `GoreeCloud/goreecloud-branding-assets`.
 
-The branding repository remains authoritative. Copies in this App Store repository are implementation derivatives only. See `BRANDING.md` for the exact canonical asset and Git-blob mappings.
+The branding repository remains authoritative. Copies in this App Store repository are implementation derivatives only. See `BRANDING.md` for exact canonical mappings.
+
+The App Store itself does not yet have an approved product-specific official icon/logo. Until that identity is established through the canonical branding path and stored in this repository, the development build must not present a placeholder as an approved production App Store identity. This remains a production-readiness blocker.
 
 ## Catalog cards and release channels
 
 Catalog-list cards show artwork, name, summary, type/category metadata, and a product-navigation affordance.
 
-The development release channel is no longer repeated as a capsule on every list card. That channel is already implicit in the development environment and the repeated capsule consumed horizontal space needed for useful type/category metadata on compact phones. Release channel remains available in the product-detail sheet where it is materially useful.
+The development release channel is not repeated as a capsule on every list card. The channel remains visible in product details where it is materially useful.
 
 Product titles may use up to two lines when needed; summaries and metadata use bounded truncation instead of single-character vertical wrapping.
 
@@ -103,15 +105,25 @@ Detail metadata uses vertically stacked label/value presentation so long values 
 
 The **Install** or **Open** action remains disabled because package/service delivery is not yet trusted or connected.
 
+## Glaze UI 2.1 status
+
+The current required GoreeCloud design-system target is **Glaze UI 2.1.0 Stable**. The App Store pins the reviewed Stable release tag `v2.1.0` and revision `c49113eb8b93c267613fdf1bbca1f814495acad7`.
+
+The application is currently a **Glaze UI 2.1 adoption candidate**, not a conformant or production-eligible consumer. The source mapping follows the 2.1 rules **Make interaction feel tangible**, **Content is solid. Interaction is glazed**, and **Nothing teleports**. Light and Dark native material-role mappings are implemented in the Compose theme, with durable content on solid Canvas/Surface roles and Glaze roles available for interaction/status chrome.
+
+This does **not** establish application conformance. Deep Dark, Reduced Transparency/Solid, Increased Contrast, 200% Large Text, Touch Assistance, TalkBack/switch/keyboard-focus behavior, supported-form-factor acceptance, and representative physical-device acceptance remain pending. Glaze Motion is not consumed.
+
+The machine-readable adoption record is `contracts/glaze-ui-adoption.json`; the explanatory record is `docs/GLAZE_UI_ADOPTION.md`. CI runs `scripts/validate_glaze_ui_adoption.py` before Android build validation.
+
 ## Development status and integral GoreeCloud systems
 
 Open the account menu and choose **Development status**, or use the development-status affordance on Discover, to inspect current integration boundaries. These diagnostics are development state, not production trust badges.
 
-The current status sheet keeps its **Development status** heading and explicit **Close** action visible while the diagnostic body scrolls. Status names receive flexible width while state capsules remain bounded and single-line.
+The status sheet keeps its **Development status** heading and explicit **Close** action visible while the diagnostic body scrolls. Status names receive flexible width while state capsules remain bounded and single-line.
 
 The status surface covers:
 
-- **Glaze UI** — current design-system target is 2.0.0; conformance is not yet claimed.
+- **Glaze UI** — 2.1.0 Stable is the current target; adoption is source/contract-level only and conformance remains pending.
 - **GoreeCloud Identity** — production authentication/authorization integration is not connected.
 - **Wardveil Security** — package trust and verification integration is not connected.
 - **Privacy Shield** — production privacy-policy integration is not connected; development analytics are off.
@@ -128,9 +140,9 @@ Client-side catalog filtering is not the future sole authorization boundary. Pro
 
 ## Current limitations
 
-The application currently has no production login, server-authoritative production catalog service, APK download/install flow, service-launch flow, production update delivery, installed-library reconciliation, production signing, Wardveil package-verification acceptance, Privacy Shield runtime acceptance, Everkeep runtime recovery acceptance, Mesh runtime event transport, or Stable Glaze UI conformance acceptance.
+The application currently has no production login, server-authoritative production catalog service, APK download/install flow, service-launch flow, production update delivery, installed-library reconciliation, production signing, Wardveil package-verification acceptance, Privacy Shield runtime acceptance, Everkeep runtime recovery acceptance, Mesh runtime event transport, approved App Store-specific official identity, or accepted current-Stable Glaze UI application conformance.
 
-The responsive corrections are being validated from real-device screenshot review, but the current phone screenshots do not establish acceptance across the supported screen-size, orientation, font-scale, accessibility, or Android runtime matrix.
+The responsive corrections are being validated from real-device screenshot review, but existing phone screenshots do not establish acceptance across the supported screen-size, orientation, font-scale, accessibility, or Android runtime matrix.
 
 These limitations are deliberate fail-closed boundaries, not hidden features.
 
@@ -141,9 +153,10 @@ The application is configured for JDK 17, Gradle 9.5.0, Android Gradle Plugin 9.
 A Gradle wrapper is not yet committed. With the required SDK and Gradle available, validate with:
 
 ```bash
+python3 scripts/validate_glaze_ui_adoption.py
 gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
 
 ## Support boundary
 
-Until a GoreeCloud App Store release is formally accepted, this manual describes the development build only. Production installation, upgrade, account, recovery, and service-access instructions will be added only when those behaviors actually exist and are validated.
+Until a GoreeCloud App Store release is formally accepted, this manual describes the development build only. Production installation, upgrade, signing, account, recovery, Glaze UI conformance, and service-access instructions will be added only when those behaviors actually exist and are validated.

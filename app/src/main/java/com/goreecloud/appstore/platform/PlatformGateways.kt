@@ -12,12 +12,20 @@ data class PlatformIntegrationStatus(
     val detail: String,
 )
 
+object GlazeUiContract {
+    const val CURRENT_STABLE_VERSION = "2.1.0"
+    const val STABLE_RELEASE_TAG = "v2.1.0"
+    const val STABLE_RELEASE_REVISION = "c49113eb8b93c267613fdf1bbca1f814495acad7"
+    const val ADOPTION_EVIDENCE = "contracts/glaze-ui-adoption.json"
+    const val CONFORMANCE_ACCEPTED = false
+}
+
 object PlatformIntegrationRegistry {
     val current = listOf(
         PlatformIntegrationStatus(
             system = "Glaze UI",
             state = IntegrationState.TARGETED,
-            detail = "UI targets the current Stable 2.0.0 consumer contract; conformance is not yet claimed.",
+            detail = "UI targets Glaze UI ${GlazeUiContract.CURRENT_STABLE_VERSION} Stable (${GlazeUiContract.STABLE_RELEASE_TAG}, ${GlazeUiContract.STABLE_RELEASE_REVISION.take(12)}) through repository-local adoption evidence; application conformance remains pending rendered, native, accessibility, and representative-device acceptance.",
         ),
         PlatformIntegrationStatus(
             system = "GoreeCloud Identity",

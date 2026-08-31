@@ -20,4 +20,8 @@ The derivatives preserve the canonical icon geometry and gradient/color intent w
 
 `Mesh Center` currently uses a neutral platform/service glyph in the development client rather than copying or approximating the more complex GoreeCloud Mesh mark. A future native derivative must reference the approved canonical Mesh asset and be reviewed as a branding consumer update.
 
-No App Store-specific logo or icon is established by this file. Any future official GoreeCloud App Store artwork must originate in `GoreeCloud/goreecloud-branding-assets` first.
+## App Store product identity gate
+
+No product-specific GoreeCloud App Store logo or icon is established by this repository. Any future official GoreeCloud App Store artwork must originate in `GoreeCloud/goreecloud-branding-assets` first and then be copied into this application repository with explicit provenance.
+
+This is an **open production-readiness defect**, not permission to improvise an official mark. Before production or Stable qualification, the approved App Store identity must be present in this repository and used by applicable Android manifest/launcher, install/update, release-packaging, documentation, and platform-discovery surfaces. Development placeholders or generic store glyphs must not be represented as approved official branding.

@@ -57,14 +57,7 @@ Production catalog metadata must be authenticated, versioned, rollback-aware, an
 
 ## Applications
 
-Application entries will eventually support:
-
-- compatible release discovery;
-- signed artifact metadata;
-- checksum and signature/provenance validation;
-- Wardveil pre-install verification;
-- Android package installation through an explicit user-authorized workflow;
-- updates, release notes, channels, rollback information, and installed-state reconciliation.
+Application entries will eventually support compatible release discovery, signed artifact metadata, checksum and signature/provenance validation, Wardveil pre-install verification, explicit user-authorized Android installation, updates, release notes, channels, rollback information, and installed-state reconciliation.
 
 The app must not request Android package-install authority until installation is implemented and the permission is justified by the approved release scope.
 
@@ -76,7 +69,15 @@ Service entries represent GoreeCloud capabilities that are opened rather than in
 
 ### Glaze UI
 
-Current consumer target: **2.0.0 Stable**. The application must substantively implement the applicable interaction, accessibility, responsive, state, material, navigation, target-size, and fallback requirements. This repository does not claim conformance until exact-revision acceptance exists.
+Current required consumer target: **Glaze UI 2.1.0 Stable**. The reviewed Stable release anchor is `v2.1.0` at `c49113eb8b93c267613fdf1bbca1f814495acad7`.
+
+The App Store is currently a **2.1 adoption candidate**, not a conformant or production-eligible consumer. Repository-local evidence is recorded in `contracts/glaze-ui-adoption.json` and `docs/GLAZE_UI_ADOPTION.md`; CI must run `scripts/validate_glaze_ui_adoption.py` before Android build validation.
+
+The application must substantively implement the applicable 2.1 material hierarchy, native interaction semantics, target floors, responsive behavior, state behavior, accessibility precedence, effects-free fallbacks, and supported-platform requirements. Durable content defaults to Canvas/Surface; interaction chrome maps to Soft Glaze/Glaze/Deep Glaze/Live Glaze according to role. A successful source-level mapping or Android build cannot by itself establish Glaze UI conformance.
+
+At this checkpoint Light and Dark native palette mappings exist. Deep Dark, Reduced Transparency/Solid, Increased Contrast, Forced Colors-equivalent behavior where applicable, 200% Large Text, Touch Assistance, TalkBack/switch/keyboard-focus behavior, supported form factors, and representative physical-device acceptance remain pending. Glaze Motion is not consumed.
+
+The prior 2.0 App Store target is historical migration input only and cannot satisfy a current-Stable conformance or production-readiness gate.
 
 ### GoreeCloud Identity
 
@@ -115,13 +116,20 @@ The product should provide:
 
 Real-device screenshots are acceptance inputs for responsive behavior, but a single device or screenshot set does not establish Glaze UI or form-factor conformance across the supported matrix.
 
+## Branding and official identity
+
+`GoreeCloud/goreecloud-branding-assets` remains the canonical brand authority. Application-owned copies are consumer derivatives and must preserve provenance.
+
+A product-specific GoreeCloud App Store icon/logo is not yet approved. That is an explicit production-readiness blocker: no generic placeholder may be treated as official identity, and a production release must not proceed until the approved App Store identity has been established through the canonical branding path, stored in this repository, and wired into applicable manifest, launcher, release, documentation, and platform surfaces.
+
 ## Release and production gates
 
 Stable qualification requires all of the following for the exact release revision:
 
 - reproducible or otherwise controlled build provenance;
-- passing CI, unit/integration tests, lint, and package validation;
+- passing CI, Glaze adoption contract validation, unit/integration tests, lint, and package validation;
 - a controlled production application-signing identity distinct from development signing;
+- an approved product-specific App Store icon/logo stored in the repository and used by applicable release surfaces;
 - real GoreeCloud Identity integration and entitlement enforcement acceptance;
 - authenticated production catalog delivery;
 - backend re-authorization for protected artifact/service access;
@@ -129,7 +137,7 @@ Stable qualification requires all of the following for the exact release revisio
 - Privacy Shield acceptance for data processing and telemetry;
 - Everkeep application-specific protection/recovery contract and required evidence;
 - GoreeCloud Mesh integration where applicable to the accepted release scope;
-- current Glaze UI consumer conformance evidence;
-- Android device/runtime validation for supported API levels, font scales, and form factors;
+- current Glaze UI 2.1 application conformance evidence, including rendered/native/accessibility/platform acceptance;
+- Android device/runtime validation for supported API levels, font scales, accessibility modes, and form factors;
 - documented installation/update rollback and failure behavior;
 - canonical project specification, changelog, README, and user documentation reconciled to the validated revision.
