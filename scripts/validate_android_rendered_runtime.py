@@ -62,7 +62,10 @@ def require_compose_navigation_acceptance() -> dict[str, object]:
         "accepted": True,
         "method": "androidx-compose-ui-test-junit4",
         "minimumTargetDp": 48,
-        "requiresClickAction": True,
+        "interactionRequirement": (
+            "selected destination exposes selected semantic state; unselected destinations expose "
+            "click action; every destination is exercised as an unselected-to-selected transition"
+        ),
     }
 
 
