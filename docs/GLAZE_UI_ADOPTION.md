@@ -3,7 +3,7 @@
 ## Status
 
 - Application: GoreeCloud App Store
-- Platform: native Android / Jetpack Compose
+- Native clients: Android / Jetpack Compose and Linux / GTK 4 + libadwaita
 - Current required Glaze UI target: **2.1.0 Stable**
 - Canonical release tag: `v2.1.0`
 - Reviewed Stable release revision: `c49113eb8b93c267613fdf1bbca1f814495acad7`
@@ -11,50 +11,58 @@
 - Glaze UI conformance accepted: **false**
 - Production eligible from Glaze UI evidence: **false**
 
-The App Store previously targeted Glaze UI 2.0.0. After Glaze UI 2.1.0 became the current Stable release, the 2.0 evidence became historical migration input and can no longer satisfy current application conformance or production-readiness requirements.
+The prior Glaze UI 2.0 work is historical migration input only. This record maps both current native clients to the 2.1 Stable contract without claiming rendered or accessibility acceptance. The machine-readable companion is `contracts/glaze-ui-adoption.json`.
 
-This record maps the App Store to the current Stable contract without claiming downstream acceptance. The machine-readable companion is `contracts/glaze-ui-adoption.json`.
+## Governing semantics
 
-## Governing 2.1 semantics
-
-The native implementation adopts the Stable 2.1 governing rules:
+Both native clients adopt the 2.1 rules:
 
 - **Make interaction feel tangible.**
 - **Content is solid. Interaction is glazed.**
 - **Nothing teleports.**
 
-The material hierarchy is **Canvas → Surface → Soft Glaze → Glaze → Deep Glaze → Live Glaze**. Durable catalog content remains on solid Canvas/Surface roles. Interaction and status chrome may use the Glaze material roles according to function and accessibility state rather than using translucency as decoration.
+The material hierarchy is **Canvas → Surface → Soft Glaze → Glaze → Deep Glaze → Live Glaze**. Durable catalog content stays on solid Canvas/Surface equivalents. Glaze roles apply to interaction/status chrome according to function and accessibility state, not as decorative translucency.
 
-## Native Android mapping
+## Android native mapping
 
-`app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt` provides a repository-local Material 3 mapping derived from the reviewed 2.1 Android Stable reference palette. It separates canvas, solid surface, raised surface, Soft Glaze/Glaze, accent, border, positive, and warning roles for Light and Dark appearance.
+`app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt` provides the repository-local Compose Material 3 mapping. It separates canvas, solid surface, raised surface, Glaze interaction, accent, border, positive, and warning roles for Light and Dark appearance.
 
-The App Store continues to use platform-native Compose controls for navigation, search, menus, buttons, bottom sheets, and scrolling semantics. Native controls are mappings of Glaze UI behavior; they are not an exemption from Glaze UI requirements.
+Android platform controls remain native Compose controls. The current 48 dp interaction floor and recorded 56 dp Touch Assistance target do not by themselves establish Touch Assistance acceptance.
 
-The current development client preserves a minimum 48 dp interaction floor for the bounded account control and uses standard Material 3 control sizing elsewhere. The 56 dp Touch Assistance requirement is recorded but still requires application-specific state implementation and acceptance before it can be claimed complete.
+Pending Android acceptance includes Deep Dark, Reduced Transparency/Solid, Increased Contrast/forced-color-equivalent behavior where applicable, 200% Large Text, Touch Assistance, TalkBack/switch/keyboard-focus behavior, supported Android form factors, and representative physical-device evidence.
+
+## Linux native mapping
+
+`linux/resources/style.css` provides the native GTK 4/libadwaita mapping. It uses host theme roles such as `@card_bg_color`, `@accent_bg_color`, borders, warning, and success roles rather than hard-coding an independent visual theme that could conflict with desktop appearance/accessibility settings.
+
+The current mapping includes Glaze-oriented header, navigation, search, card, artifact-row, status, and selected-navigation treatments while keeping primary catalog content on solid card/surface backgrounds.
+
+This Linux source mapping is not desktop conformance evidence. Pending Linux acceptance includes:
+
+- rendered Light/Dark and supported host-theme behavior;
+- Reduced Transparency/Solid-equivalent behavior where applicable;
+- Increased Contrast/high-contrast desktop behavior;
+- 200% text scaling and reflow;
+- keyboard navigation, focus visibility, screen-reader semantics, and pointer behavior;
+- supported desktop/window-size and Wayland/X11 behavior;
+- representative Linux runtime/device acceptance.
+
+No Linux interaction target-floor claim is inferred merely from CSS dimensions. Applicable Glaze target requirements must be validated against the current native desktop contract and rendered behavior.
 
 ## Accessibility and resilience boundary
 
-The following Glaze UI 2.1 application acceptance remains pending for the App Store:
+Application-wide Glaze acceptance remains pending for rendered appearance, native accessibility, representative physical devices/desktops, and supported form factors. Accessibility settings take precedence over decorative material effects.
 
-- Deep Dark application presentation;
-- Reduced Transparency / Solid interaction treatment;
-- Increased Contrast and Forced Colors-equivalent platform behavior where applicable;
-- 200% Large Text and reflow acceptance;
-- Touch Assistance 56 dp target-floor acceptance;
-- TalkBack, switch-access, keyboard/focus, and semantic-state acceptance;
-- Reduced Motion validation for any future nonessential motion;
-- representative phone/tablet/foldable and other supported Android window acceptance;
-- representative physical-device acceptance.
-
-Glaze Motion is not consumed by the App Store and remains separately governed/Experimental.
+Glaze Motion is not consumed by either App Store client and remains separately governed.
 
 ## Automated contract
 
-`scripts/validate_glaze_ui_adoption.py` fails closed when the repository-local target, reviewed Stable release anchor, platform integration record, native palette mapping, version metadata, or acceptance boundary becomes inconsistent.
+`scripts/validate_glaze_ui_adoption.py` fails closed when the current Stable target, release anchor, Android native mapping, Linux native mapping, platform integration record, Android application version boundary, or acceptance state drifts.
 
-CI runs that validator before Android tests/lint/assembly and publishes its output with the APK evidence. This is source-level and automated adoption evidence only. It does not substitute for rendered, native accessibility, human visual, or representative physical-device acceptance.
+The validator checks representative Android theme anchors and Linux GTK/libadwaita mapping markers. Android and Linux CI run the contract before their platform build acceptance work.
+
+This is automated **source-level adoption evidence only**. It does not substitute for rendered, native accessibility, human visual, keyboard/focus, supported-form-factor, or representative-device acceptance.
 
 ## Production boundary
 
-`productionAcceptance` remains `false`. Glaze UI adoption does not establish production GoreeCloud Identity integration, catalog delivery, Wardveil package verification, package installation/update authority, Privacy Shield runtime acceptance, Everkeep recovery acceptance, GoreeCloud Mesh transport, production signing, deployment, or Stable App Store status.
+`productionAcceptance` remains `false`. Glaze UI adoption does not establish production GoreeCloud Identity, authoritative catalog delivery, Wardveil package verification, Privacy Shield runtime acceptance, Everkeep recovery, GoreeCloud Mesh transport, production signing, approved App Store branding, package installation/update authority, deployment, or Stable App Store status.

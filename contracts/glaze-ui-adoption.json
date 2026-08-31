@@ -17,12 +17,12 @@
   ],
   "materialMapping": {
     "contentRoles": ["Canvas", "Surface"],
-    "interactionRoles": ["Soft Glaze", "Glaze", "Deep Glaze", "Live Glaze"],
-    "nativeTheme": "app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt"
+    "interactionRoles": ["Soft Glaze", "Glaze", "Deep Glaze", "Live Glaze"]
   },
   "nativeMapping": {
     "platform": "Android",
     "framework": "Jetpack Compose Material 3",
+    "nativeTheme": "app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt",
     "generalTargetFloorDp": 48,
     "touchAssistanceTargetFloorDp": 56,
     "implementedAppearanceProfiles": ["Light", "Dark"],
@@ -31,6 +31,21 @@
     "increasedContrast": "pending-acceptance",
     "largeText200Percent": "pending-acceptance",
     "touchAssistance": "pending-acceptance",
+    "glazeMotion": "not-consumed"
+  },
+  "linuxNativeMapping": {
+    "platform": "Linux",
+    "framework": "GTK 4 + libadwaita",
+    "nativeTheme": "linux/resources/style.css",
+    "hostThemeAdaptive": true,
+    "contentSurfacesSolid": true,
+    "interactionChromeMapped": true,
+    "deepDark": "host-theme-dependent-pending-acceptance",
+    "reducedTransparencySolidFallback": "pending-acceptance",
+    "increasedContrast": "pending-acceptance",
+    "largeText200Percent": "pending-acceptance",
+    "keyboardFocusAccessibility": "pending-acceptance",
+    "supportedDesktopFormFactors": "pending-acceptance",
     "glazeMotion": "not-consumed"
   },
   "acceptance": {

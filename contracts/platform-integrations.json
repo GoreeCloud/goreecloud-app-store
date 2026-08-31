@@ -3,6 +3,22 @@
   "application": "goreecloud-app-store",
   "productionAcceptance": false,
   "nativeApplication": true,
+  "nativeClients": {
+    "android": {
+      "implemented": true,
+      "framework": "Kotlin + Jetpack Compose",
+      "developmentApplicationId": "com.goreecloud.appstore.dev",
+      "productionConnected": false
+    },
+    "linux": {
+      "implemented": true,
+      "framework": "GTK 4 + libadwaita",
+      "language": "Rust",
+      "developmentApplicationId": "com.goreecloud.AppStore.Development",
+      "developmentBinary": "goreecloud-app-store-dev",
+      "productionConnected": false
+    }
+  },
   "integrations": {
     "glazeUi": {
       "target": "2.1.0",
@@ -11,6 +27,7 @@
       "adoptionStatus": "adoption-candidate",
       "adoptionEvidence": "contracts/glaze-ui-adoption.json",
       "automatedContract": true,
+      "nativeMappings": ["android", "linux"],
       "conformanceAccepted": false
     },
     "goreecloudIdentity": {

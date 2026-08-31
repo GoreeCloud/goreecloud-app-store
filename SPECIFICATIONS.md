@@ -2,142 +2,175 @@
 
 ## Product role
 
-GoreeCloud App Store is the official distribution and discovery surface for GoreeCloud applications and services. It is not a general third-party marketplace in its initial scope.
+GoreeCloud App Store is the official GoreeCloud distribution and discovery surface for GoreeCloud applications and services. Initial scope is first-party GoreeCloud software and services rather than a general third-party marketplace.
 
 ## Development model
 
-The App Store must be original GoreeCloud-owned native software. Store patterns may be informed by Google Play, Apple App Store, and F-Droid, but their product implementation must not be forked or reproduced as the GoreeCloud application architecture.
+The App Store must be original GoreeCloud-owned native software. Store patterns may be informed by Google Play, Apple App Store, and F-Droid, but those products are not implementation foundations.
 
-## Primary client
+## Native clients
 
-The first client is a native Android application written in Kotlin with Jetpack Compose. Android framework, Jetpack, Kotlin, Gradle, and mature cryptographic/transport primitives are supporting foundations, not substitute product implementations.
+The repository supports two first-party native clients:
 
-## Development package and signing boundary
+- **Android:** Kotlin + Jetpack Compose.
+- **Linux:** Rust + GTK 4 + libadwaita.
 
-The Android namespace remains `com.goreecloud.appstore`. The application identities have distinct development and production responsibilities:
+Both consume the same normalized catalog/entitlement model. Platform frameworks, package systems, cryptographic libraries, and transport primitives are supporting foundations rather than substitutes for GoreeCloud product implementation.
 
-- `com.goreecloud.appstore.dev` is the development/debug installation identity used by CI and device-review APKs.
-- `com.goreecloud.appstore` is reserved for a future production-approved application and must not be signed with the repository-managed development key.
+## Development identities and package boundaries
 
-Development APKs use one stable repository-managed PKCS12 development certificate so successive CI artifacts do not receive unrelated ephemeral Android debug identities. This development private key is intentionally non-production test material and is not a production security authority.
+### Android
 
-The development signing certificate SHA-256 fingerprint is recorded in `development/signing/README.md`. CI must verify the expected development package ID, label, version metadata, APK SHA-256, and signing certificate before publishing a development artifact.
+- Development application ID: `com.goreecloud.appstore.dev`.
+- Reserved future production application ID: `com.goreecloud.appstore`.
+- Development APKs use the repository-managed non-production certificate documented in `development/signing/README.md`.
+- Production signing must use separate controlled custody, provenance, recovery, and acceptance.
 
-Development version codes must advance when required for Android upgrade semantics. A future production release requires a separate controlled signing identity, custody and recovery policy, explicit signing provenance, and production acceptance. Development signing material must never be promoted into that boundary.
+### Linux
 
-Older bootstrap APKs that used `com.goreecloud.appstore` with ephemeral CI debug certificates are not an accepted update lineage and may require removal from test devices.
+- Development application ID: `com.goreecloud.AppStore.Development`.
+- Development binary: `goreecloud-app-store-dev`.
+- Debian development package: `goreecloud-app-store-dev`, `0.1.0~dev1`, amd64.
+- Flatpak development application: `com.goreecloud.AppStore.Development`, x86_64, GNOME Platform 50.
+- `.deb` is the primary native package format and Flatpak is the primary cross-distribution package format for this checkpoint.
+- AppImage remains a planned portable third format, not an implemented current package.
+- Linux production package signing/trust acceptance is not established.
 
 ## Multi-user and entitlement requirements
 
-- Every production user session must originate from GoreeCloud Identity or an explicitly approved local/offline identity path.
+- Every production session must originate from GoreeCloud Identity or an explicitly approved local/offline identity path.
 - The catalog must be personalized from authoritative policy inputs associated with the active identity.
-- Different users may receive different sets of applications, services, channels, versions, or administrative tools.
-- Concealed items must not leak through search, recommendations, counts, update lists, deep links, cached catalog metadata, or service launch affordances.
-- Administrator status must not create an implicit bypass. Access must be explicit in the applicable policy.
-- The delivery service must re-authorize artifact download/service launch independently of client rendering.
-- Account disablement and session revocation must invalidate protected catalog and delivery access according to the Identity contract.
-- A future multi-account device mode must keep per-identity library/history state separated.
+- Different identities may receive different applications, services, channels, versions, artifacts, or administrative tools.
+- Concealed items must not leak through search, recommendations, counts, update lists, deep links, package views, caches, or service launch affordances.
+- Administrator status creates no implicit bypass. Access must be explicitly granted by applicable policy.
+- The delivery service must re-authorize artifact download or service launch independently of client rendering.
+- Disablement and session revocation must invalidate protected catalog/delivery access according to the Identity contract.
+- Multi-account library/history state must remain isolated by identity.
 
-The current audience labels in `development-catalog.json` are fixtures only and do not establish the production GoreeCloud group taxonomy.
+Current development audience labels are fixtures only and do not establish production GoreeCloud taxonomy.
 
-## Catalog model
+## Shared catalog model
 
-Each catalog item must have a stable GoreeCloud identifier and declare at minimum:
+One normalized catalog source must support all clients without permitting platform-specific metadata to drift into competing stores. Each item declares at minimum:
 
-- item type: application or service;
-- display metadata;
-- category;
+- stable GoreeCloud item identifier;
+- application or service type;
+- display metadata and category;
 - lifecycle/release channel;
-- entitlement policy reference or normalized access requirements;
-- application package identity or service endpoint identity as applicable;
+- entitlement requirements or approved policy binding;
+- application package identity and/or service endpoint identity where applicable;
+- platform-specific artifact collections;
 - artifact/version provenance when delivery is enabled;
-- privacy, security, continuity, and platform-integration evidence references when available.
+- privacy, security, continuity, and platform-integration evidence references when authoritative data exists.
 
-Production catalog metadata must be authenticated, versioned, rollback-aware, and delivered over approved secure transport. A stale or unverifiable catalog must not silently become trusted production truth.
+The current fixture lives at `catalog/development-catalog.json`, is schema version 2, and is explicitly non-authoritative. Production catalog metadata must be authenticated, versioned, expiry-aware, rollback/revocation-aware, and transported over approved secure channels.
 
-## Applications
+## Applications and Linux artifacts
 
-Application entries will eventually support compatible release discovery, signed artifact metadata, checksum and signature/provenance validation, Wardveil pre-install verification, explicit user-authorized Android installation, updates, release notes, channels, rollback information, and installed-state reconciliation.
+Application entries may expose compatible platform releases. Linux product artifacts support Debian and Flatpak metadata slots.
 
-The app must not request Android package-install authority until installation is implemented and the permission is justified by the approved release scope.
+A Linux artifact MUST remain non-downloadable unless all required evidence is present and structurally valid:
+
+- publication state is `published`;
+- download URL uses HTTPS;
+- package/application identity is present;
+- SHA-256 digest is present and valid;
+- exact source revision is present;
+- signing/provenance evidence is affirmative;
+- Wardveil acceptance is affirmative.
+
+`blocked`, `withdrawn`, unpublished, incomplete, malformed, or unverifiable metadata fails closed. Current development catalog artifacts are unpublished.
+
+The Linux development client may open an approved download destination when the artifact contract is complete. Automatic installation, privileged package-manager control, unattended update behavior, and rollback automation are separate future capabilities and are disabled at this checkpoint.
+
+Android installation remains separately gated by Android package identity/signing, Wardveil acceptance, explicit user consent, package-install authority, and runtime reconciliation.
 
 ## Services
 
-Service entries represent GoreeCloud capabilities that are opened rather than installed. Launch must use a policy-approved endpoint/deep link and must not treat catalog visibility as service authorization.
+Service entries represent GoreeCloud capabilities whose service-side authorization remains independent of catalog visibility. A service may eventually have an installable Linux companion/client artifact, but possessing that package does not itself authorize the underlying service.
+
+Approved service launch must use allowlisted destinations and current authentication/authorization.
+
+## Public/shared catalog
+
+The Linux client includes a **Share catalog** surface. It MUST remain disabled while no approved public HTTPS catalog URL exists.
+
+A future shared catalog endpoint must distinguish public metadata from identity-protected catalog data. Sharing must never expose concealed entries, protected entitlement metadata, credentials, private service destinations, or otherwise bypass Privacy Shield/Identity policy. Protected artifact delivery remains re-authorized after catalog discovery.
 
 ## Integral platform systems
 
 ### Glaze UI
 
-Current required consumer target: **Glaze UI 2.1.0 Stable**. The reviewed Stable release anchor is `v2.1.0` at `c49113eb8b93c267613fdf1bbca1f814495acad7`.
+Current required consumer target: **Glaze UI 2.1.0 Stable**, release `v2.1.0` at revision `c49113eb8b93c267613fdf1bbca1f814495acad7`.
 
-The App Store is currently a **2.1 adoption candidate**, not a conformant or production-eligible consumer. Repository-local evidence is recorded in `contracts/glaze-ui-adoption.json` and `docs/GLAZE_UI_ADOPTION.md`; CI must run `scripts/validate_glaze_ui_adoption.py` before Android build validation.
+The App Store is an **adoption candidate**, not a conformant or production-eligible consumer. Android maps Glaze through the Compose theme and Linux maps it through `linux/resources/style.css` with GTK/libadwaita host-theme roles. Both clients must keep durable content on solid surfaces and map interaction/status chrome according to the Glaze hierarchy.
 
-The application must substantively implement the applicable 2.1 material hierarchy, native interaction semantics, target floors, responsive behavior, state behavior, accessibility precedence, effects-free fallbacks, and supported-platform requirements. Durable content defaults to Canvas/Surface; interaction chrome maps to Soft Glaze/Glaze/Deep Glaze/Live Glaze according to role. A successful source-level mapping or Android build cannot by itself establish Glaze UI conformance.
-
-At this checkpoint Light and Dark native palette mappings exist. Deep Dark, Reduced Transparency/Solid, Increased Contrast, Forced Colors-equivalent behavior where applicable, 200% Large Text, Touch Assistance, TalkBack/switch/keyboard-focus behavior, supported form factors, and representative physical-device acceptance remain pending. Glaze Motion is not consumed.
-
-The prior 2.0 App Store target is historical migration input only and cannot satisfy a current-Stable conformance or production-readiness gate.
+Source mapping and automated validation do not establish rendered, accessibility, supported-form-factor, contrast, reduced-transparency, large-text, keyboard/focus, or physical-device/desktop acceptance. Those remain pending. Glaze Motion is not consumed.
 
 ### GoreeCloud Identity
 
-Identity owns authentication, accounts, sessions, devices, credentials, and platform authority. The App Store owns store-domain entitlement decisions using approved Identity inputs. Production integration should prefer the approved OIDC/OAuth application integration path where appropriate and must validate login/logout, redirects, session expiry, user mapping, role/group mapping, disablement, failure behavior, and rollback.
+Identity owns authentication, accounts, sessions, devices, credentials, and platform authority. The App Store owns store-domain entitlement decisions using approved Identity inputs. Production integration must validate login/logout, redirects where applicable, session expiry, mapping, disablement, failure behavior, and rollback.
 
 ### Wardveil Security
 
-Wardveil owns package/security trust outcomes. Before installation is enabled, the App Store must validate artifact provenance and required Wardveil checks and must fail closed when required verification is missing, stale, malformed, unavailable, or negative.
+Wardveil owns package/security trust outcomes. Artifact download/install/update flows must fail closed when required provenance or Wardveil evidence is absent, stale, malformed, unavailable, revoked, blocked, or negative.
 
 ### Privacy Shield
 
-Privacy Shield owns consent, minimization, data-use, retention, sharing, and user-control policy. Store analytics are off in the development client. Any future recommendations, diagnostics, personalization telemetry, search history, or cross-device library data must have a documented purpose and Privacy Shield treatment before collection.
+Privacy Shield owns consent, minimization, data-use, retention, sharing, and user control. Development analytics remain off. Search/history/recommendation telemetry, public sharing, diagnostics, and cross-device library state require documented purpose and Privacy Shield treatment before production collection/use.
 
 ### Everkeep
 
-Everkeep owns continuity/recoverability truth. The App Store must define a protection contract for important catalog configuration, user library/history state, and recovery metadata. Sync and backup must remain conceptually distinct. A library backup must not be presented as recoverable without applicable evidence.
+Everkeep owns continuity and recoverability truth. Library/history/catalog configuration must have an application-specific protection contract before recovery claims are made. Sync and backup remain distinct concepts.
 
 ### GoreeCloud Mesh
 
-Mesh owns platform coordination, capability discovery, governance, and events. The App Store should use Mesh contracts for minimized application/service lifecycle events and catalog coordination when the production contract exists, without making Mesh the source of Identity, Privacy, Wardveil, Everkeep, or Glaze authority.
+Mesh owns platform coordination, capability discovery, governance, and events. The App Store may use approved Mesh contracts for minimized lifecycle/catalog coordination without transferring Identity, Privacy, Wardveil, Everkeep, or Glaze authority to Mesh.
 
 ## Store UX
 
-The product should provide:
+The product should provide authorized Discover/home content, Apps, Services, search, Updates, Library, product details, and platform package views appropriate to each client. Linux additionally provides desktop package-publication state and catalog sharing controls.
 
-- Discover/home recommendations based only on authorized catalog data;
-- Apps and Services sections;
-- search that never returns unauthorized items;
-- Updates and Library surfaces scoped to the active identity/device;
-- detailed product pages with version/channel, compatibility, release notes, privacy, permissions, security/provenance, continuity state, source/license information, and support links where authoritative data exists;
-- clear account switching with no cross-account metadata leakage;
-- accessible adaptive layouts for phones, tablets, foldables, desktop-class Android windows, and other supported Android form factors as validated;
-- compact-width and enlarged-text behavior that keeps navigation, account affordances, section headings, counts, release/status capsules, and metadata readable without overlap or pathological single-character vertical wrapping;
-- layout priority rules that give primary descriptive text flexible space while preserving bounded controls and status capsules, using truncation or vertical label/value presentation where horizontal pairing would become unreadable;
-- clear negative/unknown states rather than fabricated positive badges.
+UX requirements include:
 
-Real-device screenshots are acceptance inputs for responsive behavior, but a single device or screenshot set does not establish Glaze UI or form-factor conformance across the supported matrix.
+- search constrained to the already-entitled catalog;
+- clear active-identity switching with no metadata leakage;
+- truthful unknown/unpublished/blocked states instead of fabricated positive badges;
+- readable responsive/adaptive layouts;
+- keyboard/focus and accessibility behavior appropriate to the host platform;
+- product details that expose release, compatibility, privacy, security/provenance, continuity, source/license, and support information only when authoritative.
 
 ## Branding and official identity
 
-`GoreeCloud/goreecloud-branding-assets` remains the canonical brand authority. Application-owned copies are consumer derivatives and must preserve provenance.
+`GoreeCloud/goreecloud-branding-assets` remains canonical. An approved product-specific App Store icon/logo does not yet exist and is a production-readiness blocker.
 
-A product-specific GoreeCloud App Store icon/logo is not yet approved. That is an explicit production-readiness blocker: no generic placeholder may be treated as official identity, and a production release must not proceed until the approved App Store identity has been established through the canonical branding path, stored in this repository, and wired into applicable manifest, launcher, release, documentation, and platform surfaces.
+No placeholder may be represented as official. Flatpak repository-level AppStream composition is deliberately deferred until that icon exists; the development metainfo document is independently validated in CI.
 
-## Release and production gates
+## Build provenance
 
-Stable qualification requires all of the following for the exact release revision:
+Linux Rust dependency resolution must be pinned by committed `linux/Cargo.lock`; validation/build commands use `--locked`. Linux CI records exact source revision, toolchain versions, lockfile digest, executable digest, Debian package metadata/digest, Flatpak bundle digest, catalog validation, Glaze contract validation, and the development acceptance boundary.
 
-- reproducible or otherwise controlled build provenance;
-- passing CI, Glaze adoption contract validation, unit/integration tests, lint, and package validation;
-- a controlled production application-signing identity distinct from development signing;
-- an approved product-specific App Store icon/logo stored in the repository and used by applicable release surfaces;
-- real GoreeCloud Identity integration and entitlement enforcement acceptance;
+Android CI separately records exact source, APK identity/version/label/signing evidence and SHA-256.
+
+## Stable and production gates
+
+Stable qualification requires exact-release-revision evidence for all accepted platform scopes, including:
+
+- controlled/reproducible build provenance;
+- passing CI, tests, lint/static analysis, catalog validation, package validation, and Glaze contract validation;
+- committed/pinned dependency inputs where applicable;
+- approved product-specific App Store identity;
+- controlled production signing identities for each package ecosystem;
+- production GoreeCloud Identity and entitlement acceptance;
 - authenticated production catalog delivery;
 - backend re-authorization for protected artifact/service access;
-- Wardveil package-verification acceptance for install flows;
-- Privacy Shield acceptance for data processing and telemetry;
-- Everkeep application-specific protection/recovery contract and required evidence;
-- GoreeCloud Mesh integration where applicable to the accepted release scope;
-- current Glaze UI 2.1 application conformance evidence, including rendered/native/accessibility/platform acceptance;
-- Android device/runtime validation for supported API levels, font scales, accessibility modes, and form factors;
-- documented installation/update rollback and failure behavior;
+- Wardveil package verification acceptance;
+- Privacy Shield acceptance;
+- Everkeep protection/recovery acceptance;
+- GoreeCloud Mesh integration where required by release scope;
+- current Glaze UI 2.1 rendered/native/accessibility/platform acceptance;
+- Android runtime/form-factor acceptance for Android scope;
+- supported Linux distribution/runtime, Debian installation/upgrade/removal, Flatpak installation/upgrade/removal, desktop accessibility, Wayland/X11 fallback, and package failure/rollback behavior for Linux scope;
 - canonical project specification, changelog, README, and user documentation reconciled to the validated revision.
+
+`productionAcceptance` remains `false` until those gates are satisfied by evidence rather than declaration.

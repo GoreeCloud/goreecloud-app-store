@@ -39,12 +39,29 @@ def main() -> None:
     require(adoption.get("stableReleaseRevision") == EXPECTED_REVISION, "Stable release revision mismatch")
     require(adoption.get("canonicalRepository") == "GoreeCloud/goreecloud-glaze-ui", "canonical Glaze repository mismatch")
 
-    native = adoption.get("nativeMapping", {})
-    require(native.get("platform") == "Android", "native platform must be Android")
-    require(native.get("framework") == "Jetpack Compose Material 3", "native framework mapping mismatch")
-    require(native.get("generalTargetFloorDp") == 48, "general target floor must be 48 dp")
-    require(native.get("touchAssistanceTargetFloorDp") == 56, "Touch Assistance target floor must be 56 dp")
-    require(native.get("glazeMotion") == "not-consumed", "Glaze Motion must not be claimed as Stable consumption")
+    android = adoption.get("nativeMapping", {})
+    require(android.get("platform") == "Android", "Android native platform mapping missing")
+    require(android.get("framework") == "Jetpack Compose Material 3", "Android native framework mapping mismatch")
+    require(android.get("nativeTheme") == "app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt", "Android native theme path mismatch")
+    require(android.get("generalTargetFloorDp") == 48, "Android general target floor must be 48 dp")
+    require(android.get("touchAssistanceTargetFloorDp") == 56, "Android Touch Assistance target floor must be 56 dp")
+    require(android.get("glazeMotion") == "not-consumed", "Android Glaze Motion must not be claimed as Stable consumption")
+
+    linux = adoption.get("linuxNativeMapping", {})
+    require(linux.get("platform") == "Linux", "Linux native platform mapping missing")
+    require(linux.get("framework") == "GTK 4 + libadwaita", "Linux native framework mapping mismatch")
+    require(linux.get("nativeTheme") == "linux/resources/style.css", "Linux native theme path mismatch")
+    require(linux.get("hostThemeAdaptive") is True, "Linux mapping must remain host-theme adaptive")
+    require(linux.get("contentSurfacesSolid") is True, "Linux content-surface boundary must remain solid")
+    require(linux.get("glazeMotion") == "not-consumed", "Linux Glaze Motion must not be claimed as Stable consumption")
+    for key in (
+        "reducedTransparencySolidFallback",
+        "increasedContrast",
+        "largeText200Percent",
+        "keyboardFocusAccessibility",
+        "supportedDesktopFormFactors",
+    ):
+        require(linux.get(key) == "pending-acceptance", f"Linux {key} must remain pending until evidence exists")
 
     acceptance = adoption.get("acceptance", {})
     require(acceptance.get("automatedContract") is True, "automated contract must be enabled")
@@ -59,6 +76,10 @@ def main() -> None:
         require(acceptance.get(key) == "pending", f"{key} must remain pending until evidence exists")
 
     require(integrations.get("productionAcceptance") is False, "application productionAcceptance must remain false")
+    clients = integrations.get("nativeClients", {})
+    require(clients.get("android", {}).get("implemented") is True, "Android native client record missing")
+    require(clients.get("linux", {}).get("implemented") is True, "Linux native client record missing")
+    require(clients.get("linux", {}).get("framework") == "GTK 4 + libadwaita", "Linux integration framework mismatch")
     glaze = integrations.get("integrations", {}).get("glazeUi", {})
     require(glaze.get("target") == EXPECTED_VERSION, "platform Glaze target mismatch")
     require(glaze.get("stableReleaseTag") == EXPECTED_TAG, "platform Glaze release tag mismatch")
@@ -71,7 +92,7 @@ def main() -> None:
     for literal in (EXPECTED_VERSION, EXPECTED_TAG, EXPECTED_REVISION, "CONFORMANCE_ACCEPTED = false"):
         require(literal in gateways, f"PlatformGateways.kt is missing {literal!r}")
 
-    theme = read("app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt")
+    android_theme = read("app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt")
     for palette_literal in (
         "0xFFF4F7FD",
         "0xFFE8EEFF",
@@ -80,12 +101,23 @@ def main() -> None:
         "0xFF262F43",
         "0xFF93A6FF",
     ):
-        require(palette_literal in theme, f"native Glaze 2.1 palette mapping is missing {palette_literal}")
-    require("Content planes stay solid" in theme, "native material-role boundary is undocumented")
+        require(palette_literal in android_theme, f"Android Glaze 2.1 palette mapping is missing {palette_literal}")
+    require("Content planes stay solid" in android_theme, "Android material-role boundary is undocumented")
+
+    linux_theme = read("linux/resources/style.css")
+    for marker in (
+        ".glaze-header",
+        ".glaze-navigation",
+        ".glaze-search",
+        ".store-card",
+        "@card_bg_color",
+        "@accent_bg_color",
+    ):
+        require(marker in linux_theme, f"Linux Glaze mapping is missing {marker!r}")
 
     gradle = read("app/build.gradle.kts")
-    require(f'versionName = "{EXPECTED_APP_VERSION}"' in gradle, "development versionName mismatch")
-    require(f"versionCode = {EXPECTED_APP_VERSION_CODE}" in gradle, "development versionCode mismatch")
+    require(f'versionName = "{EXPECTED_APP_VERSION}"' in gradle, "Android development versionName mismatch")
+    require(f"versionCode = {EXPECTED_APP_VERSION_CODE}" in gradle, "Android development versionCode mismatch")
 
     documentation = {
         "README.md": read("README.md"),
@@ -108,7 +140,7 @@ def main() -> None:
     print(
         "Glaze UI 2.1 adoption contract validated: "
         f"status=adoption-candidate target={EXPECTED_VERSION} release={EXPECTED_TAG} "
-        "conformance=false productionEligible=false"
+        "nativeMappings=android,linux conformance=false productionEligible=false"
     )
 
 
