@@ -2,7 +2,9 @@
 """Rendered/native Android emulator evidence for GoreeCloud App Store development.
 
 This gate executes the exact checked-out development APK through adb and records
-bounded responsive/accessibility evidence. Emulator evidence is deliberately
+bounded responsive/accessibility evidence. Compose-native instrumentation owns
+bottom-navigation semantic target/action acceptance because UIAutomator flattens
+those semantics on current Android/Compose. Emulator evidence is deliberately
 not treated as TalkBack, physical-device, production-signing, Glaze UI
 conformance, human Visual Excellence, release, or production acceptance.
 """
@@ -48,6 +50,20 @@ def exact_source_revision() -> str:
                 f"checked-out source revision {revision} does not match expected exact head {expected}"
             )
     return revision
+
+
+def require_compose_navigation_acceptance() -> dict[str, object]:
+    accepted = os.environ.get("APP_STORE_COMPOSE_NAV_ACCEPTED", "").strip().lower()
+    if accepted != "true":
+        raise SystemExit(
+            "Compose-native navigation semantics acceptance was not established before rendered validation"
+        )
+    return {
+        "accepted": True,
+        "method": "androidx-compose-ui-test-junit4",
+        "minimumTargetDp": 48,
+        "requiresClickAction": True,
+    }
 
 
 def serial_from_adb() -> str:
@@ -184,11 +200,10 @@ def nearest_clickable(root: ET.Element, node: ET.Element) -> ET.Element:
         if current.attrib.get("clickable") == "true":
             return current
 
-    # Compose semantics can be flattened by UIAutomator so the text label and
-    # its clickable navigation/control region appear as siblings rather than a
-    # parent/child chain. In that case, resolve the smallest clickable region
-    # that geometrically contains the exact label. This still measures the real
-    # exported Android semantic target instead of substituting label dimensions.
+    # UIAutomator can flatten some Compose semantics. For controls that it does
+    # export as clickable regions, resolve the smallest exported clickable region
+    # that geometrically contains the label. Bottom navigation is intentionally
+    # validated through Compose-native instrumentation instead of this fallback.
     label_bounds = bounds(node)
     candidates: list[tuple[int, ET.Element]] = []
     for candidate in all_nodes(root):
@@ -214,8 +229,6 @@ def target_size_dp(node: ET.Element, dpi: int) -> tuple[float, float]:
 
 
 def assert_target_floor(root: ET.Element, text: str, dpi: int, floor: float = 48.0) -> dict[str, float]:
-    # ElementTree leaf elements are falsey even when they are valid matches, so
-    # select exact text explicitly before falling back to a substring match.
     node = find_text(root, text)
     if node is None:
         node = find_fragment(root, text)
@@ -342,14 +355,10 @@ def case_phone_light(serial: str) -> dict:
     require_fragment(root, "Standard")
     require_fragment(root, "4 available")
     require_fragment(root, "Search apps and services")
+    assert_navigation_no_overlap(root)
     dpi = current_density(serial)
     targets = {
         "account": assert_target_floor(root, "Standard", dpi),
-        "discover": assert_target_floor(root, "Discover", dpi),
-        "apps": assert_target_floor(root, "Apps", dpi),
-        "services": assert_target_floor(root, "Services", dpi),
-        "updates": assert_target_floor(root, "Updates", dpi),
-        "library": assert_target_floor(root, "Library", dpi),
     }
     browser_root, _ = visible_after_scroll(serial, "GoreeCloud Browser")
     targets["browserCard"] = assert_target_floor(browser_root, "GoreeCloud Browser", dpi)
@@ -360,6 +369,7 @@ def case_phone_light(serial: str) -> dict:
         "fontScale": 1.0,
         "nightMode": False,
         "targets": targets,
+        "navigationLabelsVisibleAndNonOverlapping": True,
         "screenshotSha256": sha,
     }
 
@@ -402,8 +412,6 @@ def case_phone_large_text(serial: str) -> dict:
     dpi = current_density(serial)
     targets = {
         "account": assert_target_floor(root, "Standard", dpi),
-        "discover": assert_target_floor(root, "Discover", dpi),
-        "library": assert_target_floor(root, "Library", dpi),
     }
     sha = screenshot(serial, "phone-large-text.png")
     return {
@@ -412,6 +420,7 @@ def case_phone_large_text(serial: str) -> dict:
         "fontScale": 2.0,
         "nightMode": False,
         "targets": targets,
+        "navigationLabelsVisibleAndNonOverlapping": True,
         "screenshotSha256": sha,
     }
 
@@ -429,7 +438,6 @@ def case_tablet(serial: str) -> dict:
     dpi = current_density(serial)
     targets = {
         "account": assert_target_floor(root, "Standard", dpi),
-        "discover": assert_target_floor(root, "Discover", dpi),
     }
     visible_after_scroll(serial, "GoreeCloud Browser", attempts=4)
     sha = screenshot(serial, "tablet-light-standard.png")
@@ -446,6 +454,7 @@ def case_tablet(serial: str) -> dict:
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     source_revision = exact_source_revision()
+    compose_navigation = require_compose_navigation_acceptance()
     serial = serial_from_adb()
     original_font_scale = adb(serial, "shell", "settings", "get", "system", "font_scale").stdout.strip() or "1.0"
 
@@ -470,6 +479,7 @@ def main() -> int:
         "sourceRevision": source_revision,
         "glazeUiTarget": "2.1.0",
         "platform": "android-emulator-rendered",
+        "composeNavigationSemantics": compose_navigation,
         "physicalDevice": False,
         "talkBackAccepted": False,
         "switchAccessAccepted": False,
@@ -485,10 +495,10 @@ def main() -> int:
         },
         "cases": cases,
         "boundary": (
-            "Emulator install/launch/responsive/target-floor/fixture-state evidence only. "
-            "It is not representative physical-device, TalkBack, switch-access, OEM, "
-            "production-signing, distribution, human Visual Excellence, full Glaze UI "
-            "conformance, release, or production acceptance."
+            "Emulator install/launch/responsive/Compose-navigation-semantics/target-floor/fixture-state "
+            "evidence only. It is not representative physical-device, TalkBack, switch-access, OEM, "
+            "production-signing, distribution, human Visual Excellence, full Glaze UI conformance, "
+            "release, or production acceptance."
         ),
     }
     (OUT / "android-rendered-evidence.json").write_text(
