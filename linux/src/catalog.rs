@@ -58,7 +58,7 @@ pub struct LinuxArtifact {
     pub wardveil_accepted: bool,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum ArtifactFormat {
     Deb,
@@ -228,8 +228,15 @@ mod tests {
         let catalog = Catalog::embedded().expect("embedded catalog should parse");
         for item in &catalog.items {
             let formats: HashSet<_> = item.artifacts.linux.iter().map(|a| a.format).collect();
-            assert_eq!(formats, HashSet::from([ArtifactFormat::Deb, ArtifactFormat::Flatpak]));
-            assert!(item.artifacts.linux.iter().all(|artifact| !artifact.is_download_ready()));
+            assert_eq!(
+                formats,
+                HashSet::from([ArtifactFormat::Deb, ArtifactFormat::Flatpak])
+            );
+            assert!(item
+                .artifacts
+                .linux
+                .iter()
+                .all(|artifact| !artifact.is_download_ready()));
         }
     }
 }
