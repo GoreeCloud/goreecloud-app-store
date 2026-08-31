@@ -162,16 +162,49 @@ def bounds(node: ET.Element) -> tuple[int, int, int, int]:
     return tuple(map(int, match.groups()))
 
 
+def contains(outer: tuple[int, int, int, int], inner: tuple[int, int, int, int]) -> bool:
+    ox1, oy1, ox2, oy2 = outer
+    ix1, iy1, ix2, iy2 = inner
+    return ox1 <= ix1 and oy1 <= iy1 and ox2 >= ix2 and oy2 >= iy2
+
+
+def area(rect: tuple[int, int, int, int]) -> int:
+    x1, y1, x2, y2 = rect
+    return max(0, x2 - x1) * max(0, y2 - y1)
+
+
 def nearest_clickable(root: ET.Element, node: ET.Element) -> ET.Element:
     if node.attrib.get("clickable") == "true":
         return node
+
     parents = {child: parent for parent in root.iter() for child in parent}
     current = node
     while current in parents:
         current = parents[current]
         if current.attrib.get("clickable") == "true":
             return current
-    raise SystemExit(f"no clickable semantic ancestor for UI text: {node.attrib.get('text')!r}")
+
+    # Compose semantics can be flattened by UIAutomator so the text label and
+    # its clickable navigation/control region appear as siblings rather than a
+    # parent/child chain. In that case, resolve the smallest clickable region
+    # that geometrically contains the exact label. This still measures the real
+    # exported Android semantic target instead of substituting label dimensions.
+    label_bounds = bounds(node)
+    candidates: list[tuple[int, ET.Element]] = []
+    for candidate in all_nodes(root):
+        if candidate.attrib.get("clickable") != "true":
+            continue
+        raw_bounds = candidate.attrib.get("bounds", "")
+        if not BOUNDS.fullmatch(raw_bounds):
+            continue
+        candidate_bounds = bounds(candidate)
+        if contains(candidate_bounds, label_bounds):
+            candidates.append((area(candidate_bounds), candidate))
+    if candidates:
+        candidates.sort(key=lambda item: item[0])
+        return candidates[0][1]
+
+    raise SystemExit(f"no clickable semantic target for UI text: {node.attrib.get('text')!r}")
 
 
 def target_size_dp(node: ET.Element, dpi: int) -> tuple[float, float]:
@@ -222,7 +255,7 @@ def tap_text(serial: str, value: str) -> None:
         node = nearest_clickable(root, node)
     except SystemExit:
         # Text rendered inside a platform popup can expose the text bounds without
-        # a separate clickable ancestor; tapping the text center remains a bounded
+        # a separate clickable region; tapping the text center remains a bounded
         # native interaction check rather than a semantic-target assertion.
         pass
     tap_node(serial, node)
