@@ -181,7 +181,11 @@ def target_size_dp(node: ET.Element, dpi: int) -> tuple[float, float]:
 
 
 def assert_target_floor(root: ET.Element, text: str, dpi: int, floor: float = 48.0) -> dict[str, float]:
-    node = find_text(root, text) or find_fragment(root, text)
+    # ElementTree leaf elements are falsey even when they are valid matches, so
+    # select exact text explicitly before falling back to a substring match.
+    node = find_text(root, text)
+    if node is None:
+        node = find_fragment(root, text)
     if node is None:
         raise SystemExit(f"target label not found: {text}")
     target = nearest_clickable(root, node)
