@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BRANDING = ROOT / "BRANDING.md"
 MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
 UI = ROOT / "app/src/main/java/com/goreecloud/appstore/ui/AppStoreApp.kt"
+CATALOG = ROOT / "app/src/main/assets/catalog/development-catalog.json"
 DRAWABLE = ROOT / "app/src/main/res/drawable"
 
 required_files = {
@@ -40,15 +42,33 @@ if 'android:icon="@drawable/goreecloud_app_store_icon"' not in manifest:
     raise SystemExit("App Store manifest is not wired to the approved launcher derivative")
 
 ui = UI.read_text(encoding="utf-8")
-required_mappings = [
-    '"goreecloud.identity-center" -> R.drawable.goreecloud_identity_center_icon',
-    '"goreecloud.mesh-center" -> R.drawable.goreecloud_mesh_center_icon',
-]
-for mapping in required_mappings:
+expected_catalog_mappings = {
+    "goreecloud.browser": "goreecloud_browser_icon",
+    "goreecloud.messenger": "goreecloud_messenger_icon",
+    "goreecloud.location": "goreecloud_location_icon",
+    "goreecloud.manager": "goreecloud_manager_icon",
+    "goreecloud.identity-center": "goreecloud_identity_center_icon",
+    "goreecloud.mesh-center": "goreecloud_mesh_center_icon",
+}
+
+catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+catalog_ids = {item.get("id") for item in catalog.get("items", [])}
+if catalog_ids != set(expected_catalog_mappings):
+    raise SystemExit(
+        "Development catalog identity set changed without an explicit branding mapping review: "
+        f"expected {sorted(expected_catalog_mappings)}, got {sorted(catalog_ids)}"
+    )
+for item_id, drawable in expected_catalog_mappings.items():
+    mapping = f'"{item_id}" -> R.drawable.{drawable}'
     if mapping not in ui:
         raise SystemExit(f"Missing approved catalog artwork mapping: {mapping}")
+    if not (DRAWABLE / f"{drawable}.xml").is_file():
+        raise SystemExit(f"Mapped catalog artwork resource is missing: {drawable}.xml")
+
 if '"goreecloud.identity-center" -> R.drawable.goreecloud_identity_icon' in ui:
     raise SystemExit("Identity Center regressed to the full GoreeCloud Identity application icon")
+if (DRAWABLE / "goreecloud_identity_icon.xml").exists():
+    raise SystemExit("Obsolete full Identity application derivative remains in the App Store resource set")
 
 app_store = required_files["App Store launcher derivative"].read_text(encoding="utf-8")
 for token in [
