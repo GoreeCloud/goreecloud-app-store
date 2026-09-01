@@ -4,47 +4,52 @@ GoreeCloud App Store consumes branding from the canonical `GoreeCloud/goreecloud
 
 The branding repository remains authoritative. Consumer copies in this repository are implementation derivatives only and do not create new branding authority.
 
-## App Store identity status
+## App Store identity
 
-No App Store-specific logo or icon is approved yet. The reserved future canonical product path is:
+The approved canonical App Store product identity is:
 
-`products/app-store/app-icon.svg`
+- canonical asset: `products/app-store/app-icon.svg`
+- canonical Git blob: `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
+- Android derivative: `app/src/main/res/drawable/goreecloud_app_store_icon.xml`
+- Android manifest consumer: `android:icon="@drawable/goreecloud_app_store_icon"`
 
-A first-round approval candidate is under review in `GoreeCloud/goreecloud-branding-assets` pull request #5 at:
-
-`concepts/product-identity-round-1/app-store.svg`
-
-That file is an approval candidate only. It must not be represented as production artwork, added to a release as the official App Store identity, or used to claim Stable visual conformance before the canonical visual-acceptance and promotion gates complete.
-
-The current Android application manifest does not declare `android:icon`. Approved identity migration therefore requires both canonical artwork promotion and a traceable Android launcher derivative wired into the application package. The absence of a launcher icon remains part of the visual-identity production-readiness blocker.
-
-The candidate identity direction is a software-catalog portal with an acquisition path. The final identity must remain distinct from GoreeCloud Launcher and GoreeCloud Search and must not copy Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, or generic package-manager identities.
+The identity uses a software-catalog portal with an acquisition path. It remains distinct from GoreeCloud Launcher and GoreeCloud Search and must not be replaced by Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, generic package-manager, framework, or emoji artwork.
 
 Branding does not establish entitlement, package authorization, artifact verification, successful download/install, security, privacy, continuity, or release truth.
 
-## Current Android derivatives
+## Approved catalog derivatives
 
-The following Android VectorDrawable resources are derived from approved canonical SVG assets so the native store can render first-party artwork without network access:
+The native development catalog renders first-party artwork from traceable Android VectorDrawable derivatives of approved canonical sources:
 
 | Store item | Canonical asset | Canonical Git blob | Android derivative |
 | --- | --- | --- | --- |
 | GoreeCloud Browser | `products/browser/app-icon.svg` | `2a81cc68cb8c1831dfd7bec6c3d0b14e2f421f1f` | `app/src/main/res/drawable/goreecloud_browser_icon.xml` |
 | GoreeCloud Messenger | `products/messenger/app-icon.svg` | `01102af91a43e100c66877489b94929165ec0430` | `app/src/main/res/drawable/goreecloud_messenger_icon.xml` |
 | GoreeCloud Location | `products/location/app-icon.svg` | `ceb93b6d814c80ece0929022eb5edcdfbc346e2d` | `app/src/main/res/drawable/goreecloud_location_icon.xml` |
-| GoreeCloud Identity / Identity Center | `products/identity/app-icon.svg` | `dc8287e385f86767f0105c48a8f234d8440d7623` | `app/src/main/res/drawable/goreecloud_identity_icon.xml` |
 | GoreeCloud Manager | `products/manager/app-icon.svg` | `024d82d5b5911e426216dfbd6a19d95cd6d71fc3` | `app/src/main/res/drawable/goreecloud_manager_icon.xml` |
+| Identity Center | `services/identity-center/service-icon.svg` | `36922e5a747817267a27f640bb4234b8d59ab2a5` | `app/src/main/res/drawable/goreecloud_identity_center_icon.xml` |
+| Mesh Center | `services/mesh-center/service-icon.svg` | `933924aaacbd075897c250cf40b6444fdcc423de` | `app/src/main/res/drawable/goreecloud_mesh_center_icon.xml` |
 
-The derivatives preserve the canonical icon geometry and gradient/color intent within Android VectorDrawable constraints.
+Identity Center must not reuse the complete `products/identity/app-icon.svg` application identity. Mesh Center must not fall back to a generic cloud/network glyph. Both service identities remain reduced derivatives of their registered parent Identity DNA, and runtime state is communicated separately from the stable mark.
 
-`Mesh Center` currently uses a neutral platform/service glyph in the development client rather than copying or approximating the more complex GoreeCloud Mesh mark. A future native derivative must reference the approved canonical Mesh asset and be reviewed as a branding consumer update.
+## Consumer-derivative rules
 
-## Promotion requirement
+- Local Android resources are packaging derivatives only; canonical SVGs and their pinned Git blobs remain authoritative.
+- A derivative must preserve the defining canonical geometry and color relationship within Android VectorDrawable constraints.
+- Service artwork must not be substituted with its parent application/system icon merely because that parent asset exists locally.
+- Generic framework glyphs may be used for navigation or unlabeled UI affordances where semantically appropriate, but not as substitutes for a registered first-party catalog item identity.
+- Operational state such as connected, authorized, healthy, secure, synchronized, installed, or verified must not be encoded into stable product/service identity artwork.
+- Any canonical asset revision requires an explicit provenance update and regenerated derivative; local edits never become independent branding authority.
 
-When an App Store-specific identity is approved, this contract must be updated with:
+## Validation requirements
 
-- the exact canonical `products/app-store/app-icon.svg` Git blob;
-- the Android launcher/adaptive-icon derivative paths;
-- the manifest/package references that consume those derivatives;
-- supported optical/platform roles;
-- any monochrome/adaptive variants required by Android;
-- validation that fails closed if the required product identity disappears or drifts.
+Repository validation must fail closed if:
+
+- the App Store launcher derivative or `android:icon` mapping disappears;
+- the canonical App Store blob reference drifts;
+- Identity Center maps back to the GoreeCloud Identity application icon;
+- Mesh Center loses its approved service derivative or regresses to the generic service fallback;
+- required service/product derivative files disappear;
+- the defining canonical color/geometry tokens used by the reviewed derivatives drift without a corresponding approved canonical update.
+
+This branding integration resolves artwork/source-package identity gaps only. It does not establish production signing, package-delivery acceptance, GoreeCloud Identity authorization, runtime service availability, complete Glaze UI conformance, production deployment, or Stable release qualification.

@@ -34,7 +34,6 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LibraryBooks
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -413,11 +412,12 @@ private fun StoreHero(visibleCount: Int) {
                 color = MaterialTheme.colorScheme.surface,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Rounded.Storefront,
+                    Image(
+                        painter = painterResource(R.drawable.goreecloud_app_store_icon),
                         contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(GlazeArtworkShape),
                     )
                 }
             }
@@ -911,7 +911,8 @@ private fun StoreItem.artworkResource(): Int? = when (id) {
     "goreecloud.messenger" -> R.drawable.goreecloud_messenger_icon
     "goreecloud.location" -> R.drawable.goreecloud_location_icon
     "goreecloud.manager" -> R.drawable.goreecloud_manager_icon
-    "goreecloud.identity-center" -> R.drawable.goreecloud_identity_icon
+    "goreecloud.identity-center" -> R.drawable.goreecloud_identity_center_icon
+    "goreecloud.mesh-center" -> R.drawable.goreecloud_mesh_center_icon
     else -> null
 }
 
