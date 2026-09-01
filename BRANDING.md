@@ -4,6 +4,24 @@ GoreeCloud App Store consumes branding from the canonical `GoreeCloud/goreecloud
 
 The branding repository remains authoritative. Consumer copies in this repository are implementation derivatives only and do not create new branding authority.
 
+## App Store identity status
+
+No App Store-specific logo or icon is approved yet. The reserved future canonical product path is:
+
+`products/app-store/app-icon.svg`
+
+A first-round approval candidate is under review in `GoreeCloud/goreecloud-branding-assets` pull request #5 at:
+
+`concepts/product-identity-round-1/app-store.svg`
+
+That file is an approval candidate only. It must not be represented as production artwork, added to a release as the official App Store identity, or used to claim Stable visual conformance before the canonical visual-acceptance and promotion gates complete.
+
+The current Android application manifest does not declare `android:icon`. Approved identity migration therefore requires both canonical artwork promotion and a traceable Android launcher derivative wired into the application package. The absence of a launcher icon remains part of the visual-identity production-readiness blocker.
+
+The candidate identity direction is a software-catalog portal with an acquisition path. The final identity must remain distinct from GoreeCloud Launcher and Search and must not copy Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, or generic package-manager identities.
+
+Branding does not establish entitlement, package authorization, artifact verification, successful download/install, security, privacy, continuity, or release truth.
+
 ## Current Android derivatives
 
 The following Android VectorDrawable resources are derived from approved canonical SVG assets so the native store can render first-party artwork without network access:
@@ -20,4 +38,13 @@ The derivatives preserve the canonical icon geometry and gradient/color intent w
 
 `Mesh Center` currently uses a neutral platform/service glyph in the development client rather than copying or approximating the more complex GoreeCloud Mesh mark. A future native derivative must reference the approved canonical Mesh asset and be reviewed as a branding consumer update.
 
-No App Store-specific logo or icon is established by this file. Any future official GoreeCloud App Store artwork must originate in `GoreeCloud/goreecloud-branding-assets` first.
+## Promotion requirement
+
+When an App Store-specific identity is approved, this contract must be updated with:
+
+- the exact canonical `products/app-store/app-icon.svg` Git blob;
+- the Android launcher/adaptive-icon derivative paths;
+- the manifest/package references that consume those derivatives;
+- supported optical/platform roles;
+- any monochrome/adaptive variants required by Android;
+- validation that fails closed if the required product identity disappears or drifts.
