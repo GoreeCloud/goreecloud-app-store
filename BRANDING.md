@@ -18,7 +18,7 @@ That file is an approval candidate only. It must not be represented as productio
 
 The current Android application manifest does not declare `android:icon`. Approved identity migration therefore requires both canonical artwork promotion and a traceable Android launcher derivative wired into the application package. The absence of a launcher icon remains part of the visual-identity production-readiness blocker.
 
-The candidate identity direction is a software-catalog portal with an acquisition path. The final identity must remain distinct from GoreeCloud Launcher and Search and must not copy Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, or generic package-manager identities.
+The candidate identity direction is a software-catalog portal with an acquisition path. The final identity must remain distinct from GoreeCloud Launcher and GoreeCloud Search and must not copy Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, or generic package-manager identities.
 
 Branding does not establish entitlement, package authorization, artifact verification, successful download/install, security, privacy, continuity, or release truth.
 
