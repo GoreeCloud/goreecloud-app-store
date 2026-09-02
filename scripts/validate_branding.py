@@ -29,7 +29,7 @@ for required in [
     "services/identity-center/service-icon.svg",
     "36922e5a747817267a27f640bb4234b8d59ab2a5",
     "services/mesh-center/service-icon.svg",
-    "933924aaacbd075897c250cf40b6444fdcc423de",
+    "2628ff825549847398e98d9768f8f57b30aa378a",
     "android:icon=\"@drawable/goreecloud_app_store_icon\"",
     "GoreeCloud Launcher",
     "GoreeCloud Search",
@@ -90,11 +90,13 @@ for token in [
 
 mesh_center = required_files["Mesh Center service derivative"].read_text(encoding="utf-8")
 for token in [
-    '#0891B2', '#2563EB', '#7C3AED',
-    'M18,23C28,23 30,41 42,41',
-    'M40.5,32A5.5,5.5',
+    '#0E7490', '#4338CA', '#7E22CE',
+    'M58,32A26,26',
+    'M14,32C20.5,21.5 28.5,20.5 32,24.5',
+    'android:rotation="120"',
+    'M36.5,32A4.5,4.5',
 ]:
     if token not in mesh_center:
-        raise SystemExit(f"Mesh Center derivative drifted from approved service identity: {token}")
+        raise SystemExit(f"Mesh Center derivative drifted from approved Interlace service identity: {token}")
 
 print("GoreeCloud App Store approved branding validation passed.")
