@@ -28,9 +28,9 @@ The native development catalog renders first-party artwork from traceable Androi
 | GoreeCloud Location | `products/location/app-icon.svg` | `ceb93b6d814c80ece0929022eb5edcdfbc346e2d` | `app/src/main/res/drawable/goreecloud_location_icon.xml` |
 | GoreeCloud Manager | `products/manager/app-icon.svg` | `024d82d5b5911e426216dfbd6a19d95cd6d71fc3` | `app/src/main/res/drawable/goreecloud_manager_icon.xml` |
 | Identity Center | `services/identity-center/service-icon.svg` | `36922e5a747817267a27f640bb4234b8d59ab2a5` | `app/src/main/res/drawable/goreecloud_identity_center_icon.xml` |
-| Mesh Center | `services/mesh-center/service-icon.svg` | `933924aaacbd075897c250cf40b6444fdcc423de` | `app/src/main/res/drawable/goreecloud_mesh_center_icon.xml` |
+| Mesh Center | `services/mesh-center/service-icon.svg` | `2628ff825549847398e98d9768f8f57b30aa378a` | `app/src/main/res/drawable/goreecloud_mesh_center_icon.xml` |
 
-Identity Center must not reuse the complete `products/identity/app-icon.svg` application identity. Mesh Center must not fall back to a generic cloud/network glyph. Both service identities remain reduced derivatives of their registered parent Identity DNA, and runtime state is communicated separately from the stable mark.
+Identity Center must not reuse the complete `products/identity/app-icon.svg` application identity. Mesh Center must not fall back to a generic cloud/network glyph. The Mesh Center derivative follows the approved GoreeCloud Mesh **Interlace** Identity DNA while remaining a reduced service-specific mark. Both service identities remain reduced derivatives of their registered parent Identity DNA, and runtime state is communicated separately from the stable mark.
 
 ## Consumer-derivative rules
 
