@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - agent/linux-app-store-bootstrap
+      - agent/linux-app-store-reconcile
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 35
     steps:
       - name: Check out exact source revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
@@ -53,12 +53,29 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Validate shared catalog and Glaze adoption
+      - name: Validate shared catalog, branding, Glaze, and Linux contract
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/validate_catalog.py | tee .artifacts/linux/catalog-validation.txt
+          python3 scripts/validate_branding.py | tee .artifacts/linux/branding-validation.txt
           python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/linux/glaze-ui-adoption.txt
+          python3 - <<'PY' | tee .artifacts/linux/linux-contract-validation.txt
+          import json
+          from pathlib import Path
+
+          contract = json.loads(Path("contracts/linux-distribution.json").read_text(encoding="utf-8"))
+          assert contract["schemaVersion"] == 1
+          assert contract["application"] == "goreecloud-app-store"
+          assert contract["platform"] == "linux"
+          assert contract["lifecycle"] == "development"
+          assert contract["catalog"]["sharedSource"] == "catalog/development-catalog.json"
+          assert contract["glazeUi"]["target"] == "1.1.0"
+          assert contract["glazeUi"]["conformanceAccepted"] is False
+          assert contract["productionAcceptance"] is False
+          assert contract["security"]["automaticPackageInstallationEnabled"] is False
+          print("Linux distribution contract validated: Development, shared catalog, GLAZE UI V1.1, productionAcceptance=false")
+          PY
 
       - name: Verify pinned Rust dependency graph
         shell: bash
@@ -135,7 +152,7 @@ jobs:
         shell: bash
         run: |
           cat > .artifacts/linux/acceptance-boundary.txt <<'EOF'
-          GoreeCloud App Store Linux development evidence only.
+          GoreeCloud App Store Linux Development evidence only.
           Production acceptance: false.
           Package publication for catalog products: not established.
           Automatic installation: disabled.
@@ -144,13 +161,13 @@ jobs:
           Privacy Shield runtime policy: not connected.
           Everkeep recovery: not connected.
           GoreeCloud Mesh production transport: not connected.
-          Glaze UI 2.1 application conformance: not accepted.
-          Official App Store product icon/logo: not approved.
-          Flatpak repository AppStream composition: deferred until approved product icon exists.
+          GLAZE UI V1.1 / 1.1.0 source mapping: present; application conformance not accepted.
+          Canonical App Store product identity: approved; Linux desktop package/icon integration requires acceptance.
+          Representative Linux desktop, native accessibility, Human Visual Excellence, protected signing, upgrade/rollback, release, deployment, and Stable acceptance: not established.
           EOF
 
       - name: Upload Linux development packages and evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: goreecloud-app-store-linux-development-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
