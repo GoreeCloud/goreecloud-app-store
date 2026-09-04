@@ -1,6 +1,6 @@
 [package]
 name = "goreecloud-app-store-dev"
-version = "0.1.5"
+version = "0.1.0"
 edition = "2021"
 description = "Development Linux client for GoreeCloud App Store"
 license = "AGPL-3.0-only"

@@ -9,7 +9,7 @@
     "uiFramework": "GTK 4 + libadwaita",
     "applicationId": "com.goreecloud.AppStore.Development",
     "binary": "goreecloud-app-store-dev",
-    "version": "0.1.5-dev"
+    "version": "0.1.0-dev"
   },
   "catalog": {
     "sharedSource": "catalog/development-catalog.json",
