@@ -67,4 +67,28 @@ class AppStoreNavigationSemanticsTest {
             composeRule.onNode(hasText(expectedContent)).assertExists().assertIsDisplayed()
         }
     }
+
+    @Test
+    fun categoryFiltersAreTouchSizedAndNarrowOnlyTheEntitledCatalog() {
+        val density = InstrumentationRegistry.getInstrumentation()
+            .targetContext.resources.displayMetrics.density
+        val productivity = composeRule.onNode(hasText("Productivity") and hasClickAction())
+
+        productivity.assertExists().assertIsDisplayed().assertHasClickAction()
+        val bounds = productivity.fetchSemanticsNode().boundsInRoot
+        assertTrue(bounds.width / density >= 48.0f)
+        assertTrue(bounds.height / density >= 48.0f)
+
+        productivity.performClick()
+        composeRule.waitForIdle()
+        composeRule.onNode(hasText("4 items in this development catalog"))
+            .assertExists()
+            .assertIsDisplayed()
+
+        composeRule.onNode(hasText("All") and hasClickAction()).performClick()
+        composeRule.waitForIdle()
+        composeRule.onNode(hasText("10 items in this development catalog"))
+            .assertExists()
+            .assertIsDisplayed()
+    }
 }
