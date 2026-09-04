@@ -46,13 +46,16 @@ jobs:
             flatpak-builder \
             appstream \
             appstream-compose \
-            appstream-util
+            appstream-util \
+            librsvg2-bin
           pkg-config --modversion gtk4 | tee .artifacts/linux/gtk4-version.txt
           pkg-config --modversion libadwaita-1 | tee .artifacts/linux/libadwaita-version.txt
           flatpak --version | tee .artifacts/linux/flatpak-version.txt
           flatpak-builder --version | tee .artifacts/linux/flatpak-builder-version.txt
           appstreamcli --version | tee .artifacts/linux/appstreamcli-version.txt
+          rsvg-convert --version | tee .artifacts/linux/rsvg-convert-version.txt
           command -v appstreamcli
+          command -v rsvg-convert
           python3 - <<'PY'
           import re
           import subprocess
@@ -93,11 +96,18 @@ jobs:
           assert contract["branding"]["canonicalBlob"] == "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
           assert contract["branding"]["linuxIcon"] == "linux/resources/com.goreecloud.AppStore.Development.svg"
           assert contract["branding"]["desktopIconId"] == "com.goreecloud.AppStore.Development"
+          derivative = contract["branding"]["flatpakRasterDerivative"]
+          assert derivative["source"] == "linux/resources/com.goreecloud.AppStore.Development.svg"
+          assert derivative["generatedAtBuild"] is True
+          assert derivative["format"] == "png"
+          assert (derivative["width"], derivative["height"]) == (256, 256)
+          assert derivative["desktopInstallPath"] == "/app/share/icons/hicolor/256x256/apps/com.goreecloud.AppStore.Development.png"
+          assert derivative["canonicalSvgInstallPath"] == "/app/share/goreecloud-app-store/branding/app-icon.svg"
           assert contract["glazeUi"]["target"] == "1.1.0"
           assert contract["glazeUi"]["conformanceAccepted"] is False
           assert contract["productionAcceptance"] is False
           assert contract["security"]["automaticPackageInstallationEnabled"] is False
-          print("Linux distribution contract validated: native client 0.1.0-dev, shared 12-item catalog, approved App Store identity, GLAZE UI V1.1, productionAcceptance=false")
+          print("Linux distribution contract validated: native client 0.1.0-dev, shared 12-item catalog, approved App Store identity with build-time Flatpak raster derivative, GLAZE UI V1.1, productionAcceptance=false")
           PY
 
       - name: Verify pinned Rust dependency graph
@@ -159,6 +169,7 @@ jobs:
           flatpak install --user -y flathub org.gnome.Platform//50 org.gnome.Sdk//50
 
           STAGE="$PWD/linux/packaging/flatpak/files"
+          RASTER="$STAGE/com.goreecloud.AppStore.Development.png"
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           cp linux/target/release/goreecloud-app-store-dev "$STAGE/goreecloud-app-store-dev"
@@ -167,12 +178,34 @@ jobs:
           cp linux/resources/com.goreecloud.AppStore.Development.svg "$STAGE/"
           cp catalog/development-catalog.json "$STAGE/development-catalog.json"
 
+          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          rsvg-convert --width 256 --height 256 \
+            --output "$RASTER" \
+            linux/resources/com.goreecloud.AppStore.Development.svg
+          python3 - "$RASTER" <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+
+          data = Path(sys.argv[1]).read_bytes()
+          assert data[:8] == b"\x89PNG\r\n\x1a\n", "Flatpak icon derivative is not PNG"
+          width, height = struct.unpack(">II", data[16:24])
+          assert (width, height) == (256, 256), f"Unexpected Flatpak icon derivative dimensions: {width}x{height}"
+          print(f"Validated canonical-derived Flatpak icon: {width}x{height} PNG")
+          PY
+          sha256sum "$RASTER" | tee .artifacts/linux/flatpak-icon-derivative.sha256
+
           flatpak-builder --force-clean \
             --repo="$PWD/.artifacts/linux/flatpak-repo" \
             "$PWD/.artifacts/linux/flatpak-build" \
             linux/packaging/flatpak/com.goreecloud.AppStore.Development.yml
 
           test -d "$PWD/.artifacts/linux/flatpak-repo/refs"
+          test -s "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/xmls/com.goreecloud.AppStore.Development.xml.gz"
+          test -s "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/icons/flatpak/128x128/com.goreecloud.AppStore.Development.png"
+          sha256sum "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/icons/flatpak/128x128/com.goreecloud.AppStore.Development.png" \
+            | tee .artifacts/linux/flatpak-appstream-icon.sha256
+
           flatpak build-bundle \
             "$PWD/.artifacts/linux/flatpak-repo" \
             "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
@@ -197,7 +230,7 @@ jobs:
           Everkeep recovery: not connected.
           GoreeCloud Mesh production transport: not connected.
           GLAZE UI V1.1 / 1.1.0 source mapping: present; application conformance not accepted.
-          Canonical App Store product identity: approved; exact Linux source copy, desktop/AppStream binding, Debian packaging, and Flatpak AppStream composition are validated by this workflow.
+          Canonical App Store product identity: approved; the Linux source SVG is byte-exact to the canonical branding blob. Debian installs that SVG directly. Flatpak retains the exact SVG as package provenance and uses a build-time 256x256 PNG derivative for desktop/AppStream composition; derivative dimensions and generated AppStream catalog/icon outputs are validated by this workflow.
           Representative Linux desktop rendering, native accessibility, Human Visual Excellence, protected signing, upgrade/rollback, release, deployment, and Stable acceptance: not established.
           EOF
 
