@@ -14,6 +14,7 @@
   "catalog": {
     "sharedSource": "catalog/development-catalog.json",
     "schema": "contracts/store-catalog.schema.json",
+    "itemCount": 12,
     "authoritative": false,
     "serverAuthoritativeDeliveryConnected": false
   },
@@ -57,9 +58,18 @@
     "libraryRecoveryAccepted": false
   },
   "glazeUi": {
-    "target": "2.1.0",
+    "target": "1.1.0",
+    "stableReleaseTag": "v1.1.0",
+    "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
     "adoptionStatus": "adoption-candidate",
     "linuxMapping": "linux/resources/style.css",
+    "atmosphere": {
+      "deepTeal": "#0F6B6F",
+      "softAmber": "#D9A35F",
+      "semanticAuthority": false
+    },
+    "environmentalSamplingEnabled": false,
+    "glazeMotionConsumed": false,
     "conformanceAccepted": false
   },
   "productionAcceptance": false
