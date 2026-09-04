@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -40,6 +41,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +72,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.goreecloud.appstore.R
 import com.goreecloud.appstore.data.CatalogJsonLoader
+import com.goreecloud.appstore.domain.CatalogDiscovery
 import com.goreecloud.appstore.domain.EntitlementEngine
 import com.goreecloud.appstore.domain.IdentitySession
 import com.goreecloud.appstore.domain.ReleaseChannel
@@ -98,28 +101,42 @@ fun GoreeCloudAppStoreExperience() {
     var session by remember { mutableStateOf(identityGateway.initialSession) }
     var selectedTab by remember { mutableStateOf(ExperienceTab.DISCOVER) }
     var query by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedItem by remember { mutableStateOf<StoreItem?>(null) }
     var showPlatformStatus by remember { mutableStateOf(false) }
 
     val entitled = remember(session, allItems) {
         EntitlementEngine.visibleItems(session, allItems)
     }
-    val visible = remember(entitled, selectedTab, query) {
-        val section = when (selectedTab) {
-            ExperienceTab.DISCOVER -> entitled
-            ExperienceTab.APPS -> entitled.filter { it.type == StoreItemType.APPLICATION }
-            ExperienceTab.SERVICES -> entitled.filter { it.type == StoreItemType.SERVICE }
-            ExperienceTab.UPDATES, ExperienceTab.LIBRARY -> emptyList()
-        }
-        if (query.isBlank()) section else section.filter {
-            it.name.contains(query, ignoreCase = true) ||
-                it.summary.contains(query, ignoreCase = true) ||
-                it.category.contains(query, ignoreCase = true)
+    val browsable = selectedTab in setOf(
+        ExperienceTab.DISCOVER,
+        ExperienceTab.APPS,
+        ExperienceTab.SERVICES,
+    )
+    val browsingType = when (selectedTab) {
+        ExperienceTab.APPS -> StoreItemType.APPLICATION
+        ExperienceTab.SERVICES -> StoreItemType.SERVICE
+        else -> null
+    }
+    val categories = remember(entitled, selectedTab) {
+        if (browsable) CatalogDiscovery.categories(entitled, browsingType) else emptyList()
+    }
+    val visible = remember(entitled, selectedTab, query, selectedCategory) {
+        if (browsable) {
+            CatalogDiscovery.filter(
+                items = entitled,
+                type = browsingType,
+                query = query,
+                category = selectedCategory,
+            )
+        } else {
+            emptyList()
         }
     }
 
     LaunchedEffect(selectedTab, session.subjectId) {
         query = ""
+        selectedCategory = null
         listState.scrollToItem(0)
     }
 
@@ -133,9 +150,7 @@ fun GoreeCloudAppStoreExperience() {
                     onShowPlatformStatus = { showPlatformStatus = true },
                 )
             },
-            bottomBar = {
-                ExperienceNavigation(selectedTab) { selectedTab = it }
-            },
+            bottomBar = { ExperienceNavigation(selectedTab) { selectedTab = it } },
             containerColor = MaterialTheme.colorScheme.background,
         ) { scaffoldPadding ->
             LazyColumn(
@@ -150,20 +165,45 @@ fun GoreeCloudAppStoreExperience() {
                     ExperienceTab.DISCOVER -> {
                         item { DevelopmentNotice { showPlatformStatus = true } }
                         item { ExperienceHero(entitled.size) }
-                        item {
-                            ExperienceSearch(query, "Search apps and services") { query = it }
+                        item { ExperienceSearch(query, "Search apps and services") { query = it } }
+                        if (categories.size > 1) {
+                            item {
+                                ExperienceCategoryFilters(
+                                    categories = categories,
+                                    selectedCategory = selectedCategory,
+                                    onCategorySelected = { selectedCategory = it },
+                                )
+                            }
                         }
-                        item {
-                            SectionHeading("Available to you", countLabel(visible.size))
-                        }
+                        item { SectionHeading("Available to you", countLabel(visible.size)) }
                     }
                     ExperienceTab.APPS -> {
                         item { TabIntro("Apps", "Applications available to this development identity.") }
                         item { ExperienceSearch(query, "Search apps") { query = it } }
+                        if (categories.size > 1) {
+                            item {
+                                ExperienceCategoryFilters(
+                                    categories = categories,
+                                    selectedCategory = selectedCategory,
+                                    onCategorySelected = { selectedCategory = it },
+                                )
+                            }
+                        }
+                        item { SectionHeading("Applications", countLabel(visible.size)) }
                     }
                     ExperienceTab.SERVICES -> {
                         item { TabIntro("Services", "Services available to this development identity.") }
                         item { ExperienceSearch(query, "Search services") { query = it } }
+                        if (categories.size > 1) {
+                            item {
+                                ExperienceCategoryFilters(
+                                    categories = categories,
+                                    selectedCategory = selectedCategory,
+                                    onCategorySelected = { selectedCategory = it },
+                                )
+                            }
+                        }
+                        item { SectionHeading("Services", countLabel(visible.size)) }
                     }
                     ExperienceTab.UPDATES -> {
                         item { TabIntro("Updates", "Approved updates will appear here after production release delivery is connected.") }
@@ -187,9 +227,14 @@ fun GoreeCloudAppStoreExperience() {
                     }
                 }
 
-                if (selectedTab == ExperienceTab.DISCOVER || selectedTab == ExperienceTab.APPS || selectedTab == ExperienceTab.SERVICES) {
+                if (browsable) {
                     if (visible.isEmpty()) {
-                        item { EmptyState(session.isAuthenticated, query.isNotBlank()) }
+                        item {
+                            EmptyState(
+                                authenticated = session.isAuthenticated,
+                                hasActiveFilter = query.isNotBlank() || selectedCategory != null,
+                            )
+                        }
                     } else {
                         items(visible, key = { it.id }) { item ->
                             ExperienceItemCard(item) { selectedItem = item }
@@ -200,12 +245,8 @@ fun GoreeCloudAppStoreExperience() {
             }
         }
 
-        selectedItem?.let { item ->
-            ExperienceItemSheet(item) { selectedItem = null }
-        }
-        if (showPlatformStatus) {
-            PlatformStatusSheet { showPlatformStatus = false }
-        }
+        selectedItem?.let { item -> ExperienceItemSheet(item) { selectedItem = null } }
+        if (showPlatformStatus) PlatformStatusSheet { showPlatformStatus = false }
     }
 }
 
@@ -381,6 +422,41 @@ private fun ExperienceSearch(query: String, placeholder: String, onQueryChanged:
 }
 
 @Composable
+private fun ExperienceCategoryFilters(
+    categories: List<String>,
+    selectedCategory: String?,
+    onCategorySelected: (String?) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            "Categories",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                FilterChip(
+                    selected = selectedCategory == null,
+                    onClick = { onCategorySelected(null) },
+                    label = { Text("All") },
+                    modifier = Modifier.heightIn(min = 48.dp),
+                )
+            }
+            items(categories, key = { it }) { category ->
+                FilterChip(
+                    selected = selectedCategory == category,
+                    onClick = {
+                        onCategorySelected(if (selectedCategory == category) null else category)
+                    },
+                    label = { Text(category, maxLines = 1) },
+                    modifier = Modifier.heightIn(min = 48.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SectionHeading(title: String, subtitle: String) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -419,14 +495,14 @@ private fun ExperienceItemCard(item: StoreItem, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EmptyState(authenticated: Boolean, hasQuery: Boolean) {
+private fun EmptyState(authenticated: Boolean, hasActiveFilter: Boolean) {
     val title = when {
-        hasQuery -> "No matching results"
+        hasActiveFilter -> "No matching results"
         authenticated -> "Nothing is available here"
         else -> "Sign in to see your catalog"
     }
     val body = when {
-        hasQuery -> "Try another search term within the catalog available to this identity."
+        hasActiveFilter -> "Change the search term or category filter within the catalog available to this identity."
         authenticated -> "This development identity has no entries in this section."
         else -> "Production sign-in will be provided by GoreeCloud Identity."
     }
