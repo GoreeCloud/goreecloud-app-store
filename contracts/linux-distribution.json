@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "application": "goreecloud-app-store",
+  "platform": "linux",
+  "lifecycle": "development",
+  "client": {
+    "implementation": "original-native",
+    "language": "Rust",
+    "uiFramework": "GTK 4 + libadwaita",
+    "applicationId": "com.goreecloud.AppStore.Development",
+    "binary": "goreecloud-app-store-dev",
+    "version": "0.1.0-dev"
+  },
+  "catalog": {
+    "sharedSource": "catalog/development-catalog.json",
+    "schema": "contracts/store-catalog.schema.json",
+    "itemCount": 12,
+    "authoritative": false,
+    "serverAuthoritativeDeliveryConnected": false
+  },
+  "branding": {
+    "canonicalRepository": "GoreeCloud/goreecloud-branding-assets",
+    "canonicalAsset": "products/app-store/app-icon.svg",
+    "canonicalBlob": "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef",
+    "linuxIcon": "linux/resources/com.goreecloud.AppStore.Development.svg",
+    "desktopIconId": "com.goreecloud.AppStore.Development",
+    "flatpakRasterDerivative": {
+      "source": "linux/resources/com.goreecloud.AppStore.Development.svg",
+      "generatedAtBuild": true,
+      "format": "png",
+      "width": 256,
+      "height": 256,
+      "desktopInstallPath": "/app/share/icons/hicolor/256x256/apps/com.goreecloud.AppStore.Development.png",
+      "canonicalSvgInstallPath": "/app/share/goreecloud-app-store/branding/app-icon.svg"
+    }
+  },
+  "packages": {
+    "debian": {
+      "priority": "primary-native",
+      "developmentPackage": "goreecloud-app-store-dev",
+      "architecture": "amd64",
+      "build": "linux/packaging/debian/build-deb.sh",
+      "productionSigningAccepted": false
+    },
+    "flatpak": {
+      "priority": "primary-universal",
+      "applicationId": "com.goreecloud.AppStore.Development",
+      "runtime": "org.gnome.Platform//50",
+      "architecture": "x86_64",
+      "manifest": "linux/packaging/flatpak/com.goreecloud.AppStore.Development.yml",
+      "productionSigningAccepted": false
+    },
+    "appImage": {
+      "priority": "portable-third",
+      "status": "planned"
+    }
+  },
+  "security": {
+    "artifactDownloadRequiresPublishedMetadata": true,
+    "artifactDownloadRequiresHttps": true,
+    "artifactDownloadRequiresSha256": true,
+    "artifactDownloadRequiresExactSourceRevision": true,
+    "artifactDownloadRequiresSigningEvidence": true,
+    "artifactDownloadRequiresWardveilAcceptance": true,
+    "automaticPackageInstallationEnabled": false
+  },
+  "privacy": {
+    "analyticsEnabled": false,
+    "crossIdentityCatalogLeakagePermitted": false,
+    "privacyShieldProductionConnected": false
+  },
+  "continuity": {
+    "everkeepProductionConnected": false,
+    "libraryRecoveryAccepted": false
+  },
+  "glazeUi": {
+    "target": "1.1.0",
+    "stableReleaseTag": "v1.1.0",
+    "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
+    "adoptionStatus": "adoption-candidate",
+    "linuxMapping": "linux/resources/style.css",
+    "atmosphere": {
+      "deepTeal": "#0F6B6F",
+      "softAmber": "#D9A35F",
+      "semanticAuthority": false
+    },
+    "environmentalSamplingEnabled": false,
+    "glazeMotionConsumed": false,
+    "conformanceAccepted": false
+  },
+  "productionAcceptance": false
+}

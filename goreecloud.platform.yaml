@@ -11,6 +11,7 @@ version: "0.1.5-dev"
 
 supported_platforms:
   - android
+  - linux
 
 api:
   versions: []
@@ -29,14 +30,15 @@ platform_systems:
     evidence:
       - contracts/platform-integrations.json
       - README.md
-    notes: The Development client collects no analytics, but production Privacy Shield policy, consent, retention, and runtime acceptance are not established.
+    notes: The Development clients collect no analytics, but production Privacy Shield policy, consent, retention, and runtime acceptance are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
     evidence:
       - contracts/platform-integrations.json
       - README.md
-    notes: Package-verification and trust boundaries are documented, but installation remains disabled and accepted Wardveil runtime verification is not established.
+      - contracts/linux-distribution.json
+    notes: Package-verification and trust boundaries are documented and Linux package actions fail closed, but accepted Wardveil runtime verification is not established.
   everkeep:
     result: applicable-blocked
     version: null
@@ -51,8 +53,10 @@ platform_systems:
       - contracts/glaze-ui-adoption.json
       - docs/GLAZE_UI_ADOPTION.md
       - app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt
+      - linux/resources/style.css
+      - contracts/linux-distribution.json
       - scripts/validate_glaze_ui_adoption.py
-    notes: Source mapping targets current Stable GLAZE UI V1.1 / 1.1.0 and its automated source contract passes, but application-specific rendered, native accessibility, supported-form-factor, representative physical-device, Human Visual Excellence, release, and production acceptance remain pending.
+    notes: Android and Linux source mappings target current Stable GLAZE UI V1.1 / 1.1.0. Android automated Compose interaction and emulator rendered/form-factor validation passed on exact upstream checkpoint b540da36f6da8eb6e786cd9fd1f0d84f666208da; exact-head Linux rendered/native accessibility, representative-device, Human Visual Excellence, release, and production acceptance remain pending.
   mesh:
     result: applicable-blocked
     version: null
@@ -69,7 +73,7 @@ platform_systems:
     evidence:
       - contracts/platform-integrations.json
       - app/src/main/java/com/goreecloud/appstore/identity/IdentityGateway.kt
-    notes: A Development-only Identity gateway and entitlement fixture exist, but production GoreeCloud Identity authentication, session, authorization, account-disablement, and revocation integration are not established.
+    notes: Development-only Identity fixtures exist, but production GoreeCloud Identity authentication, session, authorization, account-disablement, and revocation integration are not established.
 
 health:
   health_endpoint: null
@@ -84,7 +88,7 @@ continuity:
   restore:
     required: true
     requirements:
-      - Validate restoration into a clean supported Android environment before recoverability is claimed.
+      - Validate restoration into clean supported Android and Linux environments before recoverability is claimed.
       - Define account-scoped reconciliation, package-state reconciliation, rollback, and failure semantics before Library recovery is production-enabled.
   export:
     required: true
@@ -102,6 +106,10 @@ external_dependencies:
     purpose: Native application runtime, package inventory, user-authorized package installation interfaces, accessibility services, and application execution environment.
     required: true
     version_constraint: ">=26"
+  - name: Linux desktop platform
+    purpose: Native GTK 4 and libadwaita client runtime plus Debian and Flatpak Development packaging and desktop integration.
+    required: true
+    version_constraint: "GTK 4 + libadwaita 1"
 
 compatibility:
   platform_contract: "0.2"
@@ -110,34 +118,42 @@ compatibility:
     - goreecloud-platform-contract==0.2
     - glaze-ui==1.1.0
     - android-api>=26
+    - linux-native-client
   provides:
     - goreecloud-app-store-development-catalog/2
 
 evidence:
   acceptance_tests:
-    - id: android-development-ci-33853132745
+    - id: android-development-ci-33872056799
       category: supported-platform
       path: .github/workflows/android.yml
-      revision: 17432649900bc3b13c8c34ac0c43795d4950605a
+      revision: b540da36f6da8eb6e786cd9fd1f0d84f666208da
       result: passed
-      observed_at: "2026-09-04T08:24:34Z"
-      notes: Exact-head Development CI passed source verification, branding and GLAZE UI V1.1 source contracts, unit tests, native test compilation, lint, APK assembly, package/version/label checks, Development signing-certificate verification, digest generation, and artifact publication. This is not production or Stable acceptance.
-    - id: glaze-ui-v1.1-source-contract-33853132745
+      observed_at: "2026-09-04T12:19:54Z"
+      notes: Exact-head Android Development CI passed source verification, branding and GLAZE UI V1.1 source contracts, unit tests, native test compilation, lint, APK assembly, package/version/label checks, Development signing-certificate verification, digest generation, and artifact publication. This is not production or Stable acceptance.
+    - id: android-rendered-33872056804
+      category: supported-platform
+      path: .github/workflows/android-rendered.yml
+      revision: b540da36f6da8eb6e786cd9fd1f0d84f666208da
+      result: passed
+      observed_at: "2026-09-04T12:24:51Z"
+      notes: Exact-head Android rendered acceptance passed exact APK/test-APK build, deterministic Android 36 emulator setup, installation, all three Compose-native navigation/category tests, exact APK restoration after instrumentation cleanup, rendered/form-factor validation, and evidence publication. Representative physical-device and complete native accessibility acceptance remain pending.
+    - id: glaze-ui-v1.1-source-contract-33872056799
       category: glaze-ui
       path: contracts/glaze-ui-adoption.json
-      revision: 17432649900bc3b13c8c34ac0c43795d4950605a
+      revision: b540da36f6da8eb6e786cd9fd1f0d84f666208da
       result: passed
-      observed_at: "2026-09-04T08:24:34Z"
-      notes: Repository-local source-contract validation passed for current Stable 1.1.0. Rendered, accessibility, representative-device, Human Visual Excellence, release, and production acceptance remain pending.
+      observed_at: "2026-09-04T12:19:54Z"
+      notes: Repository-local source-contract validation passed for current Stable 1.1.0. Linux exact-head validation plus physical-device, native accessibility, Human Visual Excellence, release, and production acceptance remain pending.
   release:
-    - id: app-store-0.1.5-dev-artifact-9929156404
+    - id: app-store-0.1.5-dev-artifact-9936359550
       version: "0.1.5-dev"
-      revision: 17432649900bc3b13c8c34ac0c43795d4950605a
-      path: goreecloud-app-store-development-apk-17432649900bc3b13c8c34ac0c43795d4950605a
+      revision: b540da36f6da8eb6e786cd9fd1f0d84f666208da
+      path: goreecloud-app-store-development-apk-b540da36f6da8eb6e786cd9fd1f0d84f666208da
       result: candidate
-      observed_at: "2026-09-04T08:24:34Z"
-      artifact_digest: sha256:a44403a8d342067ad919c380ac86c5e3a97a6a96dd4bd9f0f9cf6d798ec9f270
-      notes: GitHub Actions artifact ID 9929156404. This digest identifies the published workflow artifact archive; the Development APK remains non-production.
+      observed_at: "2026-09-04T12:19:54Z"
+      artifact_digest: sha256:1d2a44b2017d565ca185bf1ea1adc676f5f592524706e03de5ab5d82d7cce496
+      notes: GitHub Actions artifact ID 9936359550. This digest identifies the workflow artifact archive; the Android Development APK remains non-production.
 
 conformance:
   status: nonconformant
@@ -147,15 +163,21 @@ conformance:
     - SPECIFICATIONS.md
     - contracts/platform-integrations.json
     - contracts/glaze-ui-adoption.json
+    - contracts/linux-distribution.json
     - docs/GLAZE_UI_ADOPTION.md
+    - linux/README.md
+    - linux/resources/style.css
+    - .github/workflows/linux.yml
     - scripts/validate_glaze_ui_adoption.py
     - scripts/validate_branding.py
+    - scripts/validate_catalog.py
   blockers:
     - GoreeCloud Manager registration, visibility, and acceptance are not established.
     - Privacy Shield runtime policy and acceptance are not established.
     - Wardveil Security runtime package verification and acceptance are not established.
     - Everkeep backup, clean-target restore, and recovery acceptance are not established.
-    - GLAZE UI V1.1 source mapping is present, but complete application-specific rendered, accessibility, supported-form-factor, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GLAZE UI V1.1 source mapping is present and Android automated rendered/form-factor validation has passed on the upstream exact checkpoint, but exact-head Linux rendered/native accessibility, representative physical-device, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Mesh registration, capability publication, event transport, and runtime acceptance are not established.
     - GoreeCloud Identity production authentication, session, entitlement, disablement, and revocation integration are not established.
+    - Linux Development packages are build candidates only; production package publication, protected signing, Linux desktop/icon acceptance, upgrade/rollback, and supported release procedures remain outstanding.
     - Production catalog delivery, package install/update, service launch, rollback/failure validation, protected production signing and key recovery, deployment, release approval, and Stable qualification remain outstanding.

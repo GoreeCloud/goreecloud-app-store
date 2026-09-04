@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import hashlib
 import json
 from pathlib import Path
 
@@ -6,8 +7,14 @@ ROOT = Path(__file__).resolve().parents[1]
 BRANDING = ROOT / "BRANDING.md"
 MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
 UI = ROOT / "app/src/main/java/com/goreecloud/appstore/ui/AppStoreExperience.kt"
-CATALOG = ROOT / "app/src/main/assets/catalog/development-catalog.json"
+CATALOG = ROOT / "catalog/development-catalog.json"
 DRAWABLE = ROOT / "app/src/main/res/drawable"
+LINUX_ICON = ROOT / "linux/resources/com.goreecloud.AppStore.Development.svg"
+LINUX_DESKTOP = ROOT / "linux/resources/com.goreecloud.AppStore.Development.desktop"
+LINUX_METAINFO = ROOT / "linux/resources/com.goreecloud.AppStore.Development.metainfo.xml"
+APP_STORE_CANONICAL_BLOB = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+LINUX_ICON_ID = "com.goreecloud.AppStore.Development"
+LINUX_DESKTOP_ID = f"{LINUX_ICON_ID}.desktop"
 
 expected = {
     "goreecloud.browser": ("goreecloud_browser_icon", "products/browser/app-icon.svg", "2a81cc68cb8c1831dfd7bec6c3d0b14e2f421f1f"),
@@ -24,18 +31,22 @@ expected = {
     "goreecloud.mesh-center": ("goreecloud_mesh_center_icon", "services/mesh-center/service-icon.svg", "2628ff825549847398e98d9768f8f57b30aa378a"),
 }
 
-for path in (BRANDING, MANIFEST, UI, CATALOG):
+for path in (BRANDING, MANIFEST, UI, CATALOG, LINUX_ICON, LINUX_DESKTOP, LINUX_METAINFO):
     if not path.is_file():
         raise SystemExit(f"Missing required branding input: {path.relative_to(ROOT)}")
 branding = BRANDING.read_text(encoding="utf-8")
 ui = UI.read_text(encoding="utf-8")
 manifest = MANIFEST.read_text(encoding="utf-8")
+linux_desktop = LINUX_DESKTOP.read_text(encoding="utf-8")
+linux_metainfo = LINUX_METAINFO.read_text(encoding="utf-8")
 
 for token in (
     "GoreeCloud/goreecloud-branding-assets",
     "products/app-store/app-icon.svg",
-    "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef",
+    APP_STORE_CANONICAL_BLOB,
     "android:icon=\"@drawable/goreecloud_app_store_icon\"",
+    "linux/resources/com.goreecloud.AppStore.Development.svg",
+    LINUX_ICON_ID,
     "GoreeCloud Launcher",
     "GoreeCloud Search",
 ):
@@ -45,6 +56,21 @@ if 'android:icon="@drawable/goreecloud_app_store_icon"' not in manifest:
     raise SystemExit("Manifest is not wired to the approved App Store identity")
 if "R.drawable.goreecloud_app_store_icon" not in ui:
     raise SystemExit("Discover hero is not wired to the approved App Store identity")
+
+linux_icon_bytes = LINUX_ICON.read_bytes()
+linux_icon_git_blob = hashlib.sha1(
+    b"blob " + str(len(linux_icon_bytes)).encode("ascii") + b"\0" + linux_icon_bytes
+).hexdigest()
+if linux_icon_git_blob != APP_STORE_CANONICAL_BLOB:
+    raise SystemExit(
+        f"Linux App Store icon is not the exact approved canonical SVG: expected {APP_STORE_CANONICAL_BLOB}, got {linux_icon_git_blob}"
+    )
+if f"Icon={LINUX_ICON_ID}" not in linux_desktop:
+    raise SystemExit("Linux desktop entry is not wired to the approved App Store icon ID")
+if f'<launchable type="desktop-id">{LINUX_DESKTOP_ID}</launchable>' not in linux_metainfo:
+    raise SystemExit("Linux AppStream metadata is not bound to the App Store desktop entry")
+if '<icon type="stock">' in linux_metainfo:
+    raise SystemExit("Linux AppStream metainfo must not represent the package-owned App Store icon as a stock icon")
 
 catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
 ids = {item.get("id") for item in catalog.get("items", [])}
@@ -81,4 +107,4 @@ for name, tokens in checks.items():
         if token not in text:
             raise SystemExit(f"{name} drifted from reviewed canonical derivative token: {token}")
 
-print("GoreeCloud App Store approved branding and 12-item catalog mapping validation passed.")
+print("GoreeCloud App Store approved Android/Linux branding and 12-item shared catalog mapping validation passed.")
