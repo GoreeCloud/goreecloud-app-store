@@ -10,7 +10,6 @@
     <p>Package download actions remain unavailable unless exact release metadata, integrity evidence, signing/provenance, and Wardveil acceptance are present.</p>
   </description>
   <launchable type="desktop-id">com.goreecloud.AppStore.Development.desktop</launchable>
-  <icon type="stock">com.goreecloud.AppStore.Development</icon>
   <developer id="com.goreecloud">
     <name>GoreeCloud</name>
   </developer>

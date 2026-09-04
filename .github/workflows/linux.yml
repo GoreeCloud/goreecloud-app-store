@@ -126,7 +126,11 @@ jobs:
           set -euo pipefail
           test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
           grep -Fx 'Icon=com.goreecloud.AppStore.Development' linux/resources/com.goreecloud.AppStore.Development.desktop
-          grep -F '<icon type="stock">com.goreecloud.AppStore.Development</icon>' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
+          grep -F '<launchable type="desktop-id">com.goreecloud.AppStore.Development.desktop</launchable>' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
+          if grep -F '<icon type="stock">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml; then
+            echo 'Package-owned App Store icon must not be represented as a stock AppStream icon' >&2
+            exit 1
+          fi
           appstream-util validate-relax linux/resources/com.goreecloud.AppStore.Development.metainfo.xml \
             | tee .artifacts/linux/appstream-validation.txt
           grep -F '<release version="0.1.0-dev" date="2026-08-31">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
@@ -176,7 +180,7 @@ jobs:
           Everkeep recovery: not connected.
           GoreeCloud Mesh production transport: not connected.
           GLAZE UI V1.1 / 1.1.0 source mapping: present; application conformance not accepted.
-          Canonical App Store product identity: approved; exact Linux source copy, desktop/AppStream mapping, Debian packaging, and Flatpak AppStream composition are validated by this workflow.
+          Canonical App Store product identity: approved; exact Linux source copy, desktop/AppStream binding, Debian packaging, and Flatpak AppStream composition are validated by this workflow.
           Representative Linux desktop rendering, native accessibility, Human Visual Excellence, protected signing, upgrade/rollback, release, deployment, and Stable acceptance: not established.
           EOF
 

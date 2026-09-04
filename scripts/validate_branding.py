@@ -14,6 +14,7 @@ LINUX_DESKTOP = ROOT / "linux/resources/com.goreecloud.AppStore.Development.desk
 LINUX_METAINFO = ROOT / "linux/resources/com.goreecloud.AppStore.Development.metainfo.xml"
 APP_STORE_CANONICAL_BLOB = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
 LINUX_ICON_ID = "com.goreecloud.AppStore.Development"
+LINUX_DESKTOP_ID = f"{LINUX_ICON_ID}.desktop"
 
 expected = {
     "goreecloud.browser": ("goreecloud_browser_icon", "products/browser/app-icon.svg", "2a81cc68cb8c1831dfd7bec6c3d0b14e2f421f1f"),
@@ -66,8 +67,10 @@ if linux_icon_git_blob != APP_STORE_CANONICAL_BLOB:
     )
 if f"Icon={LINUX_ICON_ID}" not in linux_desktop:
     raise SystemExit("Linux desktop entry is not wired to the approved App Store icon ID")
-if f'<icon type="stock">{LINUX_ICON_ID}</icon>' not in linux_metainfo:
-    raise SystemExit("Linux AppStream metadata is not wired to the approved App Store icon ID")
+if f'<launchable type="desktop-id">{LINUX_DESKTOP_ID}</launchable>' not in linux_metainfo:
+    raise SystemExit("Linux AppStream metadata is not bound to the App Store desktop entry")
+if '<icon type="stock">' in linux_metainfo:
+    raise SystemExit("Linux AppStream metainfo must not represent the package-owned App Store icon as a stock icon")
 
 catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
 ids = {item.get("id") for item in catalog.get("items", [])}
