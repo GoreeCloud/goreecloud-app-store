@@ -22,15 +22,14 @@ class AppStoreNavigationSemanticsTest {
             .targetContext.resources.displayMetrics.density
 
         listOf("Discover", "Apps", "Services", "Updates", "Library").forEach { label ->
-            val interaction = composeRule.onNode(hasText(label))
+            val interaction = composeRule.onNode(hasText(label) and hasClickAction())
             interaction
                 .assertExists()
                 .assertIsDisplayed()
+                .assertHasClickAction()
 
             if (label == "Discover") {
                 interaction.assertIsSelected()
-            } else {
-                interaction.assertHasClickAction()
             }
 
             val bounds = interaction.fetchSemanticsNode().boundsInRoot
@@ -61,9 +60,10 @@ class AppStoreNavigationSemanticsTest {
         )
 
         expectations.forEach { (label, expectedContent) ->
-            composeRule.onNode(hasText(label) and hasClickAction()).performClick()
+            val navigation = composeRule.onNode(hasText(label) and hasClickAction())
+            navigation.performClick()
             composeRule.waitForIdle()
-            composeRule.onNode(hasText(label)).assertIsSelected()
+            navigation.assertIsSelected()
             composeRule.onNode(hasText(expectedContent)).assertExists().assertIsDisplayed()
         }
     }
