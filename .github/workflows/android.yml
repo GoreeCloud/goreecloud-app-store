@@ -1,4 +1,4 @@
-name: Android bootstrap validation
+name: Android development validation
 
 on:
   pull_request:
@@ -12,9 +12,10 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - name: Record exact source revision
         shell: bash
         run: |
@@ -24,8 +25,10 @@ jobs:
           test "$ACTUAL_SHA" = "$EXPECTED_SHA"
           mkdir -p build-evidence
           printf '%s\n' "$ACTUAL_SHA" | tee build-evidence/source-commit.txt
-      - name: Approved branding validation
-        run: python3 scripts/validate_branding.py
+      - name: Validate approved branding
+        run: python3 scripts/validate_branding.py | tee build-evidence/branding.txt
+      - name: Validate GLAZE UI V1.1 source mapping
+        run: python3 scripts/validate_glaze_ui_adoption.py | tee build-evidence/glaze-ui-adoption.txt
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -35,6 +38,8 @@ jobs:
           gradle-version: '9.5.0'
       - name: Unit tests
         run: gradle :app:testDebugUnitTest
+      - name: Compile native acceptance tests
+        run: gradle :app:assembleDebugAndroidTest
       - name: Lint
         run: gradle :app:lintDebug
       - name: Assemble development APK
@@ -45,27 +50,25 @@ jobs:
           set -euo pipefail
           APK="app/build/outputs/apk/debug/app-debug.apk"
           test -f "$APK"
-
           sha256sum "$APK" | tee build-evidence/app-debug.apk.sha256
-
           AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
-          test -n "$AAPT"
-          test -n "$APKSIGNER"
-
           "$AAPT" dump badging "$APK" | tee build-evidence/app-debug.badging.txt
           "$APKSIGNER" verify --print-certs "$APK" | tee build-evidence/app-debug.signing.txt
-
-          grep -Fq "package: name='com.goreecloud.appstore.dev' versionCode='3' versionName='0.1.2-dev'" build-evidence/app-debug.badging.txt
+          grep -Fq "package: name='com.goreecloud.appstore.dev' versionCode='6' versionName='0.1.5-dev'" build-evidence/app-debug.badging.txt
           grep -Fq "application-label:'GoreeCloud App Store Dev'" build-evidence/app-debug.badging.txt
           grep -Fiq "certificate SHA-256 digest: 38d543bbc137dbf4e7a299ff2d2dd06555a5c20d110a9ada4de5e9e0d9055145" build-evidence/app-debug.signing.txt
-      - name: Upload development APK evidence
+      - name: Upload development evidence
         uses: actions/upload-artifact@v4
         with:
           name: goreecloud-app-store-development-apk-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            contracts/glaze-ui-adoption.json
             build-evidence/source-commit.txt
+            build-evidence/branding.txt
+            build-evidence/glaze-ui-adoption.txt
             build-evidence/app-debug.apk.sha256
             build-evidence/app-debug.badging.txt
             build-evidence/app-debug.signing.txt
