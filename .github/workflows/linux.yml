@@ -69,12 +69,14 @@ jobs:
           assert contract["application"] == "goreecloud-app-store"
           assert contract["platform"] == "linux"
           assert contract["lifecycle"] == "development"
+          assert contract["client"]["version"] == "0.1.5-dev"
           assert contract["catalog"]["sharedSource"] == "catalog/development-catalog.json"
+          assert contract["catalog"]["itemCount"] == 12
           assert contract["glazeUi"]["target"] == "1.1.0"
           assert contract["glazeUi"]["conformanceAccepted"] is False
           assert contract["productionAcceptance"] is False
           assert contract["security"]["automaticPackageInstallationEnabled"] is False
-          print("Linux distribution contract validated: Development, shared catalog, GLAZE UI V1.1, productionAcceptance=false")
+          print("Linux distribution contract validated: 0.1.5-dev, shared 12-item catalog, GLAZE UI V1.1, productionAcceptance=false")
           PY
 
       - name: Verify pinned Rust dependency graph
@@ -103,12 +105,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DEB="$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb"
-          ./linux/packaging/debian/build-deb.sh '0.1.0~dev1' amd64 "$PWD/linux/target/release/goreecloud-app-store-dev" "$DEB"
+          DEB="$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.5-dev1-amd64.deb"
+          ./linux/packaging/debian/build-deb.sh '0.1.5~dev1' amd64 "$PWD/linux/target/release/goreecloud-app-store-dev" "$DEB"
           dpkg-deb --info "$DEB" | tee .artifacts/linux/debian-info.txt
           dpkg-deb --contents "$DEB" | tee .artifacts/linux/debian-contents.txt
           dpkg-deb -f "$DEB" Package | grep -Fx 'goreecloud-app-store-dev'
-          dpkg-deb -f "$DEB" Version | grep -Fx '0.1.0~dev1'
+          dpkg-deb -f "$DEB" Version | grep -Fx '0.1.5~dev1'
           dpkg-deb -f "$DEB" Architecture | grep -Fx 'amd64'
           sha256sum "$DEB" | tee .artifacts/linux/debian.sha256
 
@@ -118,6 +120,7 @@ jobs:
           set -euo pipefail
           appstream-util validate-relax linux/resources/com.goreecloud.AppStore.Development.metainfo.xml \
             | tee .artifacts/linux/appstream-validation.txt
+          grep -F '<release version="0.1.5-dev" date="2026-09-04">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
 
       - name: Build Flatpak development bundle
         shell: bash
@@ -141,10 +144,10 @@ jobs:
 
           flatpak build-bundle \
             "$PWD/.artifacts/linux/flatpak-repo" \
-            "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+            "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.5-dev-x86_64.flatpak" \
             com.goreecloud.AppStore.Development
 
-          sha256sum "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+          sha256sum "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.5-dev-x86_64.flatpak" \
             | tee .artifacts/linux/flatpak.sha256
           rm -rf "$STAGE"
 
@@ -152,7 +155,7 @@ jobs:
         shell: bash
         run: |
           cat > .artifacts/linux/acceptance-boundary.txt <<'EOF'
-          GoreeCloud App Store Linux Development evidence only.
+          GoreeCloud App Store Linux 0.1.5-dev Development evidence only.
           Production acceptance: false.
           Package publication for catalog products: not established.
           Automatic installation: disabled.
@@ -171,8 +174,8 @@ jobs:
         with:
           name: goreecloud-app-store-linux-development-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
-            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb
-            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak
+            .artifacts/linux/GoreeCloud-App-Store-0.1.5-dev1-amd64.deb
+            .artifacts/linux/GoreeCloud-App-Store-0.1.5-dev-x86_64.flatpak
             .artifacts/linux/*.txt
             .artifacts/linux/*.sha256
             .artifacts/linux/Cargo.lock
