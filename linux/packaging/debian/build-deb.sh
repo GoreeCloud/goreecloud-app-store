@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-VERSION="${1:-0.1.0~dev1}"
+VERSION="${1:-0.1.5~dev1}"
 ARCH="${2:-amd64}"
 BINARY="${3:-$ROOT/linux/target/release/goreecloud-app-store-dev}"
 OUT="${4:-$ROOT/.artifacts/GoreeCloud-App-Store-${VERSION}-${ARCH}.deb}"
