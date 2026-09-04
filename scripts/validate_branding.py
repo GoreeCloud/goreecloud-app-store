@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRANDING = ROOT / "BRANDING.md"
 MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
 UI = ROOT / "app/src/main/java/com/goreecloud/appstore/ui/AppStoreExperience.kt"
-CATALOG = ROOT / "app/src/main/assets/catalog/development-catalog.json"
+CATALOG = ROOT / "catalog/development-catalog.json"
 DRAWABLE = ROOT / "app/src/main/res/drawable"
 
 expected = {
@@ -81,4 +81,4 @@ for name, tokens in checks.items():
         if token not in text:
             raise SystemExit(f"{name} drifted from reviewed canonical derivative token: {token}")
 
-print("GoreeCloud App Store approved branding and 12-item catalog mapping validation passed.")
+print("GoreeCloud App Store approved branding and 12-item shared catalog mapping validation passed.")
