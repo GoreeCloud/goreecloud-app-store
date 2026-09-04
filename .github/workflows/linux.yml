@@ -54,11 +54,14 @@ jobs:
           appstreamcli --version | tee .artifacts/linux/appstreamcli-version.txt
           command -v appstreamcli
           python3 - <<'PY'
+          import re
           import subprocess
-          version = subprocess.check_output(["flatpak-builder", "--version"], text=True).strip().split()[-1]
-          parts = tuple(int(part) for part in version.split(".")[:2])
-          assert parts >= (1, 4), f"flatpak-builder >= 1.4 required for appstreamcli composition, found {version}"
-          print(f"Validated modern flatpak-builder AppStream composition toolchain: {version}")
+          output = subprocess.check_output(["flatpak-builder", "--version"], text=True).strip()
+          match = re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", output)
+          assert match, f"Could not parse flatpak-builder version: {output}"
+          parts = tuple(int(part) for part in match.groups(default="0")[:2])
+          assert parts >= (1, 4), f"flatpak-builder >= 1.4 required for appstreamcli composition, found {output}"
+          print(f"Validated modern flatpak-builder AppStream composition toolchain: {output}")
           PY
 
       - name: Install Rust toolchain
