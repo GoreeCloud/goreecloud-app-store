@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   linux-native-packages:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - name: Check out exact source revision
@@ -44,9 +44,22 @@ jobs:
             dpkg-dev \
             flatpak \
             flatpak-builder \
+            appstream \
+            appstream-compose \
             appstream-util
           pkg-config --modversion gtk4 | tee .artifacts/linux/gtk4-version.txt
           pkg-config --modversion libadwaita-1 | tee .artifacts/linux/libadwaita-version.txt
+          flatpak --version | tee .artifacts/linux/flatpak-version.txt
+          flatpak-builder --version | tee .artifacts/linux/flatpak-builder-version.txt
+          appstreamcli --version | tee .artifacts/linux/appstreamcli-version.txt
+          command -v appstreamcli
+          python3 - <<'PY'
+          import subprocess
+          version = subprocess.check_output(["flatpak-builder", "--version"], text=True).strip().split()[-1]
+          parts = tuple(int(part) for part in version.split(".")[:2])
+          assert parts >= (1, 4), f"flatpak-builder >= 1.4 required for appstreamcli composition, found {version}"
+          print(f"Validated modern flatpak-builder AppStream composition toolchain: {version}")
+          PY
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@1.90.0
@@ -156,6 +169,7 @@ jobs:
             "$PWD/.artifacts/linux/flatpak-build" \
             linux/packaging/flatpak/com.goreecloud.AppStore.Development.yml
 
+          test -d "$PWD/.artifacts/linux/flatpak-repo/refs"
           flatpak build-bundle \
             "$PWD/.artifacts/linux/flatpak-repo" \
             "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
