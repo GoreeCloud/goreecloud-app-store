@@ -1,0 +1,166 @@
+name: Linux development validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent/linux-app-store-bootstrap
+
+permissions:
+  contents: read
+
+jobs:
+  linux-native-packages:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          mkdir -p .artifacts/linux
+          printf '%s\n' "$ACTUAL_SHA" | tee .artifacts/linux/source-commit.txt
+
+      - name: Install native Linux build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            dpkg-dev \
+            flatpak \
+            flatpak-builder \
+            appstream-util
+          pkg-config --modversion gtk4 | tee .artifacts/linux/gtk4-version.txt
+          pkg-config --modversion libadwaita-1 | tee .artifacts/linux/libadwaita-version.txt
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.90.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Validate shared catalog and Glaze adoption
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_catalog.py | tee .artifacts/linux/catalog-validation.txt
+          python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/linux/glaze-ui-adoption.txt
+
+      - name: Verify pinned Rust dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f linux/Cargo.lock
+          cargo metadata --manifest-path linux/Cargo.toml --locked --no-deps > /dev/null
+          rustc --version --verbose | tee .artifacts/linux/rustc-version.txt
+          cargo --version | tee .artifacts/linux/cargo-version.txt
+          sha256sum linux/Cargo.lock | tee .artifacts/linux/cargo-lock.sha256
+          cp linux/Cargo.lock .artifacts/linux/Cargo.lock
+
+      - name: Format, test, lint, and build native Linux client
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --manifest-path linux/Cargo.toml -- --check
+          cargo test --manifest-path linux/Cargo.toml --locked
+          cargo clippy --manifest-path linux/Cargo.toml --locked --all-targets -- -D warnings
+          cargo build --manifest-path linux/Cargo.toml --locked --release
+          test -x linux/target/release/goreecloud-app-store-dev
+          sha256sum linux/target/release/goreecloud-app-store-dev | tee .artifacts/linux/goreecloud-app-store-dev.sha256
+
+      - name: Build and validate Debian development package
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEB="$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb"
+          ./linux/packaging/debian/build-deb.sh '0.1.0~dev1' amd64 "$PWD/linux/target/release/goreecloud-app-store-dev" "$DEB"
+          dpkg-deb --info "$DEB" | tee .artifacts/linux/debian-info.txt
+          dpkg-deb --contents "$DEB" | tee .artifacts/linux/debian-contents.txt
+          dpkg-deb -f "$DEB" Package | grep -Fx 'goreecloud-app-store-dev'
+          dpkg-deb -f "$DEB" Version | grep -Fx '0.1.0~dev1'
+          dpkg-deb -f "$DEB" Architecture | grep -Fx 'amd64'
+          sha256sum "$DEB" | tee .artifacts/linux/debian.sha256
+
+      - name: Validate AppStream metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          appstream-util validate-relax linux/resources/com.goreecloud.AppStore.Development.metainfo.xml \
+            | tee .artifacts/linux/appstream-validation.txt
+
+      - name: Build Flatpak development bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.gnome.Platform//50 org.gnome.Sdk//50
+
+          STAGE="$PWD/linux/packaging/flatpak/files"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          cp linux/target/release/goreecloud-app-store-dev "$STAGE/goreecloud-app-store-dev"
+          cp linux/resources/com.goreecloud.AppStore.Development.desktop "$STAGE/"
+          cp linux/resources/com.goreecloud.AppStore.Development.metainfo.xml "$STAGE/"
+          cp catalog/development-catalog.json "$STAGE/development-catalog.json"
+
+          flatpak-builder --force-clean \
+            --repo="$PWD/.artifacts/linux/flatpak-repo" \
+            "$PWD/.artifacts/linux/flatpak-build" \
+            linux/packaging/flatpak/com.goreecloud.AppStore.Development.yml
+
+          flatpak build-bundle \
+            "$PWD/.artifacts/linux/flatpak-repo" \
+            "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+            com.goreecloud.AppStore.Development
+
+          sha256sum "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+            | tee .artifacts/linux/flatpak.sha256
+          rm -rf "$STAGE"
+
+      - name: Record development acceptance boundary
+        shell: bash
+        run: |
+          cat > .artifacts/linux/acceptance-boundary.txt <<'EOF'
+          GoreeCloud App Store Linux development evidence only.
+          Production acceptance: false.
+          Package publication for catalog products: not established.
+          Automatic installation: disabled.
+          Production GoreeCloud Identity: not connected.
+          Wardveil runtime package verification: not connected.
+          Privacy Shield runtime policy: not connected.
+          Everkeep recovery: not connected.
+          GoreeCloud Mesh production transport: not connected.
+          Glaze UI 2.1 application conformance: not accepted.
+          Official App Store product icon/logo: not approved.
+          Flatpak repository AppStream composition: deferred until approved product icon exists.
+          EOF
+
+      - name: Upload Linux development packages and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-app-store-linux-development-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb
+            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak
+            .artifacts/linux/*.txt
+            .artifacts/linux/*.sha256
+            .artifacts/linux/Cargo.lock
+            contracts/linux-distribution.json
+            contracts/store-catalog.schema.json
+            catalog/development-catalog.json
+          if-no-files-found: error
+          retention-days: 14

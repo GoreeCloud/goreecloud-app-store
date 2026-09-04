@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GoreeCloud App Store Dev
+Comment=Browse the development GoreeCloud application and service catalog
+Exec=goreecloud-app-store-dev
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=true
+X-GNOME-UsesNotifications=false

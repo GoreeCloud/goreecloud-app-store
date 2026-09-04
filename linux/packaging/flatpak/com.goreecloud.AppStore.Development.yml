@@ -1,0 +1,32 @@
+app-id: com.goreecloud.AppStore.Development
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+command: goreecloud-app-store-dev
+# Repository AppStream composition remains disabled for the development bundle
+# until an approved product-specific App Store icon exists. The installed
+# metainfo file is validated separately in CI; no placeholder icon is promoted.
+appstream-compose: false
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+modules:
+  - name: goreecloud-app-store-dev
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 goreecloud-app-store-dev /app/bin/goreecloud-app-store-dev
+      - install -Dm644 com.goreecloud.AppStore.Development.desktop /app/share/applications/com.goreecloud.AppStore.Development.desktop
+      - install -Dm644 com.goreecloud.AppStore.Development.metainfo.xml /app/share/metainfo/com.goreecloud.AppStore.Development.metainfo.xml
+      - install -Dm644 development-catalog.json /app/share/goreecloud-app-store/catalog/development-catalog.json
+    sources:
+      - type: file
+        path: files/goreecloud-app-store-dev
+      - type: file
+        path: files/com.goreecloud.AppStore.Development.desktop
+      - type: file
+        path: files/com.goreecloud.AppStore.Development.metainfo.xml
+      - type: file
+        path: files/development-catalog.json
