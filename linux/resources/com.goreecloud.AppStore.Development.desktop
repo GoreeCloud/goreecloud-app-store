@@ -3,6 +3,7 @@ Type=Application
 Name=GoreeCloud App Store Dev
 Comment=Browse the development GoreeCloud application and service catalog
 Exec=goreecloud-app-store-dev
+Icon=com.goreecloud.AppStore.Development
 Terminal=false
 Categories=Network;Utility;
 StartupNotify=true

@@ -15,11 +15,19 @@ fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 PKG="$WORK/package"
-mkdir -p "$PKG/DEBIAN" "$PKG/usr/bin" "$PKG/usr/share/applications" "$PKG/usr/share/metainfo" "$PKG/usr/share/goreecloud-app-store/catalog" "$(dirname "$OUT")"
+mkdir -p \
+  "$PKG/DEBIAN" \
+  "$PKG/usr/bin" \
+  "$PKG/usr/share/applications" \
+  "$PKG/usr/share/metainfo" \
+  "$PKG/usr/share/icons/hicolor/scalable/apps" \
+  "$PKG/usr/share/goreecloud-app-store/catalog" \
+  "$(dirname "$OUT")"
 
 install -m 0755 "$BINARY" "$PKG/usr/bin/goreecloud-app-store-dev"
 install -m 0644 "$ROOT/linux/resources/com.goreecloud.AppStore.Development.desktop" "$PKG/usr/share/applications/com.goreecloud.AppStore.Development.desktop"
 install -m 0644 "$ROOT/linux/resources/com.goreecloud.AppStore.Development.metainfo.xml" "$PKG/usr/share/metainfo/com.goreecloud.AppStore.Development.metainfo.xml"
+install -m 0644 "$ROOT/linux/resources/com.goreecloud.AppStore.Development.svg" "$PKG/usr/share/icons/hicolor/scalable/apps/com.goreecloud.AppStore.Development.svg"
 install -m 0644 "$ROOT/catalog/development-catalog.json" "$PKG/usr/share/goreecloud-app-store/catalog/development-catalog.json"
 
 cat > "$PKG/DEBIAN/control" <<EOF

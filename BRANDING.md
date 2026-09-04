@@ -1,12 +1,15 @@
 # GoreeCloud App Store Branding Contract
 
-GoreeCloud App Store consumes product and service identity from `GoreeCloud/goreecloud-branding-assets`. Canonical SVGs and pinned Git blobs remain authoritative; Android resources here are implementation derivatives only.
+GoreeCloud App Store consumes product and service identity from `GoreeCloud/goreecloud-branding-assets`. Canonical SVGs and pinned Git blobs remain authoritative; repository platform resources are implementation copies or derivatives only.
 
 ## App Store identity
 
 - `products/app-store/app-icon.svg` — `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
 - Android derivative: `app/src/main/res/drawable/goreecloud_app_store_icon.xml`
-- Manifest mapping: `android:icon="@drawable/goreecloud_app_store_icon"`
+- Android manifest mapping: `android:icon="@drawable/goreecloud_app_store_icon"`
+- Linux canonical copy: `linux/resources/com.goreecloud.AppStore.Development.svg` — byte-identical Git blob `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
+- Linux desktop icon ID: `com.goreecloud.AppStore.Development`
+- Linux package path: `share/icons/hicolor/scalable/apps/com.goreecloud.AppStore.Development.svg`
 
 The App Store identity remains distinct from GoreeCloud Launcher, GoreeCloud Search, Google Play, Apple App Store, F-Droid, generic storefronts, shopping bags, and package-manager glyphs.
 
@@ -34,5 +37,5 @@ Identity Center must not reuse the complete GoreeCloud Identity application icon
 - Stable identity artwork never communicates installed, connected, healthy, secure, authorized, synchronized, or verified state.
 - Generic framework glyphs may be used for navigation and unlabeled affordances, not as substitutes for registered catalog identities.
 - Catalog expansion requires explicit artwork mapping and provenance review.
-- Canonical asset changes require explicit derivative regeneration and provenance updates.
+- Canonical asset changes require explicit platform-copy/derivative regeneration and provenance updates.
 - Branding acceptance does not establish package delivery, runtime authorization, security/privacy/continuity acceptance, production signing, deployment, or Stable release status.

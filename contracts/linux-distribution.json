@@ -18,6 +18,13 @@
     "authoritative": false,
     "serverAuthoritativeDeliveryConnected": false
   },
+  "branding": {
+    "canonicalRepository": "GoreeCloud/goreecloud-branding-assets",
+    "canonicalAsset": "products/app-store/app-icon.svg",
+    "canonicalBlob": "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef",
+    "linuxIcon": "linux/resources/com.goreecloud.AppStore.Development.svg",
+    "desktopIconId": "com.goreecloud.AppStore.Development"
+  },
   "packages": {
     "debian": {
       "priority": "primary-native",
