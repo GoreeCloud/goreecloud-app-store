@@ -21,6 +21,18 @@
     "environmentalSampling": false,
     "glazeMotion": "not-consumed"
   },
+  "webMapping": {
+    "platform": "Web",
+    "framework": "standards-html-css-es-modules",
+    "generalTargetFloorPx": 48,
+    "implementedAppearanceProfiles": ["Light", "Dark"],
+    "deepDarkSourceMapping": true,
+    "deepDarkRuntimeSelection": "pending-policy",
+    "atmosphere": "bounded-non-semantic-source-only",
+    "environmentalSampling": false,
+    "externalRuntimeDependencies": false,
+    "glazeMotion": "not-consumed"
+  },
   "acceptance": {
     "automatedContract": true,
     "renderedAcceptance": "pending",
@@ -28,6 +40,9 @@
     "representativePhysicalDeviceAcceptance": "pending",
     "supportedFormFactorAcceptance": "pending",
     "humanVisualExcellence": "pending",
+    "webRenderedAcceptance": "pending",
+    "webAccessibilityAcceptance": "pending",
+    "webRepresentativeTargetAcceptance": "pending",
     "productionEligible": false,
     "conformanceAccepted": false
   }

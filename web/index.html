@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>GoreeCloud App Store Dev</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#catalog">Skip to catalog</a>
+  <header class="topbar">
+    <div class="brand">
+      <img src="./assets/app-icon.svg" width="44" height="44" alt="">
+      <div>
+        <p class="eyebrow">GoreeCloud</p>
+        <h1>App Store <span class="dev-badge">Development</span></h1>
+      </div>
+    </div>
+    <label class="identity-control" for="identitySelect">
+      <span>Development identity</span>
+      <select id="identitySelect" aria-describedby="identityHelp">
+        <option value="standard">Standard demo</option>
+        <option value="administrator">Administrator demo</option>
+        <option value="developer">Developer demo</option>
+        <option value="signed-out">Signed out</option>
+      </select>
+    </label>
+  </header>
+
+  <p id="identityHelp" class="development-notice">
+    Development fixtures only. Catalog visibility does not establish production entitlement, publication, deployment, or install authority.
+  </p>
+
+  <nav class="tabs" aria-label="App Store sections">
+    <button type="button" data-tab="discover" aria-current="page">Discover</button>
+    <button type="button" data-tab="applications">Apps</button>
+    <button type="button" data-tab="services">Services</button>
+    <button type="button" data-tab="updates">Updates</button>
+    <button type="button" data-tab="library">Library</button>
+  </nav>
+
+  <main id="catalog" tabindex="-1">
+    <section class="hero" aria-labelledby="viewTitle">
+      <div>
+        <p class="eyebrow">First-party catalog</p>
+        <h2 id="viewTitle">Discover</h2>
+        <p id="viewSummary">Browse only the Development items available to the selected fixture identity.</p>
+      </div>
+      <output id="resultCount" class="count" aria-live="polite">Loading…</output>
+    </section>
+
+    <section id="filterPanel" class="filters" aria-label="Catalog filters">
+      <label>
+        <span>Search</span>
+        <input id="searchInput" type="search" autocomplete="off" placeholder="Search your available catalog">
+      </label>
+      <label>
+        <span>Category</span>
+        <select id="categorySelect">
+          <option value="all">All categories</option>
+        </select>
+      </label>
+    </section>
+
+    <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+    <section id="catalogGrid" class="catalog-grid" aria-label="Available catalog items"></section>
+    <section id="unavailablePanel" class="unavailable" hidden>
+      <h3 id="unavailableTitle">Unavailable in Development</h3>
+      <p id="unavailableText">This workflow remains disabled until its authoritative production contracts and acceptance evidence exist.</p>
+    </section>
+  </main>
+
+  <dialog id="productDialog" aria-labelledby="dialogTitle">
+    <form method="dialog" class="dialog-shell">
+      <button class="dialog-close" value="close" aria-label="Close details">×</button>
+      <p id="dialogType" class="eyebrow"></p>
+      <h2 id="dialogTitle"></h2>
+      <p id="dialogSummary"></p>
+      <dl class="metadata">
+        <div><dt>Category</dt><dd id="dialogCategory"></dd></div>
+        <div><dt>Version</dt><dd id="dialogVersion"></dd></div>
+        <div><dt>Channel</dt><dd id="dialogChannel"></dd></div>
+      </dl>
+      <button class="primary-action" type="button" disabled>Install / Open unavailable in Development</button>
+    </form>
+  </dialog>
+
+  <noscript>This Development client requires JavaScript to apply entitlement filtering before presenting the local fixture catalog.</noscript>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
