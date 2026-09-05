@@ -110,6 +110,18 @@ def wait_count(wait: WebDriverWait, expected: str) -> None:
     wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == expected)
 
 
+def clear_search(driver: webdriver.Chrome, element) -> None:
+    """Clear the search control through the same input event consumed by app.mjs."""
+    driver.execute_script(
+        """
+        const input = arguments[0];
+        input.value = '';
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+        """,
+        element,
+    )
+
+
 def assert_no_document_overflow(driver: webdriver.Chrome, context: str) -> None:
     scroll_width, client_width = driver.execute_script(
         "return [document.documentElement.scrollWidth, document.documentElement.clientWidth];"
@@ -203,14 +215,14 @@ def assert_discovery_interactions(driver: webdriver.Chrome, wait: WebDriverWait,
     click_tab(driver, wait, "discover", "10 items")
 
     search = driver.find_element(By.ID, "searchInput")
-    search.clear()
+    clear_search(driver, search)
     search.send_keys("Notes")
     wait_count(wait, "1 item")
     names = [element.text for element in driver.find_elements(By.CSS_SELECTOR, ".store-card h3")]
     if names != ["GoreeCloud Notes"]:
         raise AssertionError(f"{context}: search returned unexpected entries: {names}")
 
-    search.clear()
+    clear_search(driver, search)
     wait_count(wait, "10 items")
     category = Select(driver.find_element(By.ID, "categorySelect"))
     category.select_by_value("Productivity")
