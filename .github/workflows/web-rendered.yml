@@ -1,0 +1,108 @@
+name: Web rendered acceptance
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent/app-store-catalog-expansion
+
+permissions:
+  contents: read
+
+jobs:
+  web-rendered-chrome:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          mkdir -p .artifacts/web-rendered/evidence
+          printf '%s\n' "$ACTUAL_SHA" | tee .artifacts/web-rendered/evidence/source-commit.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Install pinned browser-test dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'selenium==4.47.0'
+          python - <<'PY' | tee .artifacts/web-rendered/evidence/selenium-version.txt
+          import selenium
+          print(selenium.__version__)
+          PY
+
+      - name: Validate and build exact Web Development site
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          python3 scripts/validate_catalog.py | tee .artifacts/web-rendered/evidence/catalog-validation.txt
+          python3 scripts/validate_branding.py | tee .artifacts/web-rendered/evidence/branding-validation.txt
+          python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/web-rendered/evidence/glaze-ui-validation.txt
+          python3 scripts/validate_web.py | tee .artifacts/web-rendered/evidence/web-validation.txt
+          python3 scripts/build_web.py --revision "$EXPECTED_SHA" | tee .artifacts/web-rendered/evidence/web-build.txt
+
+      - name: Start exact Web Development artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8766 --bind 127.0.0.1 --directory .artifacts/web/site \
+            > .artifacts/web-rendered/evidence/http-server.log 2>&1 &
+          echo $! > .artifacts/web-rendered/http-server.pid
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error http://127.0.0.1:8766/index.html > /dev/null; then
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat .artifacts/web-rendered/evidence/http-server.log
+          exit 1
+
+      - name: Run actual-browser rendered and accessibility-tree acceptance
+        env:
+          GOREECLOUD_APP_STORE_WEB_URL: http://127.0.0.1:8766
+          GOREECLOUD_APP_STORE_WEB_EVIDENCE: .artifacts/web-rendered/evidence
+        run: python web/rendered_acceptance.py
+
+      - name: Record bounded Development acceptance
+        shell: bash
+        run: |
+          cat > .artifacts/web-rendered/evidence/acceptance-boundary.txt <<'EOF'
+          GoreeCloud App Store Web rendered acceptance — Development automation only.
+          Production acceptance: false.
+          Actual browser: GitHub-hosted headless Chrome.
+          Validated: compact/expanded Light and Dark rendering, Development entitlement concealment, search/category composition, fail-closed Updates/Library/Install/Open states, modal details, 48 px rendered targets, keyboard skip-link focus, no document horizontal overflow, Reduced Motion media behavior, compact 200% text reflow, and accessible names for interactive controls exposed through Chrome's accessibility tree.
+          Not established: screen-reader or other assistive-technology acceptance, human visual/optical approval, cross-browser acceptance, representative user hardware, production hosting/security-header acceptance, production Identity/server-authoritative catalog delivery, deployment, release approval, Release Candidate promotion, or Stable qualification.
+          EOF
+
+      - name: Stop local Web Development server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f .artifacts/web-rendered/http-server.pid ]; then
+            kill "$(cat .artifacts/web-rendered/http-server.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload rendered Development evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: goreecloud-app-store-web-rendered-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/web-rendered/evidence
+          if-no-files-found: error
+          retention-days: 14
