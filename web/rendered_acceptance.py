@@ -3,7 +3,7 @@
 
 This is Development evidence only. It validates durable rendered behavior in a
 GitHub-hosted Chrome environment without claiming screen-reader, human visual,
-production-hosting, cross-browser, or representative physical-device acceptance.
+production-hosting, cross-browser, localization, or representative physical-device acceptance.
 """
 
 from __future__ import annotations
@@ -72,18 +72,26 @@ def make_driver(viewport: Viewport) -> webdriver.Chrome:
     return driver
 
 
-def set_media(driver: webdriver.Chrome, appearance: Appearance, reduced_motion: bool = False) -> None:
+def set_media(
+    driver: webdriver.Chrome,
+    appearance: Appearance,
+    reduced_motion: bool = False,
+    forced_colors: bool = False,
+) -> None:
+    features = [
+        {"name": "prefers-color-scheme", "value": appearance.scheme},
+        {
+            "name": "prefers-reduced-motion",
+            "value": "reduce" if reduced_motion else "no-preference",
+        },
+    ]
+    if forced_colors:
+        features.append({"name": "forced-colors", "value": "active"})
     driver.execute_cdp_cmd(
         "Emulation.setEmulatedMedia",
         {
             "media": "screen",
-            "features": [
-                {"name": "prefers-color-scheme", "value": appearance.scheme},
-                {
-                    "name": "prefers-reduced-motion",
-                    "value": "reduce" if reduced_motion else "no-preference",
-                },
-            ],
+            "features": features,
         },
     )
 
@@ -270,7 +278,7 @@ def assert_dialog_and_unavailable_states(driver: webdriver.Chrome, wait: WebDriv
     click_tab(driver, wait, "discover", "10 items")
 
 
-def assert_keyboard_and_resilience(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
+def assert_keyboard_and_text_resilience(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
     driver.get(f"{BASE_URL}/index.html")
     wait_count(wait, "10 items")
     body = driver.find_element(By.TAG_NAME, "body")
@@ -284,8 +292,63 @@ def assert_keyboard_and_resilience(driver: webdriver.Chrome, wait: WebDriverWait
     driver.execute_script("document.documentElement.style.fontSize = '200%';")
     assert_no_document_overflow(driver, f"{context} 200%-text")
     assert_visible_targets(driver, f"{context} 200%-text")
+    assert_ax_names(driver, f"{context} 200%-text")
+    click_tab(driver, wait, "applications", "9 items")
+    click_tab(driver, wait, "discover", "10 items")
     capture(driver, f"{context}-200pct-text")
     driver.execute_script("document.documentElement.style.fontSize = ''; if (document.activeElement) document.activeElement.blur();")
+
+
+def assert_forced_colors_resilience(
+    driver: webdriver.Chrome,
+    wait: WebDriverWait,
+    viewport: Viewport,
+    appearance: Appearance,
+) -> None:
+    context = f"{viewport.name}-forced-colors"
+    set_media(driver, appearance, forced_colors=True)
+    driver.get(f"{BASE_URL}/index.html")
+    wait_count(wait, "10 items")
+    if not driver.execute_script("return matchMedia('(forced-colors: active)').matches;"):
+        raise AssertionError(f"{context}: Forced Colors media emulation did not activate")
+    assert_no_document_overflow(driver, context)
+    assert_visible_targets(driver, context)
+    assert_ax_names(driver, context)
+    click_tab(driver, wait, "applications", "9 items")
+    click_tab(driver, wait, "services", "1 item")
+    click_tab(driver, wait, "discover", "10 items")
+    capture(driver, context)
+    set_media(driver, appearance)
+
+
+def assert_rtl_structural_resilience(
+    driver: webdriver.Chrome,
+    wait: WebDriverWait,
+    viewport: Viewport,
+    appearance: Appearance,
+) -> None:
+    context = f"{viewport.name}-rtl-structural"
+    set_media(driver, appearance)
+    driver.get(f"{BASE_URL}/index.html")
+    wait_count(wait, "10 items")
+    driver.execute_script("document.documentElement.dir = 'rtl'; document.body.dir = 'rtl';")
+    direction = driver.execute_script("return getComputedStyle(document.documentElement).direction;")
+    if direction != "rtl":
+        raise AssertionError(f"{context}: document direction is {direction!r}, expected 'rtl'")
+    assert_no_document_overflow(driver, context)
+    assert_visible_targets(driver, context)
+    assert_ax_names(driver, context)
+    click_tab(driver, wait, "applications", "9 items")
+    click_tab(driver, wait, "services", "1 item")
+    click_tab(driver, wait, "discover", "10 items")
+    search = driver.find_element(By.ID, "searchInput")
+    search.send_keys("Notes")
+    wait_count(wait, "1 item")
+    clear_search(driver, search)
+    wait_count(wait, "10 items")
+    assert_no_document_overflow(driver, context)
+    capture(driver, context)
+    driver.execute_script("document.documentElement.dir = ''; document.body.dir = '';")
 
 
 def run_case(viewport: Viewport, appearance: Appearance) -> dict[str, str]:
@@ -317,9 +380,13 @@ def run_case(viewport: Viewport, appearance: Appearance) -> dict[str, str]:
             raise AssertionError(f"{context}: Reduced Motion media state was not activated")
         assert_no_document_overflow(driver, f"{context} reduced-motion")
 
-        if viewport.name == "compact":
-            assert_keyboard_and_resilience(driver, wait, context)
+        assert_keyboard_and_text_resilience(driver, wait, context)
 
+        if appearance.name == "light":
+            assert_forced_colors_resilience(driver, wait, viewport, appearance)
+            assert_rtl_structural_resilience(driver, wait, viewport, appearance)
+
+        set_media(driver, appearance)
         driver.get(f"{BASE_URL}/index.html")
         wait_count(wait, "10 items")
         capture(driver, f"{context}-discover")
@@ -360,18 +427,21 @@ def main() -> None:
             "keyboardSkipLink": True,
             "minimumTargetPx": MIN_TARGET_PX,
             "reducedMotion": True,
-            "compact200PercentTextReflow": True,
+            "allViewports200PercentTextReflow": True,
+            "forcedColorsAutomation": True,
+            "rtlStructuralAutomation": True,
             "screenReaderAcceptance": False,
             "humanVisualExcellence": False,
             "productionHostingAcceptance": False,
             "crossBrowserAcceptance": False,
+            "localizationAcceptance": False,
         },
         "results": results,
     }
     (EVIDENCE_DIR / "acceptance-report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"Web rendered Development acceptance passed across {len(results)} browser cases")
+    print(f"Web rendered Development acceptance passed across {len(results)} browser cases plus Forced Colors and RTL structural checks")
 
 
 if __name__ == "__main__":
