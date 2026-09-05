@@ -1,0 +1,70 @@
+@define-color goreecloud_deep_teal #0F6B6F;
+@define-color goreecloud_soft_amber #D9A35F;
+
+/* GLAZE UI V1.1 Development mapping.
+ * Host-theme semantic colors retain authority. Deep Teal and Soft Amber are
+ * restrained non-semantic atmosphere only and never encode trust, entitlement,
+ * installation, privacy, security, or availability state.
+ */
+.glaze-header {
+  background-color: alpha(@window_bg_color, 0.96);
+  border-bottom: 1px solid alpha(@borders, 0.55);
+}
+
+.glaze-navigation {
+  background-color: alpha(@goreecloud_deep_teal, 0.07);
+  border: 1px solid alpha(@goreecloud_deep_teal, 0.14);
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.glaze-search {
+  min-height: 48px;
+  border-radius: 16px;
+}
+
+.store-card {
+  background-color: @card_bg_color;
+  border: 1px solid alpha(@borders, 0.55);
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.artifact-row {
+  background-color: alpha(@goreecloud_deep_teal, 0.05);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+
+.status-pill {
+  background-color: alpha(@accent_bg_color, 0.12);
+  color: @accent_color;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.development-notice {
+  background-color: alpha(@goreecloud_soft_amber, 0.07);
+  border: 1px solid alpha(@goreecloud_soft_amber, 0.16);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.accent {
+  color: @accent_color;
+}
+
+.success {
+  color: @success_color;
+}
+
+.navigation-sidebar row {
+  border-radius: 12px;
+  min-height: 48px;
+}
+
+.navigation-sidebar row:selected {
+  background-color: alpha(@goreecloud_deep_teal, 0.12);
+}

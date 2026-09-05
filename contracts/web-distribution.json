@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "application": "goreecloud-app-store",
+  "platform": "web",
+  "lifecycle": "development",
+  "client": {
+    "implementation": "original-first-party-static",
+    "framework": "standards-html-css-es-modules",
+    "version": "0.1.0-dev",
+    "entrypoint": "web/index.html",
+    "externalRuntimeDependencies": false
+  },
+  "catalog": {
+    "sharedSource": "catalog/development-catalog.json",
+    "schema": "contracts/store-catalog.schema.json",
+    "itemCount": 12,
+    "authoritative": false,
+    "serverAuthoritativeDeliveryConnected": false
+  },
+  "build": {
+    "script": "scripts/build_web.py",
+    "output": ".artifacts/web/site",
+    "productionDeploymentConfigured": false
+  },
+  "branding": {
+    "canonicalRepository": "GoreeCloud/goreecloud-branding-assets",
+    "canonicalAsset": "products/app-store/app-icon.svg",
+    "canonicalBlob": "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef",
+    "repositorySource": "linux/resources/com.goreecloud.AppStore.Development.svg",
+    "generatedSiteAsset": "assets/app-icon.svg"
+  },
+  "security": {
+    "contentSecurityPolicySourcePresent": true,
+    "analyticsEnabled": false,
+    "thirdPartyRuntimeCode": false,
+    "packageInstallationEnabled": false,
+    "serviceLaunchEnabled": false,
+    "productionAuthenticationConnected": false
+  },
+  "privacy": {
+    "crossIdentityCatalogLeakagePermitted": false,
+    "persistentSearchHistoryEnabled": false,
+    "personalizationTelemetryEnabled": false,
+    "privacyShieldProductionConnected": false
+  },
+  "glazeUi": {
+    "target": "1.1.0",
+    "stableReleaseTag": "v1.1.0",
+    "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
+    "mapping": "web/styles.css",
+    "deepDarkRuntimeSelection": "pending-policy",
+    "conformanceAccepted": false
+  },
+  "acceptance": {
+    "sourceContract": "candidate",
+    "unitTests": "candidate",
+    "staticBuild": "candidate",
+    "httpSmoke": "candidate",
+    "renderedBrowser": "candidate",
+    "renderedBrowserEvidence": {
+      "revision": "c313cbe05f4688e526a50e1c2c76225f733b0244",
+      "workflowRun": 33941355045,
+      "artifactId": 9961926088,
+      "artifactDigest": "sha256:643d4ae806530a6c3d845089c68c726c07e7e6af745e068ffb1bf87764adb7b4"
+    },
+    "accessibilityTreeNames": "candidate",
+    "accessibilityAssistiveTechnology": "pending",
+    "humanVisualExcellence": "pending",
+    "representativeTargetEnvironment": "pending",
+    "productionHostingHeaders": "pending"
+  },
+  "productionAcceptance": false
+}

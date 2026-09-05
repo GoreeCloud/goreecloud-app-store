@@ -1,0 +1,118 @@
+name: Web development validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent/app-store-catalog-expansion
+
+permissions:
+  contents: read
+
+jobs:
+  web-development:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          mkdir -p .artifacts/web/evidence
+          printf '%s\n' "$ACTUAL_SHA" | tee .artifacts/web/evidence/source-commit.txt
+
+      - name: Validate shared catalog, branding, GLAZE UI, and Web contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_catalog.py | tee .artifacts/web/evidence/catalog-validation.txt
+          python3 scripts/validate_branding.py | tee .artifacts/web/evidence/branding-validation.txt
+          python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/web/evidence/glaze-ui-validation.txt
+          python3 scripts/validate_web.py | tee .artifacts/web/evidence/web-validation.txt
+
+      - name: Validate JavaScript and entitlement behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version | tee .artifacts/web/evidence/node-version.txt
+          node --check web/entitlements.mjs
+          node --check web/app.mjs
+          node --test web/tests/*.test.mjs | tee .artifacts/web/evidence/web-tests.txt
+
+      - name: Build exact Web Development artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          python3 scripts/build_web.py --revision "$EXPECTED_SHA" | tee .artifacts/web/evidence/web-build.txt
+          python3 - <<'PY' | tee .artifacts/web/evidence/build-info-validation.txt
+          import json
+          from pathlib import Path
+          expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          info = json.loads(Path(".artifacts/web/site/build-info.json").read_text(encoding="utf-8"))
+          assert info["sourceRevision"] == expected
+          assert info["clientVersion"] == "0.1.0-dev"
+          assert info["lifecycle"] == "development"
+          assert info["productionAcceptance"] is False
+          print(f"Web Development build-info validated for exact source {expected}")
+          PY
+          cmp catalog/development-catalog.json .artifacts/web/site/catalog/development-catalog.json
+          test "$(git hash-object .artifacts/web/site/assets/app-icon.svg)" = '05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef'
+
+      - name: Smoke-test generated static site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory .artifacts/web/site > .artifacts/web/evidence/http-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error http://127.0.0.1:8765/index.html > .artifacts/web/evidence/index-response.html; then
+              break
+            fi
+            sleep 0.25
+          done
+          curl --fail --silent --show-error http://127.0.0.1:8765/catalog/development-catalog.json > .artifacts/web/evidence/catalog-response.json
+          curl --fail --silent --show-error http://127.0.0.1:8765/app.mjs > .artifacts/web/evidence/app-response.mjs
+          curl --fail --silent --show-error http://127.0.0.1:8765/assets/app-icon.svg > .artifacts/web/evidence/icon-response.svg
+          cmp catalog/development-catalog.json .artifacts/web/evidence/catalog-response.json
+          cmp web/app.mjs .artifacts/web/evidence/app-response.mjs
+          cmp linux/resources/com.goreecloud.AppStore.Development.svg .artifacts/web/evidence/icon-response.svg
+          grep -F 'GoreeCloud App Store Dev' .artifacts/web/evidence/index-response.html
+
+      - name: Record acceptance boundary
+        shell: bash
+        run: |
+          cat > .artifacts/web/evidence/acceptance-boundary.txt <<'EOF'
+          GoreeCloud App Store Web client 0.1.0-dev Development evidence only.
+          Production acceptance: false.
+          Shared catalog: non-authoritative Development fixture.
+          Production GoreeCloud Identity/server-authoritative entitlement delivery: not connected.
+          Package install/update and service launch authority: disabled.
+          Wardveil, Privacy Shield, Everkeep, Mesh, and Manager production runtime acceptance: not established.
+          GLAZE UI V1.1 source mapping: present; application conformance not accepted.
+          This workflow validates exact source, entitlement logic, static source/build integrity, approved App Store identity provenance, and local HTTP delivery only.
+          Rendered browser, assistive-technology, Human Visual Excellence, representative target environment, production hosting headers, deployment, release approval, Release Candidate promotion, and Stable qualification remain pending.
+          EOF
+
+      - name: Upload Web Development artifact and evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: goreecloud-app-store-web-development-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            .artifacts/web/site
+            .artifacts/web/evidence
+            contracts/web-distribution.json
+            web/README.md
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,255 @@
+name: Linux development validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - agent/linux-app-store-reconcile
+
+permissions:
+  contents: read
+
+jobs:
+  linux-native-packages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact source revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          mkdir -p .artifacts/linux
+          printf '%s\n' "$ACTUAL_SHA" | tee .artifacts/linux/source-commit.txt
+
+      - name: Install native Linux build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            dpkg-dev \
+            flatpak \
+            flatpak-builder \
+            appstream \
+            appstream-compose \
+            appstream-util \
+            librsvg2-bin
+          pkg-config --modversion gtk4 | tee .artifacts/linux/gtk4-version.txt
+          pkg-config --modversion libadwaita-1 | tee .artifacts/linux/libadwaita-version.txt
+          flatpak --version | tee .artifacts/linux/flatpak-version.txt
+          flatpak-builder --version | tee .artifacts/linux/flatpak-builder-version.txt
+          appstreamcli --version | tee .artifacts/linux/appstreamcli-version.txt
+          rsvg-convert --version | tee .artifacts/linux/rsvg-convert-version.txt
+          command -v appstreamcli
+          command -v rsvg-convert
+          python3 - <<'PY'
+          import re
+          import subprocess
+          output = subprocess.check_output(["flatpak-builder", "--version"], text=True).strip()
+          match = re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", output)
+          assert match, f"Could not parse flatpak-builder version: {output}"
+          parts = tuple(int(part) for part in match.groups(default="0")[:2])
+          assert parts >= (1, 4), f"flatpak-builder >= 1.4 required for appstreamcli composition, found {output}"
+          print(f"Validated modern flatpak-builder AppStream composition toolchain: {output}")
+          PY
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.90.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Validate shared catalog, branding, Glaze, and Linux contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_catalog.py | tee .artifacts/linux/catalog-validation.txt
+          python3 scripts/validate_branding.py | tee .artifacts/linux/branding-validation.txt
+          python3 scripts/validate_glaze_ui_adoption.py | tee .artifacts/linux/glaze-ui-adoption.txt
+          python3 - <<'PY' | tee .artifacts/linux/linux-contract-validation.txt
+          import json
+          from pathlib import Path
+
+          contract = json.loads(Path("contracts/linux-distribution.json").read_text(encoding="utf-8"))
+          assert contract["schemaVersion"] == 1
+          assert contract["application"] == "goreecloud-app-store"
+          assert contract["platform"] == "linux"
+          assert contract["lifecycle"] == "development"
+          assert contract["client"]["version"] == "0.1.0-dev"
+          assert contract["catalog"]["sharedSource"] == "catalog/development-catalog.json"
+          assert contract["catalog"]["itemCount"] == 12
+          assert contract["branding"]["canonicalRepository"] == "GoreeCloud/goreecloud-branding-assets"
+          assert contract["branding"]["canonicalAsset"] == "products/app-store/app-icon.svg"
+          assert contract["branding"]["canonicalBlob"] == "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          assert contract["branding"]["linuxIcon"] == "linux/resources/com.goreecloud.AppStore.Development.svg"
+          assert contract["branding"]["desktopIconId"] == "com.goreecloud.AppStore.Development"
+          derivative = contract["branding"]["flatpakRasterDerivative"]
+          assert derivative["source"] == "linux/resources/com.goreecloud.AppStore.Development.svg"
+          assert derivative["generatedAtBuild"] is True
+          assert derivative["format"] == "png"
+          assert (derivative["width"], derivative["height"]) == (256, 256)
+          assert derivative["desktopInstallPath"] == "/app/share/icons/hicolor/256x256/apps/com.goreecloud.AppStore.Development.png"
+          assert derivative["canonicalSvgInstallPath"] == "/app/share/goreecloud-app-store/branding/app-icon.svg"
+          assert contract["glazeUi"]["target"] == "1.1.0"
+          assert contract["glazeUi"]["conformanceAccepted"] is False
+          assert contract["productionAcceptance"] is False
+          assert contract["security"]["automaticPackageInstallationEnabled"] is False
+          print("Linux distribution contract validated: native client 0.1.0-dev, shared 12-item catalog, approved App Store identity with build-time Flatpak raster derivative, GLAZE UI V1.1, productionAcceptance=false")
+          PY
+
+      - name: Verify pinned Rust dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f linux/Cargo.lock
+          cargo metadata --manifest-path linux/Cargo.toml --locked --no-deps > /dev/null
+          rustc --version --verbose | tee .artifacts/linux/rustc-version.txt
+          cargo --version | tee .artifacts/linux/cargo-version.txt
+          sha256sum linux/Cargo.lock | tee .artifacts/linux/cargo-lock.sha256
+          cp linux/Cargo.lock .artifacts/linux/Cargo.lock
+
+      - name: Format, test, lint, and build native Linux client
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --manifest-path linux/Cargo.toml -- --check
+          cargo test --manifest-path linux/Cargo.toml --locked
+          cargo clippy --manifest-path linux/Cargo.toml --locked --all-targets -- -D warnings
+          cargo build --manifest-path linux/Cargo.toml --locked --release
+          test -x linux/target/release/goreecloud-app-store-dev
+          sha256sum linux/target/release/goreecloud-app-store-dev | tee .artifacts/linux/goreecloud-app-store-dev.sha256
+
+      - name: Build and validate Debian development package
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEB="$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb"
+          ./linux/packaging/debian/build-deb.sh '0.1.0~dev1' amd64 "$PWD/linux/target/release/goreecloud-app-store-dev" "$DEB"
+          dpkg-deb --info "$DEB" | tee .artifacts/linux/debian-info.txt
+          dpkg-deb --contents "$DEB" | tee .artifacts/linux/debian-contents.txt
+          dpkg-deb -f "$DEB" Package | grep -Fx 'goreecloud-app-store-dev'
+          dpkg-deb -f "$DEB" Version | grep -Fx '0.1.0~dev1'
+          dpkg-deb -f "$DEB" Architecture | grep -Fx 'amd64'
+          grep -F './usr/share/icons/hicolor/scalable/apps/com.goreecloud.AppStore.Development.svg' .artifacts/linux/debian-contents.txt
+          sha256sum "$DEB" | tee .artifacts/linux/debian.sha256
+
+      - name: Validate desktop and AppStream identity metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          grep -Fx 'Icon=com.goreecloud.AppStore.Development' linux/resources/com.goreecloud.AppStore.Development.desktop
+          grep -F '<launchable type="desktop-id">com.goreecloud.AppStore.Development.desktop</launchable>' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
+          if grep -F '<icon type="stock">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml; then
+            echo 'Package-owned App Store icon must not be represented as a stock AppStream icon' >&2
+            exit 1
+          fi
+          appstream-util validate-relax linux/resources/com.goreecloud.AppStore.Development.metainfo.xml \
+            | tee .artifacts/linux/appstream-validation.txt
+          grep -F '<release version="0.1.0-dev" date="2026-08-31">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
+
+      - name: Build Flatpak development bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.gnome.Platform//50 org.gnome.Sdk//50
+
+          STAGE="$PWD/linux/packaging/flatpak/files"
+          RASTER="$STAGE/com.goreecloud.AppStore.Development.png"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          cp linux/target/release/goreecloud-app-store-dev "$STAGE/goreecloud-app-store-dev"
+          cp linux/resources/com.goreecloud.AppStore.Development.desktop "$STAGE/"
+          cp linux/resources/com.goreecloud.AppStore.Development.metainfo.xml "$STAGE/"
+          cp linux/resources/com.goreecloud.AppStore.Development.svg "$STAGE/"
+          cp catalog/development-catalog.json "$STAGE/development-catalog.json"
+
+          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          rsvg-convert --width 256 --height 256 \
+            --output "$RASTER" \
+            linux/resources/com.goreecloud.AppStore.Development.svg
+          python3 - "$RASTER" <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+
+          data = Path(sys.argv[1]).read_bytes()
+          assert data[:8] == b"\x89PNG\r\n\x1a\n", "Flatpak icon derivative is not PNG"
+          width, height = struct.unpack(">II", data[16:24])
+          assert (width, height) == (256, 256), f"Unexpected Flatpak icon derivative dimensions: {width}x{height}"
+          print(f"Validated canonical-derived Flatpak icon: {width}x{height} PNG")
+          PY
+          sha256sum "$RASTER" | tee .artifacts/linux/flatpak-icon-derivative.sha256
+
+          flatpak-builder --force-clean \
+            --repo="$PWD/.artifacts/linux/flatpak-repo" \
+            "$PWD/.artifacts/linux/flatpak-build" \
+            linux/packaging/flatpak/com.goreecloud.AppStore.Development.yml
+
+          test -d "$PWD/.artifacts/linux/flatpak-repo/refs"
+          test -s "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/xmls/com.goreecloud.AppStore.Development.xml.gz"
+          test -s "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/icons/flatpak/128x128/com.goreecloud.AppStore.Development.png"
+          sha256sum "$PWD/.artifacts/linux/flatpak-build/files/share/app-info/icons/flatpak/128x128/com.goreecloud.AppStore.Development.png" \
+            | tee .artifacts/linux/flatpak-appstream-icon.sha256
+
+          flatpak build-bundle \
+            "$PWD/.artifacts/linux/flatpak-repo" \
+            "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+            com.goreecloud.AppStore.Development
+
+          sha256sum "$PWD/.artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak" \
+            | tee .artifacts/linux/flatpak.sha256
+          rm -rf "$STAGE"
+
+      - name: Record development acceptance boundary
+        shell: bash
+        run: |
+          cat > .artifacts/linux/acceptance-boundary.txt <<'EOF'
+          GoreeCloud App Store Linux native client 0.1.0-dev Development evidence only.
+          It is reconciled with the App Store 0.1.5-dev product-development line without rewriting the Linux client's own version history.
+          Production acceptance: false.
+          Package publication for catalog products: not established.
+          Automatic installation: disabled.
+          Production GoreeCloud Identity: not connected.
+          Wardveil runtime package verification: not connected.
+          Privacy Shield runtime policy: not connected.
+          Everkeep recovery: not connected.
+          GoreeCloud Mesh production transport: not connected.
+          GLAZE UI V1.1 / 1.1.0 source mapping: present; application conformance not accepted.
+          Canonical App Store product identity: approved; the Linux source SVG is byte-exact to the canonical branding blob. Debian installs that SVG directly. Flatpak retains the exact SVG as package provenance and uses a build-time 256x256 PNG derivative for desktop/AppStream composition; derivative dimensions and generated AppStream catalog/icon outputs are validated by this workflow.
+          Representative Linux desktop rendering, native accessibility, Human Visual Excellence, protected signing, upgrade/rollback, release, deployment, and Stable acceptance: not established.
+          EOF
+
+      - name: Upload Linux development packages and evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: goreecloud-app-store-linux-development-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev1-amd64.deb
+            .artifacts/linux/GoreeCloud-App-Store-0.1.0-dev-x86_64.flatpak
+            .artifacts/linux/*.txt
+            .artifacts/linux/*.sha256
+            .artifacts/linux/Cargo.lock
+            BRANDING.md
+            contracts/linux-distribution.json
+            contracts/store-catalog.schema.json
+            catalog/development-catalog.json
+            linux/resources/com.goreecloud.AppStore.Development.desktop
+            linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
+            linux/resources/com.goreecloud.AppStore.Development.svg
+          if-no-files-found: error
+          retention-days: 14

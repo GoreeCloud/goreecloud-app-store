@@ -1,105 +1,91 @@
 # GoreeCloud App Store
 
-GoreeCloud App Store is the official GoreeCloud-owned application for discovering, obtaining, updating, and opening GoreeCloud applications and services that an authenticated identity is authorized to access.
+GoreeCloud App Store is the first-party GoreeCloud catalog and delivery experience for applications and services an authenticated identity is authorized to access.
 
-This repository is an **original native GoreeCloud implementation**. Google Play, Apple App Store, and F-Droid are product inspirations only; their application code, architecture, branding, and UI are not the implementation foundation.
+## Current Development line
 
-## Current checkpoint
+The active successor line remains **Development**, not production or Stable:
 
-Status: **Active Development — native Android application**  
-Production acceptance: **false**
+- **Android:** original Kotlin / Jetpack Compose client, `0.1.5-dev` / versionCode `6`, package `com.goreecloud.appstore.dev`.
+- **Linux:** original Rust / GTK 4 / libadwaita client, `0.1.0-dev`, with fail-closed unpublished Debian and Flatpak Development packaging.
+- **Web:** original standards-based HTML/CSS/ES-module client, `0.1.0-dev`, using the same non-authoritative twelve-item Development catalog. Its current source/build contract requires exact-revision Web CI before accepted Web evidence is claimed.
 
-The current development branch establishes:
+The reserved future production Android package remains `com.goreecloud.appstore` and must use a separately controlled production signing lineage.
 
-- a native Android/Jetpack Compose store application;
-- a Glaze UI 2.0.0 consumer target with layered native surfaces, capsule controls, light/dark adaptation, accessible interaction sizing, and effects-free behavior;
-- a persistent App Store/account header and Material bottom navigation;
-- a per-session entitlement engine that filters the catalog before presentation;
-- development-only multi-user identity fixtures behind an explicit `IdentityGateway` boundary;
-- distinct application and service catalog entries;
-- Discover, Apps, Services, Updates, and Library surfaces;
-- search constrained to the already-entitled catalog;
-- store-style application/service cards and product-detail bottom sheets;
-- approved first-party artwork derivatives tied to canonical assets in `GoreeCloud/goreecloud-branding-assets`;
-- development-status diagnostics separated from ordinary catalog browsing;
-- compact-width safeguards for account controls, catalog headings, item metadata, release-channel labels, detail metadata, and platform-status rows;
-- explicit source boundaries for GoreeCloud Identity, Wardveil Security, Privacy Shield, Everkeep, and GoreeCloud Mesh;
-- a machine-readable platform-integration record;
-- unit tests that prevent implicit administrator bypass of catalog audience rules;
-- exact-source Android CI for tests, lint, APK assembly, package/application-label validation, signing-certificate verification, SHA-256 evidence, and development artifact publication.
+## Development catalog and entitlement model
 
-The interface is being iterated with real-device screenshots from Android development builds. The first review removed oversized internal diagnostics from normal browsing, replaced placeholder artwork/navigation glyphs, fixed tab/account scroll behavior, and moved item details to store-style sheets. A second compact-phone review then exposed width-allocation defects: catalog counts could overlap section headings, long metadata could squeeze the Development channel into a vertical single-character stack, and account/status metadata could compete for insufficient horizontal space. The current source constrains those elements explicitly, gives primary text flexible width, keeps status/channel capsules single-line, and uses vertical metadata presentation where horizontal pairing is not resilient.
+The shared non-authoritative fixture contains twelve entries:
 
-## Development APK identity
+**Applications:** GoreeCloud Browser, Messenger, Location, Contacts, Tasks, Notes, Memos, Launcher, Keyboard, and Manager.
 
-CI/debug builds install as `com.goreecloud.appstore.dev` with the Android label **GoreeCloud App Store Dev**. They are signed with one repository-managed development-only certificate so successive development builds can update each other instead of receiving a new ephemeral Android debug identity from every CI runner.
+**Services:** Identity Center and Mesh Center.
 
-The current development version line is `0.1.2-dev` with version code `3`.
+Development identity fixtures exercise concealment before presentation/search. Administrator status has no implicit bypass; access requires an explicitly matching fixture audience. The Web client derives categories and search results only from the already-entitled subset. Signed-out fixtures see no protected entries.
 
-The reserved future production application ID remains `com.goreecloud.appstore`. The development signing key MUST NOT sign that production package or any artifact represented as production-approved or Stable. See `development/signing/README.md` for the explicit boundary and certificate fingerprint.
+Catalog membership and fixture audiences do not establish production entitlement taxonomy, package publication, deployment state, or release eligibility. Production delivery must become server-authoritative and backend-re-authorized before restricted metadata or artifacts are exposed.
 
-Older bootstrap APKs used `com.goreecloud.appstore` with ephemeral runner-generated debug certificates. Those builds cannot be upgraded in place by later CI APKs and should be removed from test devices before using the new development package.
+## Platform clients
 
-## Important acceptance boundary
+### Android
 
-The account switcher is **not** a production GoreeCloud Identity login. It uses development fixtures only so multi-user entitlement behavior can be built and tested while the application-facing GoreeCloud Identity runtime remains unaccepted.
+The Compose client provides Discover, Apps, Services, Updates, and Library navigation, search constrained to the entitled fixture catalog, canonical artwork, account fixtures, details, fail-closed unavailable delivery states, package/version/signing validation, and deterministic emulator interaction/rendered evidence. Representative physical-device, complete accessibility, Human Visual Excellence, production integration, signing, release, and Stable acceptance remain open.
 
-The development catalog also does not assert production package identities, service endpoints, versions, or audience taxonomy. Those values must come from approved authoritative release, service, and Identity metadata.
+### Linux
 
-Package download, APK installation, service launch, production update delivery, Wardveil package-verification acceptance, production Privacy Shield policy evaluation, Everkeep library recovery, and Mesh lifecycle transport are deliberately unavailable until their real integrations are implemented and validated. The UI must not imply otherwise.
+The Rust/GTK/libadwaita client consumes the same shared catalog and builds Development Debian/Flatpak artifacts. Debian installs the byte-exact approved App Store SVG. Flatpak retains that SVG as provenance and uses a build-time raster derivative for AppStream; CI validates the derivative and generated AppStream catalog/icon. Automatic catalog-product installation and supported production publication remain disabled/unaccepted.
 
-## Authorization model
+### Web
 
-The App Store separates three decisions:
+The first-party Web Development client has no third-party runtime JavaScript and no analytics. It uses a local Content Security Policy source declaration, the shared Development catalog, pure entitlement logic, responsive/focus/reduced-motion/Forced-Colors source handling, and fail-closed Updates/Library/Install/Open states. The deterministic build copies the shared catalog and approved App Store identity into a static artifact rather than creating competing authorities.
 
-1. **Identity authentication and platform authority** — owned by GoreeCloud Identity.
-2. **Catalog entitlement** — an App Store domain decision evaluated from approved Identity claims/policy inputs; an item not entitled to a user is concealed rather than merely disabled.
-3. **Artifact/service authorization** — must be enforced again by the package or service delivery backend. Client-side filtering is defense in depth, not the security boundary.
+This source bootstrap does **not** by itself establish rendered browser, assistive-technology, Human Visual Excellence, representative target environment, production hosting headers, deployment, or release acceptance.
 
-No role receives an undocumented superuser bypass. Administrative access must be explicitly granted by policy.
+## Security and platform boundaries
 
-## Branding contract
+Package installation, application updates, library reconciliation, and service opening remain disabled until the responsible production contracts are accepted. The Android Development client does not request `REQUEST_INSTALL_PACKAGES`.
 
-`GoreeCloud/goreecloud-branding-assets` is the canonical branding repository. Android VectorDrawable copies in this repository are consumer derivatives only and do not become new branding authorities.
+A future install/update path must use backend re-authorization, immutable release/artifact identity, digest and signing provenance, Wardveil verification, secure transport, platform/user authorization, result reconciliation, rollback/failure behavior, and auditable source/release evidence.
 
-See `BRANDING.md` for the exact canonical asset paths and Git-blob mappings currently consumed for Browser, Messenger, Location, Identity, and Manager artwork.
+GoreeCloud Identity remains authoritative for identity and sessions; Wardveil Security for package trust; Privacy Shield for privacy policy and data use; Everkeep for recovery truth; GoreeCloud Mesh for coordination; GoreeCloud Manager for applicable operational visibility; and GLAZE UI for shared presentation requirements.
 
-No App Store-specific official icon/logo is established here. Any future official App Store artwork must originate in the canonical branding repository first.
+## GLAZE UI
 
-## Build foundation
+Current source mappings target **GLAZE UI V1.1 / 1.1.0**, release tag `v1.1.0`, exact release revision `15cc76d2bcd4065552dc31c77145b63f34d9e7b2`.
 
-The application is pinned to current stable Android tooling as of August 29, 2026:
+Android and Web include inherited Light/Dark structure, explicit Deep Dark source mapping without automatic Deep Dark selection, V1.1 optical geometry/target rules, and bounded Deep Teal + Soft Amber non-semantic atmosphere. Linux maintains its native source mapping. Environmental/user-content sampling is disabled and Glaze Motion is not consumed.
 
-- Android Gradle Plugin 9.3.0
-- Gradle 9.5.0
-- JDK 17
-- compileSdk 37
-- targetSdk 36
-- minSdk 26
-- Kotlin / Compose compiler plugin 2.4.10
-- Jetpack Compose BOM 2026.08.00
+`conformanceAccepted=false` and `productionAcceptance=false` remain explicit. Complete rendered/native/browser accessibility, supported form factors/target environments, Human Visual Excellence, production signing, deployment, and Stable qualification remain pending.
 
-A Gradle wrapper is not yet committed. With JDK 17 and Gradle 9.5.0 installed:
+## Build and validation
 
-```bash
-gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+Android:
+
+```sh
+gradle :app:testDebugUnitTest
+gradle :app:lintDebug
+gradle :app:assembleDebug
 ```
 
-CI installs the pinned Gradle distribution directly, checks out and records the exact source revision, validates the generated development APK package/version/application label and development signing certificate, generates SHA-256 evidence, and publishes the development APK/evidence bundle.
+Linux:
 
-## Repository records
+```sh
+cargo test --manifest-path linux/Cargo.toml --locked
+cargo clippy --manifest-path linux/Cargo.toml --locked --all-targets -- -D warnings
+cargo build --manifest-path linux/Cargo.toml --locked --release
+```
 
-- `SPECIFICATIONS.md` — product and engineering requirements
-- `ARCHITECTURE.md` — authority boundaries and runtime design
-- `FEATURES.md` — implemented and planned capabilities
-- `BENEFITS.md` — intended user/platform value
-- `COMPETITIVE-OBJECTIVES.md` — inspiration translated into GoreeCloud-native objectives
-- `BRANDING.md` — canonical branding-consumer mappings
-- `USER-MANUAL.md` — current user/developer behavior and limitations
-- `development/signing/README.md` — development package/signing boundary
-- `contracts/platform-integrations.json` — machine-readable current integration truth
-- `app/src/main/assets/catalog/development-catalog.json` — non-authoritative development fixture catalog
+Web:
 
-## License
+```sh
+node --test web/tests/*.test.mjs
+python3 scripts/validate_web.py
+python3 scripts/build_web.py --revision <40-character-git-revision>
+```
 
-GNU Affero General Public License v3.0. See `LICENSE`.
+Repository CI validates exact source identity for the application-specific workflows, shared catalog and branding provenance, GLAZE source contracts, client-specific tests/builds, and bounded Development artifacts. The central reusable Platform Contract workflow currently has a separately tracked pull-request revision-attribution defect and must not be described as exact-head evidence when it evaluates GitHub's synthetic PR merge revision.
+
+## Production status
+
+`productionAcceptance=false`.
+
+No GitHub Release, production signing, supported production deployment, Release Candidate promotion, or Stable lifecycle status is established by Development source or CI alone.

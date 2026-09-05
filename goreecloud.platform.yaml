@@ -1,0 +1,254 @@
+schema_version: "0.2"
+
+component:
+  type: application
+  id: goreecloud-app-store
+  product_name: GoreeCloud App Store
+  repository: GoreeCloud/goreecloud-app-store
+
+lifecycle: development
+version: "0.1.5-dev"
+
+supported_platforms:
+  - android
+  - linux
+  - web
+
+api:
+  versions: []
+  endpoints: []
+
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+    notes: Accepted GoreeCloud Manager registration, operational visibility, and administrative integration are not established for the App Store.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+      - contracts/web-distribution.json
+      - README.md
+    notes: Development clients collect no analytics, but production Privacy Shield policy, consent, retention, and runtime acceptance are not established.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+      - contracts/linux-distribution.json
+      - contracts/web-distribution.json
+      - README.md
+    notes: Package-verification and trust boundaries are documented and package actions fail closed, but accepted Wardveil runtime verification is not established.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+      - SPECIFICATIONS.md
+    notes: Library/history continuity requirements are documented, but accepted backup, clean-target restore, and recovery evidence are not established.
+  glaze_ui:
+    result: applicable-nonconformant
+    version: "1.1.0"
+    evidence:
+      - contracts/glaze-ui-adoption.json
+      - docs/GLAZE_UI_ADOPTION.md
+      - app/src/main/java/com/goreecloud/appstore/ui/GlazeTheme.kt
+      - linux/resources/style.css
+      - web/styles.css
+      - contracts/linux-distribution.json
+      - contracts/web-distribution.json
+      - scripts/validate_glaze_ui_adoption.py
+    notes: Android, Linux, and Web source mappings target current Stable GLAZE UI V1.1 / 1.1.0. Android automated Compose/rendered evidence and Linux native/package evidence passed at the verified integrated Development checkpoint d9dd17975608fe5f94b0e264ab682bab036d98aa. Automated actual-browser Chrome rendering and accessibility-tree name evidence passed for Web at c313cbe05f4688e526a50e1c2c76225f733b0244. Actual assistive-technology, Human Visual Excellence, representative target, release, and production acceptance remain pending.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+    notes: Catalog and lifecycle coordination boundaries are documented, but canonical Mesh registration, capability publication, event transport, and runtime acceptance are not established.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - contracts/platform-integrations.json
+      - app/src/main/java/com/goreecloud/appstore/identity/IdentityGateway.kt
+      - web/entitlements.mjs
+    notes: Development-only Identity fixtures exist, but production GoreeCloud Identity authentication, session, authorization, account-disablement, revocation, and server-authoritative entitled-catalog delivery are not established.
+
+health:
+  health_endpoint: null
+  readiness_endpoint: null
+
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Define and accept the App Store-owned backup scope for catalog configuration, per-identity library/history state, release metadata, and other durable state that requires recovery.
+      - Preserve Privacy Shield minimization and retention requirements while keeping synchronization distinct from backup truth.
+  restore:
+    required: true
+    requirements:
+      - Validate restoration into clean supported Android and Linux environments and define recovery behavior for any durable Web-owned state before recoverability is claimed.
+      - Define account-scoped reconciliation, package-state reconciliation, rollback, and failure semantics before Library recovery is production-enabled.
+  export:
+    required: true
+    requirements:
+      - Provide a documented user-controlled export for portable App Store-owned library/history state where applicable.
+      - Exclude credentials, protected catalog metadata, and unrelated platform-owned state unless separately authorized.
+  portability:
+    required: true
+    requirements:
+      - Keep durable App Store-owned state in documented versioned formats or contracts that can be migrated without binding recovery to one client implementation.
+      - Define migration behavior for catalog schema, per-identity library/history state, and release-channel metadata before Stable qualification.
+
+external_dependencies:
+  - name: Android platform
+    purpose: Native application runtime, package inventory, user-authorized package installation interfaces, accessibility services, and application execution environment.
+    required: true
+    version_constraint: ">=26"
+  - name: Linux desktop platform
+    purpose: Native GTK 4 and libadwaita client runtime plus Debian and Flatpak Development packaging and desktop integration.
+    required: true
+    version_constraint: "GTK 4 + libadwaita 1"
+  - name: Web platform
+    purpose: Standards-based browser runtime for the first-party Web Development client; production hosting and server-authoritative entitlement delivery remain separate acceptance requirements.
+    required: true
+    version_constraint: "modern standards browser"
+
+compatibility:
+  platform_contract: "0.2"
+  glaze_ui_required: "1.1.0"
+  requires:
+    - goreecloud-platform-contract==0.2
+    - glaze-ui==1.1.0
+    - android-api>=26
+    - linux-native-client
+    - web-static-client
+  provides:
+    - goreecloud-app-store-development-catalog/2
+
+evidence:
+  acceptance_tests:
+    - id: android-development-ci-33940293150
+      category: supported-platform
+      path: .github/workflows/android.yml
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: passed
+      observed_at: "2026-09-05T02:54:10Z"
+      notes: Exact branch-head Android Development CI passed source verification, branding and GLAZE UI V1.1 source contracts, unit tests, native test compilation, lint, APK assembly, package/version/label checks, Development signing-certificate verification, digest generation, and artifact publication. This is not production or Stable acceptance.
+    - id: android-rendered-33940293169
+      category: supported-platform
+      path: .github/workflows/android-rendered.yml
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: passed
+      observed_at: "2026-09-05T02:59:53Z"
+      notes: Exact branch-head Android rendered acceptance passed exact APK/test-APK build, deterministic Android 36 emulator setup, installation, Compose-native navigation/category tests, exact APK restoration after instrumentation cleanup, rendered/form-factor validation, and evidence publication. Representative physical-device and complete native accessibility acceptance remain pending.
+    - id: linux-development-33940293151
+      category: supported-platform
+      path: .github/workflows/linux.yml
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: passed
+      observed_at: "2026-09-05T02:56:05Z"
+      notes: Exact branch-head Linux Development CI passed shared catalog/branding/GLAZE/Linux-contract validation, locked Rust dependency verification, format/test/clippy/release build, Debian package construction, AppStream metadata, canonical-derived Flatpak icon validation, Flatpak AppStream composition and bundle creation, and evidence publication.
+    - id: web-development-33940293204
+      category: supported-platform
+      path: .github/workflows/web.yml
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: passed
+      observed_at: "2026-09-05T02:52:29Z"
+      notes: Exact branch-head Web Development CI passed shared catalog, branding, GLAZE UI, Web contract, JavaScript entitlement behavior, deterministic exact-revision static build, local HTTP delivery smoke checks, and evidence publication. This does not establish production hosting or release acceptance.
+    - id: web-rendered-33941355045
+      category: supported-platform
+      path: .github/workflows/web-rendered.yml
+      revision: c313cbe05f4688e526a50e1c2c76225f733b0244
+      result: passed
+      observed_at: "2026-09-05T03:16:04Z"
+      notes: Exact branch-head automated headless-Chrome Development acceptance passed compact 390x844 and expanded 1280x900 Light/Dark rendering, fixture entitlement concealment, discovery/search/category behavior, fail-closed Updates/Library/Install/Open states, modal details, 48 px rendered targets, keyboard skip-link focus, document overflow safety, Reduced Motion, compact 200% text reflow, and accessible names for exposed interactive controls in Chrome's accessibility tree. The gate exposed and the source corrected a genuine compact sticky-topbar navigation interception defect before passing. Actual screen-reader or other assistive-technology acceptance, human visual approval, cross-browser acceptance, representative user hardware, production hosting/security headers, deployment, release approval, Release Candidate promotion, and Stable qualification remain pending.
+    - id: platform-contract-pr-context-33940293405
+      category: integration
+      path: .github/workflows/platform-contract.yml
+      revision: 97f28e904355b8342adce63a1b73483c4bdb419e
+      result: passed
+      observed_at: "2026-09-05T02:52:33Z"
+      notes: The central reusable validator passed against GitHub's synthetic PR merge revision for PR #7, not branch head d9dd17975608fe5f94b0e264ab682bab036d98aa. The separately tracked central revision-attribution defect prevents representing this as exact-head Platform Contract evidence.
+    - id: glaze-ui-v1.1-source-contract-33940293150
+      category: glaze-ui
+      path: contracts/glaze-ui-adoption.json
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: passed
+      observed_at: "2026-09-05T02:54:10Z"
+      notes: Repository-local source-contract validation passed for the integrated Android and Web GLAZE UI V1.1 source mappings. Complete whole-application conformance remains unaccepted.
+  release:
+    - id: app-store-android-0.1.5-dev-artifact-9961600717
+      version: "0.1.5-dev"
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      path: goreecloud-app-store-development-apk-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: candidate
+      observed_at: "2026-09-05T02:54:10Z"
+      artifact_digest: sha256:09410e2c035fce588d397844fb1f3b97fe63b6766fb23077507e16c5ca5b0b06
+      notes: GitHub Actions artifact ID 9961600717. This digest identifies the workflow artifact archive; the Android Development APK remains non-production.
+    - id: app-store-linux-0.1.0-dev-artifact-9961628153
+      version: "0.1.0-dev"
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      path: goreecloud-app-store-linux-development-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: candidate
+      observed_at: "2026-09-05T02:56:05Z"
+      artifact_digest: sha256:bd9477a8cf622252d2001073c569938c0352b54d9813dd7b72cf5785ca8fd1bc
+      notes: GitHub Actions artifact ID 9961628153. Debian and Flatpak outputs are Development build evidence only; supported publication and release acceptance remain pending.
+    - id: app-store-web-0.1.0-dev-artifact-9961575473
+      version: "0.1.0-dev"
+      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      path: goreecloud-app-store-web-development-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      result: candidate
+      observed_at: "2026-09-05T02:52:29Z"
+      artifact_digest: sha256:6b7cd7ab59775987d914887fff79b8c60cfa5aafb7fd62916df1eacaa16f178b
+      notes: GitHub Actions artifact ID 9961575473. The deterministic static site and evidence bundle are Development artifacts only; production hosting/deployment and release acceptance remain pending.
+    - id: app-store-web-rendered-evidence-9961926088
+      version: "0.1.0-dev"
+      revision: c313cbe05f4688e526a50e1c2c76225f733b0244
+      path: goreecloud-app-store-web-rendered-c313cbe05f4688e526a50e1c2c76225f733b0244
+      result: candidate
+      observed_at: "2026-09-05T03:16:04Z"
+      artifact_digest: sha256:643d4ae806530a6c3d845089c68c726c07e7e6af745e068ffb1bf87764adb7b4
+      notes: GitHub Actions artifact ID 9961926088 contains automated rendered-Web Development screenshots and acceptance evidence. It is not a production release artifact and does not establish assistive-technology, human visual, hosting, deployment, or Stable acceptance.
+
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - SPECIFICATIONS.md
+    - contracts/platform-integrations.json
+    - contracts/glaze-ui-adoption.json
+    - contracts/linux-distribution.json
+    - contracts/web-distribution.json
+    - docs/GLAZE_UI_ADOPTION.md
+    - linux/README.md
+    - linux/resources/style.css
+    - web/README.md
+    - web/styles.css
+    - web/rendered_acceptance.py
+    - .github/workflows/linux.yml
+    - .github/workflows/web.yml
+    - .github/workflows/web-rendered.yml
+    - scripts/validate_glaze_ui_adoption.py
+    - scripts/validate_branding.py
+    - scripts/validate_catalog.py
+    - scripts/validate_web.py
+  blockers:
+    - GoreeCloud Manager registration, visibility, and acceptance are not established.
+    - Privacy Shield runtime policy and acceptance are not established.
+    - Wardveil Security runtime package verification and acceptance are not established.
+    - Everkeep backup, clean-target restore, and recovery acceptance are not established.
+    - GLAZE UI V1.1 source mappings and bounded automated rendering evidence exist for Android and Web, but complete application conformance, actual native/browser assistive-technology accessibility, representative-device/target-environment, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GoreeCloud Mesh registration, capability publication, event transport, and runtime acceptance are not established.
+    - GoreeCloud Identity production authentication, session, entitlement, disablement, revocation, and server-authoritative entitled-catalog delivery are not established.
+    - Linux Development packages are build candidates only; production package publication, protected signing, representative Linux target acceptance, upgrade/rollback, and supported release procedures remain outstanding.
+    - Web Development source/build/local-HTTP and automated headless-Chrome rendered evidence are established as Development candidates; actual assistive-technology, cross-browser where required, representative target environment, production hosting/security headers, deployment, release, and Stable acceptance remain outstanding.
+    - Production catalog delivery, package install/update, service launch, rollback/failure validation, protected production signing and key recovery, deployment, release approval, and Stable qualification remain outstanding.
