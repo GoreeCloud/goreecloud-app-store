@@ -156,7 +156,11 @@ def assert_visible_targets(driver: webdriver.Chrome, context: str) -> None:
                 assert_target(element, f"{context} {selector}")
 
 
-def assert_ax_names(driver: webdriver.Chrome, context: str) -> None:
+def assert_ax_names(
+    driver: webdriver.Chrome,
+    context: str,
+    required_roles: tuple[str, ...] = ("button", "combobox", "searchbox"),
+) -> None:
     driver.execute_cdp_cmd("Accessibility.enable", {})
     nodes = driver.execute_cdp_cmd("Accessibility.getFullAXTree", {}).get("nodes", [])
     interactive_roles = {"button", "combobox", "searchbox", "link", "dialog"}
@@ -174,7 +178,7 @@ def assert_ax_names(driver: webdriver.Chrome, context: str) -> None:
             missing.append(role)
     if missing:
         raise AssertionError(f"{context}: unnamed accessibility-tree controls: {missing}")
-    for required in ("button", "combobox", "searchbox"):
+    for required in required_roles:
         if required not in seen_roles:
             raise AssertionError(f"{context}: expected accessibility-tree role {required!r} is absent")
 
@@ -249,7 +253,7 @@ def assert_dialog_and_unavailable_states(driver: webdriver.Chrome, wait: WebDriv
     if disabled_action.is_enabled():
         raise AssertionError(f"{context}: Development Install/Open action became enabled")
     assert_target(dialog.find_element(By.CSS_SELECTOR, ".dialog-close"), f"{context} dialog close")
-    assert_ax_names(driver, f"{context} dialog")
+    assert_ax_names(driver, f"{context} dialog", required_roles=("button", "dialog"))
     capture(driver, f"{context}-dialog")
     dialog.find_element(By.CSS_SELECTOR, ".dialog-close").click()
     wait.until(EC.invisibility_of_element_located((By.ID, "productDialog")))
