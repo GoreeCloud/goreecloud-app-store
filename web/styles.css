@@ -137,7 +137,7 @@ dialog { width: min(620px, calc(100vw - 28px)); max-height: calc(100vh - 28px); 
 :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 72%, white); outline-offset: 3px; }
 
 @media (max-width: 650px) {
-  .topbar { align-items: stretch; flex-direction: column; gap: 10px; }
+  .topbar { position: static; align-items: stretch; flex-direction: column; gap: 10px; }
   .identity-control select { width: 100%; max-width: none; }
   .hero { align-items: start; flex-direction: column; }
   .filters { grid-template-columns: 1fr; }
