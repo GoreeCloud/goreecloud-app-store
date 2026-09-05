@@ -157,7 +157,7 @@ evidence:
       observed_at: "2026-09-04T14:11:19Z"
       notes: Exact branch-head Linux Development CI passed shared catalog/branding/GLAZE/Linux-contract validation, locked Rust dependency verification, format/test/clippy/release build, Debian package construction, AppStream metadata, canonical-derived Flatpak icon validation, Flatpak AppStream composition and bundle creation, and evidence publication.
     - id: platform-contract-pr-context-33881483682
-      category: platform-contract
+      category: integration
       path: .github/workflows/platform-contract.yml
       revision: 1a64e0b0ddfec533365cade88824f4b4af4f5e75
       result: passed
