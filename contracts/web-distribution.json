@@ -56,7 +56,14 @@
     "unitTests": "candidate",
     "staticBuild": "candidate",
     "httpSmoke": "candidate",
-    "renderedBrowser": "pending",
+    "renderedBrowser": "candidate",
+    "renderedBrowserEvidence": {
+      "revision": "c313cbe05f4688e526a50e1c2c76225f733b0244",
+      "workflowRun": 33941355045,
+      "artifactId": 9961926088,
+      "artifactDigest": "sha256:643d4ae806530a6c3d845089c68c726c07e7e6af745e068ffb1bf87764adb7b4"
+    },
+    "accessibilityTreeNames": "candidate",
     "accessibilityAssistiveTechnology": "pending",
     "humanVisualExcellence": "pending",
     "representativeTargetEnvironment": "pending",
