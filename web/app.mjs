@@ -31,6 +31,8 @@ const state = {
   category: "all",
 };
 
+let dialogOpener = null;
+
 const tabMeta = {
   discover: ["Discover", "Browse only the Development items available to the selected fixture identity."],
   applications: ["Apps", "Applications are filtered from the already-entitled Development catalog."],
@@ -57,14 +59,18 @@ function setText(element, value) {
   element.textContent = value ?? "";
 }
 
-function openDetails(item) {
+function openDetails(item, trigger) {
+  dialogOpener = trigger;
   setText(els.dialogType, item.type === "service" ? "Service" : "Application");
   setText(els.dialogTitle, item.name);
   setText(els.dialogSummary, item.summary);
   setText(els.dialogCategory, item.category);
   setText(els.dialogVersion, item.version);
   setText(els.dialogChannel, item.releaseChannel);
-  if (typeof els.dialog.showModal === "function") els.dialog.showModal();
+  if (typeof els.dialog.showModal === "function") {
+    els.dialog.showModal();
+    els.dialog.querySelector(".dialog-close")?.focus();
+  }
 }
 
 function renderCard(item) {
@@ -94,7 +100,8 @@ function renderCard(item) {
   button.type = "button";
   button.className = "details-button";
   button.textContent = "View details";
-  button.addEventListener("click", () => openDetails(item));
+  button.setAttribute("aria-label", `View details for ${item.name}`);
+  button.addEventListener("click", () => openDetails(item, button));
 
   article.append(eyebrow, heading, summary, meta, button);
   return article;
@@ -186,6 +193,11 @@ els.search.addEventListener("input", () => {
 els.category.addEventListener("change", () => {
   state.category = els.category.value;
   render();
+});
+
+els.dialog.addEventListener("close", () => {
+  if (dialogOpener?.isConnected) dialogOpener.focus();
+  dialogOpener = null;
 });
 
 loadCatalog()

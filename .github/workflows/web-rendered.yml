@@ -79,6 +79,12 @@ jobs:
           GOREECLOUD_APP_STORE_WEB_EVIDENCE: .artifacts/web-rendered/evidence
         run: python web/rendered_acceptance.py
 
+      - name: Run modal keyboard and focus acceptance
+        env:
+          GOREECLOUD_APP_STORE_WEB_URL: http://127.0.0.1:8766
+          GOREECLOUD_APP_STORE_WEB_EVIDENCE: .artifacts/web-rendered/evidence
+        run: python web/dialog_accessibility_acceptance.py
+
       - name: Record bounded Development acceptance
         shell: bash
         run: |
@@ -86,8 +92,9 @@ jobs:
           GoreeCloud App Store Web rendered acceptance — Development automation only.
           Production acceptance: false.
           Actual browser: GitHub-hosted headless Chrome.
-          Validated: compact/expanded Light and Dark rendering, Development entitlement concealment, search/category composition, fail-closed Updates/Library/Install/Open states, modal details, 48 px rendered targets, keyboard skip-link focus, no document horizontal overflow, Reduced Motion media behavior, compact 200% text reflow, and accessible names for interactive controls exposed through Chrome's accessibility tree.
-          Not established: screen-reader or other assistive-technology acceptance, human visual/optical approval, cross-browser acceptance, representative user hardware, production hosting/security-header acceptance, production Identity/server-authoritative catalog delivery, deployment, release approval, Release Candidate promotion, or Stable qualification.
+          Validated: compact/expanded Light and Dark rendering, Development entitlement concealment, search/category composition, fail-closed Updates/Library/Install/Open states, modal details, product-specific details-button accessible names, dialog description relationship, keyboard Enter activation, modal initial focus and focus containment, Escape dismissal and focus return, 48 px rendered targets, keyboard skip-link focus, no document horizontal overflow, Reduced Motion media behavior, 200% text reflow on compact and expanded viewports, Forced Colors emulation, RTL structural interaction/overflow resilience, and accessible names for interactive controls exposed through Chrome's accessibility tree.
+          RTL automation is structural only and is not localization acceptance.
+          Not established: screen-reader or other assistive-technology acceptance, localization acceptance, human visual/optical approval, cross-browser acceptance, representative user hardware, production hosting/security-header acceptance, production Identity/server-authoritative catalog delivery, deployment, release approval, Release Candidate promotion, or Stable qualification.
           EOF
 
       - name: Stop local Web Development server
