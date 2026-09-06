@@ -58,13 +58,18 @@
     "httpSmoke": "candidate",
     "renderedBrowser": "candidate",
     "renderedBrowserEvidence": {
-      "revision": "c313cbe05f4688e526a50e1c2c76225f733b0244",
-      "workflowRun": 33941355045,
-      "artifactId": 9961926088,
-      "artifactDigest": "sha256:643d4ae806530a6c3d845089c68c726c07e7e6af745e068ffb1bf87764adb7b4"
+      "revision": "5692a2f4274117d4601873216783c31ea762fd8b",
+      "workflowRun": 33942155630,
+      "artifactId": 9962183774,
+      "artifactDigest": "sha256:bda95c8ed3adbbb60aec141b72d464f4a03de83b3c724af0c2f63d0f49822ca6"
     },
     "accessibilityTreeNames": "candidate",
+    "forcedColorsAutomation": "candidate",
+    "rtlStructuralResilience": "candidate",
+    "allViewports200PercentTextReflow": "candidate",
+    "localizationAcceptance": "pending",
     "accessibilityAssistiveTechnology": "pending",
+    "crossBrowserAcceptance": "pending",
     "humanVisualExcellence": "pending",
     "representativeTargetEnvironment": "pending",
     "productionHostingHeaders": "pending"
