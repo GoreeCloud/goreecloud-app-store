@@ -61,7 +61,7 @@ platform_systems:
       - contracts/linux-distribution.json
       - contracts/web-distribution.json
       - scripts/validate_glaze_ui_adoption.py
-    notes: Android, Linux, and Web source mappings target current Stable GLAZE UI V1.1 / 1.1.0. Android automated Compose/rendered evidence and Linux native/package evidence passed at the verified integrated Development checkpoint d9dd17975608fe5f94b0e264ab682bab036d98aa. Automated actual-browser Chrome rendering and accessibility-tree name evidence passed for Web at c313cbe05f4688e526a50e1c2c76225f733b0244. Actual assistive-technology, Human Visual Excellence, representative target, release, and production acceptance remain pending.
+    notes: Android, Linux, and Web source mappings target current Stable GLAZE UI V1.1 / 1.1.0. Exact-head Android automated Compose/rendered evidence, Linux native/package evidence, Web source/build evidence, and bounded automated Chrome rendered evidence all passed at integrated Development checkpoint 5692a2f4274117d4601873216783c31ea762fd8b. Web browser automation includes compact and expanded Light/Dark, Reduced Motion, Forced Colors emulation, RTL structural resilience, all-viewport 200% text reflow, target sizing, keyboard skip-link focus, entitlement behavior, fail-closed delivery/library states, and accessibility-tree names. Actual assistive-technology, localization, cross-browser where required, Human Visual Excellence, representative target, release, and production acceptance remain pending.
   mesh:
     result: applicable-blocked
     version: null
@@ -135,88 +135,88 @@ compatibility:
 
 evidence:
   acceptance_tests:
-    - id: android-development-ci-33940293150
+    - id: android-development-ci-33942155731
       category: supported-platform
       path: .github/workflows/android.yml
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T02:54:10Z"
+      observed_at: "2026-09-05T03:34:32Z"
       notes: Exact branch-head Android Development CI passed source verification, branding and GLAZE UI V1.1 source contracts, unit tests, native test compilation, lint, APK assembly, package/version/label checks, Development signing-certificate verification, digest generation, and artifact publication. This is not production or Stable acceptance.
-    - id: android-rendered-33940293169
+    - id: android-rendered-33942155750
       category: supported-platform
       path: .github/workflows/android-rendered.yml
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T02:59:53Z"
+      observed_at: "2026-09-05T03:39:45Z"
       notes: Exact branch-head Android rendered acceptance passed exact APK/test-APK build, deterministic Android 36 emulator setup, installation, Compose-native navigation/category tests, exact APK restoration after instrumentation cleanup, rendered/form-factor validation, and evidence publication. Representative physical-device and complete native accessibility acceptance remain pending.
-    - id: linux-development-33940293151
+    - id: linux-development-33942155610
       category: supported-platform
       path: .github/workflows/linux.yml
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T02:56:05Z"
+      observed_at: "2026-09-05T03:36:58Z"
       notes: Exact branch-head Linux Development CI passed shared catalog/branding/GLAZE/Linux-contract validation, locked Rust dependency verification, format/test/clippy/release build, Debian package construction, AppStream metadata, canonical-derived Flatpak icon validation, Flatpak AppStream composition and bundle creation, and evidence publication.
-    - id: web-development-33940293204
+    - id: web-development-33942155668
       category: supported-platform
       path: .github/workflows/web.yml
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T02:52:29Z"
+      observed_at: "2026-09-05T03:33:00Z"
       notes: Exact branch-head Web Development CI passed shared catalog, branding, GLAZE UI, Web contract, JavaScript entitlement behavior, deterministic exact-revision static build, local HTTP delivery smoke checks, and evidence publication. This does not establish production hosting or release acceptance.
-    - id: web-rendered-33941355045
+    - id: web-rendered-33942155630
       category: supported-platform
       path: .github/workflows/web-rendered.yml
-      revision: c313cbe05f4688e526a50e1c2c76225f733b0244
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T03:16:04Z"
-      notes: Exact branch-head automated headless-Chrome Development acceptance passed compact 390x844 and expanded 1280x900 Light/Dark rendering, fixture entitlement concealment, discovery/search/category behavior, fail-closed Updates/Library/Install/Open states, modal details, 48 px rendered targets, keyboard skip-link focus, document overflow safety, Reduced Motion, compact 200% text reflow, and accessible names for exposed interactive controls in Chrome's accessibility tree. The gate exposed and the source corrected a genuine compact sticky-topbar navigation interception defect before passing. Actual screen-reader or other assistive-technology acceptance, human visual approval, cross-browser acceptance, representative user hardware, production hosting/security headers, deployment, release approval, Release Candidate promotion, and Stable qualification remain pending.
-    - id: platform-contract-pr-context-33940293405
+      observed_at: "2026-09-05T03:33:42Z"
+      notes: Exact branch-head automated headless-Chrome Development acceptance passed compact 390x844 and expanded 1280x900 Light/Dark rendering, fixture entitlement concealment, discovery/search/category behavior, fail-closed Updates/Library/Install/Open states, modal details, 48 px rendered targets, keyboard skip-link focus, document overflow safety, Reduced Motion, all-viewport 200% text reflow, Forced Colors emulation, RTL structural interaction/overflow checks, and accessible names for exposed interactive controls in Chrome's accessibility tree. This is structural browser automation, not localization or actual assistive-technology acceptance. Actual screen-reader or other assistive-technology acceptance, localization, cross-browser acceptance where required, human visual approval, representative user hardware, production hosting/security headers, deployment, release approval, Release Candidate promotion, and Stable qualification remain pending.
+    - id: platform-contract-pr-context-33942156196
       category: integration
       path: .github/workflows/platform-contract.yml
-      revision: 97f28e904355b8342adce63a1b73483c4bdb419e
+      revision: aeb3581a52375c898cb6643148a432f6b8d7ce34
       result: passed
-      observed_at: "2026-09-05T02:52:33Z"
-      notes: The central reusable validator passed against GitHub's synthetic PR merge revision for PR #7, not branch head d9dd17975608fe5f94b0e264ab682bab036d98aa. The separately tracked central revision-attribution defect prevents representing this as exact-head Platform Contract evidence.
-    - id: glaze-ui-v1.1-source-contract-33940293150
+      observed_at: "2026-09-05T03:33:04Z"
+      notes: The central reusable validator passed against GitHub's synthetic PR merge revision for PR #7, not branch head 5692a2f4274117d4601873216783c31ea762fd8b. The separately tracked central revision-attribution defect prevents representing this as exact-head Platform Contract evidence.
+    - id: glaze-ui-v1.1-source-contract-33942155731
       category: glaze-ui
       path: contracts/glaze-ui-adoption.json
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
       result: passed
-      observed_at: "2026-09-05T02:54:10Z"
+      observed_at: "2026-09-05T03:34:32Z"
       notes: Repository-local source-contract validation passed for the integrated Android and Web GLAZE UI V1.1 source mappings. Complete whole-application conformance remains unaccepted.
   release:
-    - id: app-store-android-0.1.5-dev-artifact-9961600717
+    - id: app-store-android-0.1.5-dev-artifact-9962195610
       version: "0.1.5-dev"
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
-      path: goreecloud-app-store-development-apk-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
+      path: goreecloud-app-store-development-apk-5692a2f4274117d4601873216783c31ea762fd8b
       result: candidate
-      observed_at: "2026-09-05T02:54:10Z"
-      artifact_digest: sha256:09410e2c035fce588d397844fb1f3b97fe63b6766fb23077507e16c5ca5b0b06
-      notes: GitHub Actions artifact ID 9961600717. This digest identifies the workflow artifact archive; the Android Development APK remains non-production.
-    - id: app-store-linux-0.1.0-dev-artifact-9961628153
+      observed_at: "2026-09-05T03:34:32Z"
+      artifact_digest: sha256:a83aac0c7e711f3deb7d994d9d99e3d6ee66f36a0c0814a56d7a8205794d06f1
+      notes: GitHub Actions artifact ID 9962195610. This digest identifies the workflow artifact archive; the Android Development APK remains non-production.
+    - id: app-store-linux-0.1.0-dev-artifact-9962230060
       version: "0.1.0-dev"
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
-      path: goreecloud-app-store-linux-development-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
+      path: goreecloud-app-store-linux-development-5692a2f4274117d4601873216783c31ea762fd8b
       result: candidate
-      observed_at: "2026-09-05T02:56:05Z"
-      artifact_digest: sha256:bd9477a8cf622252d2001073c569938c0352b54d9813dd7b72cf5785ca8fd1bc
-      notes: GitHub Actions artifact ID 9961628153. Debian and Flatpak outputs are Development build evidence only; supported publication and release acceptance remain pending.
-    - id: app-store-web-0.1.0-dev-artifact-9961575473
+      observed_at: "2026-09-05T03:36:58Z"
+      artifact_digest: sha256:aa98a324f76f772d30c4c8c839fcf57cf70f984b2c5f49d4fb2ca8da9d0aafaf
+      notes: GitHub Actions artifact ID 9962230060. Debian and Flatpak outputs are Development build evidence only; supported publication and release acceptance remain pending.
+    - id: app-store-web-0.1.0-dev-artifact-9962173747
       version: "0.1.0-dev"
-      revision: d9dd17975608fe5f94b0e264ab682bab036d98aa
-      path: goreecloud-app-store-web-development-d9dd17975608fe5f94b0e264ab682bab036d98aa
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
+      path: goreecloud-app-store-web-development-5692a2f4274117d4601873216783c31ea762fd8b
       result: candidate
-      observed_at: "2026-09-05T02:52:29Z"
-      artifact_digest: sha256:6b7cd7ab59775987d914887fff79b8c60cfa5aafb7fd62916df1eacaa16f178b
-      notes: GitHub Actions artifact ID 9961575473. The deterministic static site and evidence bundle are Development artifacts only; production hosting/deployment and release acceptance remain pending.
-    - id: app-store-web-rendered-evidence-9961926088
+      observed_at: "2026-09-05T03:33:00Z"
+      artifact_digest: sha256:17d7e751fe3c0d09eb7dd34a8bbc7096455c8e7b568cedb896adf6c56005e2c4
+      notes: GitHub Actions artifact ID 9962173747. The deterministic static site and evidence bundle are Development artifacts only; production hosting/deployment and release acceptance remain pending.
+    - id: app-store-web-rendered-evidence-9962183774
       version: "0.1.0-dev"
-      revision: c313cbe05f4688e526a50e1c2c76225f733b0244
-      path: goreecloud-app-store-web-rendered-c313cbe05f4688e526a50e1c2c76225f733b0244
+      revision: 5692a2f4274117d4601873216783c31ea762fd8b
+      path: goreecloud-app-store-web-rendered-5692a2f4274117d4601873216783c31ea762fd8b
       result: candidate
-      observed_at: "2026-09-05T03:16:04Z"
-      artifact_digest: sha256:643d4ae806530a6c3d845089c68c726c07e7e6af745e068ffb1bf87764adb7b4
-      notes: GitHub Actions artifact ID 9961926088 contains automated rendered-Web Development screenshots and acceptance evidence. It is not a production release artifact and does not establish assistive-technology, human visual, hosting, deployment, or Stable acceptance.
+      observed_at: "2026-09-05T03:33:42Z"
+      artifact_digest: sha256:bda95c8ed3adbbb60aec141b72d464f4a03de83b3c724af0c2f63d0f49822ca6
+      notes: GitHub Actions artifact ID 9962183774 contains automated rendered-Web Development screenshots and acceptance evidence, including Forced Colors, RTL structural resilience, and all-viewport 200% text checks. It is not a production release artifact and does not establish localization, assistive-technology, human visual, representative target, hosting, deployment, or Stable acceptance.
 
 conformance:
   status: nonconformant
@@ -246,9 +246,9 @@ conformance:
     - Privacy Shield runtime policy and acceptance are not established.
     - Wardveil Security runtime package verification and acceptance are not established.
     - Everkeep backup, clean-target restore, and recovery acceptance are not established.
-    - GLAZE UI V1.1 source mappings and bounded automated rendering evidence exist for Android and Web, but complete application conformance, actual native/browser assistive-technology accessibility, representative-device/target-environment, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GLAZE UI V1.1 source mappings and bounded automated rendering evidence exist for Android and Web, but complete application conformance, actual native/browser assistive-technology accessibility, localization where applicable, representative-device/target-environment, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Mesh registration, capability publication, event transport, and runtime acceptance are not established.
     - GoreeCloud Identity production authentication, session, entitlement, disablement, revocation, and server-authoritative entitled-catalog delivery are not established.
     - Linux Development packages are build candidates only; production package publication, protected signing, representative Linux target acceptance, upgrade/rollback, and supported release procedures remain outstanding.
-    - Web Development source/build/local-HTTP and automated headless-Chrome rendered evidence are established as Development candidates; actual assistive-technology, cross-browser where required, representative target environment, production hosting/security headers, deployment, release, and Stable acceptance remain outstanding.
+    - Web Development source/build/local-HTTP and automated headless-Chrome rendered evidence now include Light/Dark, Reduced Motion, Forced Colors, RTL structural resilience, all-viewport 200% text reflow, target sizing, keyboard skip-link focus, and accessibility-tree names; actual assistive-technology, localization, cross-browser where required, representative target environment, production hosting/security headers, deployment, release, and Stable acceptance remain outstanding.
     - Production catalog delivery, package install/update, service launch, rollback/failure validation, protected production signing and key recovery, deployment, release approval, and Stable qualification remain outstanding.
