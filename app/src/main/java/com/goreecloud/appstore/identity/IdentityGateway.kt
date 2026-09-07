@@ -41,7 +41,10 @@ object DevelopmentIdentityGateway : IdentityGateway {
         IdentitySession(
             subjectId = "dev:developer",
             displayName = "Developer demo",
-            audiences = setOf("audience:developer"),
+            audiences = setOf(
+                "audience:standard",
+                "audience:developer",
+            ),
             isAuthenticated = true,
             allowedReleaseChannels = DownloadReleaseChannel.entries.toSet(),
         ),
