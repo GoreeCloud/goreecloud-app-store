@@ -81,6 +81,17 @@ function releaseLabel(channel) {
   return releaseLabels[channel] ?? channel ?? "Unknown";
 }
 
+function dialogFocusableElements() {
+  const selector = [
+    "button:not([disabled])",
+    "select:not([disabled])",
+    "input:not([disabled])",
+    "a[href]",
+    "[tabindex]:not([tabindex='-1'])",
+  ].join(",");
+  return [...els.dialog.querySelectorAll(selector)].filter((element) => element.getClientRects().length > 0);
+}
+
 function renderReleaseSelection(item) {
   els.dialogReleaseChannel.replaceChildren();
 
@@ -281,6 +292,29 @@ els.category.addEventListener("change", () => {
 
 els.dialogReleaseChannel.addEventListener("change", () => {
   if (dialogItem) updateReleaseStatus(dialogItem);
+});
+
+els.dialog.addEventListener("keydown", (event) => {
+  if (event.key !== "Tab" || !els.dialog.open) return;
+  const focusable = dialogFocusableElements();
+  if (focusable.length === 0) {
+    event.preventDefault();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+els.dialog.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  els.dialog.close();
 });
 
 els.dialog.addEventListener("close", () => {
