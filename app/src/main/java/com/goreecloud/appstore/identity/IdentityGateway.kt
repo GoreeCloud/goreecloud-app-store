@@ -1,7 +1,7 @@
 package com.goreecloud.appstore.identity
 
+import com.goreecloud.appstore.domain.DownloadReleaseChannel
 import com.goreecloud.appstore.domain.IdentitySession
-import com.goreecloud.appstore.domain.ReleaseChannel
 
 /**
  * Boundary for GoreeCloud Identity.
@@ -22,7 +22,7 @@ object DevelopmentIdentityGateway : IdentityGateway {
             displayName = "Standard demo",
             audiences = setOf("audience:standard"),
             isAuthenticated = true,
-            allowedReleaseChannels = setOf(ReleaseChannel.STABLE),
+            allowedReleaseChannels = setOf(DownloadReleaseChannel.STABLE),
         ),
         IdentitySession(
             subjectId = "dev:administrator",
@@ -33,9 +33,9 @@ object DevelopmentIdentityGateway : IdentityGateway {
             ),
             isAuthenticated = true,
             allowedReleaseChannels = setOf(
-                ReleaseChannel.STABLE,
-                ReleaseChannel.RELEASE_CANDIDATE,
-                ReleaseChannel.BETA,
+                DownloadReleaseChannel.STABLE,
+                DownloadReleaseChannel.RELEASE_CANDIDATE,
+                DownloadReleaseChannel.BETA,
             ),
         ),
         IdentitySession(
@@ -43,7 +43,7 @@ object DevelopmentIdentityGateway : IdentityGateway {
             displayName = "Developer demo",
             audiences = setOf("audience:developer"),
             isAuthenticated = true,
-            allowedReleaseChannels = ReleaseChannel.entries.toSet(),
+            allowedReleaseChannels = DownloadReleaseChannel.entries.toSet(),
         ),
         IdentitySession(
             subjectId = "dev:signed-out",
