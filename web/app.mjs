@@ -81,6 +81,12 @@ function releaseLabel(channel) {
   return releaseLabels[channel] ?? channel ?? "Unknown";
 }
 
+function catalogChannelLabel(channel) {
+  const value = String(channel ?? "").trim();
+  if (!value) return "Unknown";
+  return value.charAt(0).toLocaleUpperCase() + value.slice(1);
+}
+
 function dialogFocusableElements() {
   const selector = [
     "button:not([disabled])",
@@ -146,7 +152,7 @@ function updateReleaseStatus(item) {
   } else {
     setText(
       els.dialogReleaseStatus,
-      `${releaseLabel(selected)} is the channel represented by this fixture entry. Download still remains disabled until protected delivery, digest/signing provenance, Wardveil verification, and backend re-authorization are accepted.`,
+      `${releaseLabel(selected)} is the authorized download interpretation of this Development fixture entry. Download still remains disabled until protected delivery, digest/signing provenance, Wardveil verification, and backend re-authorization are accepted.`,
     );
   }
   setText(els.dialogDownloadAction, `Download ${selected ? releaseLabel(selected) : "release"} unavailable in Development`);
@@ -160,7 +166,7 @@ function openDetails(item, trigger) {
   setText(els.dialogSummary, item.summary);
   setText(els.dialogCategory, item.category);
   setText(els.dialogVersion, item.version || "Not provided");
-  setText(els.dialogChannel, releaseLabel(normalizeReleaseChannel(item.releaseChannel) ?? item.releaseChannel));
+  setText(els.dialogChannel, catalogChannelLabel(item.releaseChannel));
   renderReleaseSelection(item);
   if (typeof els.dialog.showModal === "function") {
     els.dialog.showModal();
@@ -184,7 +190,7 @@ function renderCard(item) {
 
   const meta = document.createElement("div");
   meta.className = "card-meta";
-  for (const value of [item.category, releaseLabel(normalizeReleaseChannel(item.releaseChannel) ?? item.releaseChannel)]) {
+  for (const value of [item.category, catalogChannelLabel(item.releaseChannel)]) {
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.textContent = value;
