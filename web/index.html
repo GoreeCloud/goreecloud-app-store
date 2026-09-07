@@ -30,7 +30,7 @@
   </header>
 
   <p id="identityHelp" class="development-notice">
-    Development fixtures only. Catalog visibility does not establish production entitlement, publication, deployment, or install authority.
+    Development fixtures only. Catalog visibility and release-channel grants do not establish production entitlement, publication, deployment, or install authority.
   </p>
 
   <nav class="tabs" aria-label="App Store sections">
@@ -80,10 +80,15 @@
       <p id="dialogSummary"></p>
       <dl class="metadata">
         <div><dt>Category</dt><dd id="dialogCategory"></dd></div>
-        <div><dt>Version</dt><dd id="dialogVersion"></dd></div>
-        <div><dt>Channel</dt><dd id="dialogChannel"></dd></div>
+        <div><dt>Current fixture version</dt><dd id="dialogVersion"></dd></div>
+        <div><dt>Current fixture channel</dt><dd id="dialogChannel"></dd></div>
       </dl>
-      <button class="primary-action" type="button" disabled>Install / Open unavailable in Development</button>
+      <label class="identity-control" for="dialogReleaseChannel">
+        <span>Download channel authorized for this login</span>
+        <select id="dialogReleaseChannel"></select>
+      </label>
+      <p id="dialogReleaseStatus" class="status-message" role="status" aria-live="polite"></p>
+      <button id="dialogDownloadAction" class="primary-action" type="button" disabled>Download unavailable in Development</button>
     </form>
   </dialog>
 
