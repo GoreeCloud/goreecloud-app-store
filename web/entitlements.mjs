@@ -16,7 +16,7 @@ export const IDENTITIES = Object.freeze({
   developer: Object.freeze({
     id: "developer",
     signedIn: true,
-    audiences: Object.freeze(["audience:developer"]),
+    audiences: Object.freeze(["audience:standard", "audience:developer"]),
     releaseChannels: RELEASE_CHANNELS,
   }),
   "signed-out": Object.freeze({
