@@ -36,7 +36,9 @@ object CatalogJsonLoader {
                         type = StoreItemType.valueOf(item.getString("type").uppercase()),
                         category = item.getString("category"),
                         version = item.optString("version").takeIf(String::isNotBlank),
-                        releaseChannel = ReleaseChannel.fromCatalog(item.getString("releaseChannel")),
+                        releaseChannel = ReleaseChannel.valueOf(
+                            item.getString("releaseChannel").uppercase(),
+                        ),
                         packageName = item.optString("packageName").takeIf(String::isNotBlank),
                         serviceUrl = item.optString("serviceUrl").takeIf(String::isNotBlank),
                         accessRule = AccessRule(
