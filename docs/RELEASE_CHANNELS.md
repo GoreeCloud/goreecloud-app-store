@@ -19,18 +19,21 @@ Release-channel access is login-dependent and must be granted explicitly. Admini
 
 The current Development identity adapter uses these fixtures only to exercise the rule:
 
-| Development login | Explicit download-channel grants |
-| --- | --- |
-| Standard demo | Stable |
-| Administrator demo | Stable, RC, Beta |
-| Developer demo | Stable, RC, Beta, Debug |
-| Signed out | None |
+| Development login | Explicit download-channel grants | Catalog scope used by the fixture |
+| --- | --- | --- |
+| Standard demo | Stable | Standard |
+| Administrator demo | Stable, RC, Beta | Administrator |
+| Developer demo | Stable, RC, Beta, Debug | Developer-only |
+| Release tester demo | Stable, RC, Beta, Debug | Standard + Developer, explicitly combined for channel UX testing |
+| Signed out | None | None |
 
-These names and grants are not the production GoreeCloud Identity role taxonomy. Production grants must come from an approved Identity/App Store authorization contract.
+These names, audience combinations, and grants are not the production GoreeCloud Identity role taxonomy. Production grants must come from an approved Identity/App Store authorization contract.
 
 ## Product behavior
 
-The client may present only release channels authorized for the active identity. It must not reveal unauthorized version numbers, release notes, artifact names, download URLs, checksums, signing metadata, or hidden-channel availability through search, counts, caches, deep links, update checks, or error messages.
+The client may present only release channels authorized for the active identity. It must not reveal unauthorized channel names, version numbers, release notes, artifact names, download URLs, checksums, signing metadata, or hidden-channel availability through product pages, search, counts, caches, deep links, update checks, or error messages.
+
+The current `Development` catalog lifecycle label remains visible as fixture metadata. The Web Development client may internally interpret that legacy fixture token as Debug only when evaluating a login that is explicitly authorized for Debug; it must not relabel the shared fixture as Debug for an unauthorized login.
 
 When a channel is authorized but the catalog contains no approved release for that channel, the App Store must show a clear unavailable state rather than fabricating a version.
 
@@ -44,7 +47,9 @@ Before a download/install can be enabled, the release record must provide accept
 
 ## Catalog evolution
 
-The current schema exposes one fixture `version` and `releaseChannel` per catalog item and is not yet a production multi-version release manifest. The production catalog contract must evolve so one application can expose multiple release records, each with at least:
+The current schema exposes one fixture `version` and `releaseChannel` per catalog item and is not yet a production multi-version release manifest. The proposed `contracts/release-manifest.schema.json` defines the protected multi-release response shape without changing the current shared Development catalog contract.
+
+A production release manifest must let one application expose multiple release records, each with at least:
 
 - immutable release identifier;
 - semantic/display version;
@@ -61,6 +66,8 @@ The backend should preferably return only the releases the active identity is en
 
 ## Current Development implementation
 
-The Android domain model now carries explicit per-session download-channel grants and unit-test coverage. The first-party Web Development client exposes a release-channel picker in product details and limits its choices to the active fixture login's explicit grants. The current shared Development catalog does not contain real Stable, RC, or Beta release manifests, and package delivery remains disabled, so selecting a channel cannot enable a download yet.
+The Android domain model now carries explicit per-session download-channel grants, a concrete multi-release filtering model, and unit-test coverage for channel, item, blocked, withdrawn, and cross-item concealment. The first-party Web Development client exposes a release-channel picker in product details and limits its choices to the active fixture login's explicit grants. Browser acceptance also checks that Standard and Administrator fixtures do not leak unauthorized channel names and that the dedicated Release tester fixture can exercise Stable, RC, Beta, and Debug choices on visible applications.
+
+The current shared Development catalog does not contain real Stable, RC, or Beta release manifests, and package delivery remains disabled, so selecting a channel cannot enable a download yet.
 
 Production Acceptance remains false.
