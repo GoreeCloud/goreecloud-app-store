@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { IDENTITIES, deriveCategories, filterItems, visibleItems } from "../entitlements.mjs";
+import {
+  IDENTITIES,
+  allowedReleaseChannels,
+  canUseReleaseChannel,
+  deriveCategories,
+  filterItems,
+  normalizeReleaseChannel,
+  visibleItems,
+} from "../entitlements.mjs";
 
 const catalog = JSON.parse(await readFile(new URL("../../catalog/development-catalog.json", import.meta.url), "utf8"));
 
@@ -23,6 +31,28 @@ test("administrator fixture sees all twelve explicitly authorized entries", () =
 test("developer fixture receives only Mesh Center and no administrator bypass", () => {
   const items = visibleItems(catalog, IDENTITIES.developer);
   assert.deepEqual(items.map((item) => item.id), ["goreecloud.mesh-center"]);
+});
+
+test("release channels are granted explicitly by login", () => {
+  assert.deepEqual(allowedReleaseChannels(IDENTITIES.standard), ["stable"]);
+  assert.deepEqual(
+    allowedReleaseChannels(IDENTITIES.administrator),
+    ["stable", "release-candidate", "beta"],
+  );
+  assert.deepEqual(
+    allowedReleaseChannels(IDENTITIES.developer),
+    ["stable", "release-candidate", "beta", "debug"],
+  );
+  assert.deepEqual(allowedReleaseChannels(IDENTITIES["signed-out"]), []);
+});
+
+test("administrator status does not implicitly grant Debug", () => {
+  assert.equal(canUseReleaseChannel(IDENTITIES.administrator, "debug"), false);
+  assert.equal(canUseReleaseChannel(IDENTITIES.developer, "debug"), true);
+});
+
+test("legacy Development catalog token maps to Debug", () => {
+  assert.equal(normalizeReleaseChannel("development"), "debug");
 });
 
 test("search cannot widen the already-entitled set", () => {
