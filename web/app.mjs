@@ -1,4 +1,11 @@
-import { IDENTITIES, deriveCategories, filterItems, visibleItems } from "./entitlements.mjs";
+import {
+  IDENTITIES,
+  allowedReleaseChannels,
+  deriveCategories,
+  filterItems,
+  normalizeReleaseChannel,
+  visibleItems,
+} from "./entitlements.mjs";
 
 const els = {
   identity: document.querySelector("#identitySelect"),
@@ -21,6 +28,9 @@ const els = {
   dialogCategory: document.querySelector("#dialogCategory"),
   dialogVersion: document.querySelector("#dialogVersion"),
   dialogChannel: document.querySelector("#dialogChannel"),
+  dialogReleaseChannel: document.querySelector("#dialogReleaseChannel"),
+  dialogReleaseStatus: document.querySelector("#dialogReleaseStatus"),
+  dialogDownloadAction: document.querySelector("#dialogDownloadAction"),
 };
 
 const state = {
@@ -32,6 +42,7 @@ const state = {
 };
 
 let dialogOpener = null;
+let dialogItem = null;
 
 const tabMeta = {
   discover: ["Discover", "Browse only the Development items available to the selected fixture identity."],
@@ -40,6 +51,13 @@ const tabMeta = {
   updates: ["Updates", "Update delivery remains unavailable until authoritative release, package, identity, Wardveil, and rollback contracts are accepted."],
   library: ["Library", "Recoverable Library state remains unavailable until identity isolation, Privacy Shield, Everkeep, and reconciliation contracts are accepted."],
 };
+
+const releaseLabels = Object.freeze({
+  stable: "Stable",
+  "release-candidate": "Release Candidate (RC)",
+  beta: "Beta",
+  debug: "Debug",
+});
 
 function validateCatalog(value) {
   if (!value || value.schemaVersion !== 2 || value.authoritative !== false || !Array.isArray(value.items)) {
@@ -59,14 +77,80 @@ function setText(element, value) {
   element.textContent = value ?? "";
 }
 
+function releaseLabel(channel) {
+  return releaseLabels[channel] ?? channel ?? "Unknown";
+}
+
+function renderReleaseSelection(item) {
+  els.dialogReleaseChannel.replaceChildren();
+
+  if (item.type !== "application") {
+    els.dialogReleaseChannel.disabled = true;
+    const option = document.createElement("option");
+    option.textContent = "Not applicable to service";
+    option.value = "";
+    els.dialogReleaseChannel.append(option);
+    setText(els.dialogReleaseStatus, "Services do not expose downloadable package channels in this Development client.");
+    setText(els.dialogDownloadAction, "Open unavailable in Development");
+    return;
+  }
+
+  const allowed = allowedReleaseChannels(state.identity);
+  els.dialogReleaseChannel.disabled = allowed.length === 0;
+  for (const channel of allowed) {
+    const option = document.createElement("option");
+    option.value = channel;
+    option.textContent = releaseLabel(channel);
+    els.dialogReleaseChannel.append(option);
+  }
+
+  if (allowed.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No authorized channels";
+    els.dialogReleaseChannel.append(option);
+  } else {
+    const current = normalizeReleaseChannel(item.releaseChannel);
+    els.dialogReleaseChannel.value = current && allowed.includes(current) ? current : allowed[0];
+  }
+
+  updateReleaseStatus(item);
+}
+
+function updateReleaseStatus(item) {
+  if (item.type !== "application") return;
+
+  const selected = els.dialogReleaseChannel.value;
+  const current = normalizeReleaseChannel(item.releaseChannel);
+  if (!selected) {
+    setText(
+      els.dialogReleaseStatus,
+      "This login has no App Store download-channel grant. Unauthorized channel metadata remains unavailable.",
+    );
+  } else if (selected !== current) {
+    setText(
+      els.dialogReleaseStatus,
+      `No ${releaseLabel(selected)} build is present in this non-authoritative Development fixture. A production catalog must provide an authorized release before download can be offered.`,
+    );
+  } else {
+    setText(
+      els.dialogReleaseStatus,
+      `${releaseLabel(selected)} is the channel represented by this fixture entry. Download still remains disabled until protected delivery, digest/signing provenance, Wardveil verification, and backend re-authorization are accepted.`,
+    );
+  }
+  setText(els.dialogDownloadAction, `Download ${selected ? releaseLabel(selected) : "release"} unavailable in Development`);
+}
+
 function openDetails(item, trigger) {
   dialogOpener = trigger;
+  dialogItem = item;
   setText(els.dialogType, item.type === "service" ? "Service" : "Application");
   setText(els.dialogTitle, item.name);
   setText(els.dialogSummary, item.summary);
   setText(els.dialogCategory, item.category);
-  setText(els.dialogVersion, item.version);
-  setText(els.dialogChannel, item.releaseChannel);
+  setText(els.dialogVersion, item.version || "Not provided");
+  setText(els.dialogChannel, releaseLabel(normalizeReleaseChannel(item.releaseChannel) ?? item.releaseChannel));
+  renderReleaseSelection(item);
   if (typeof els.dialog.showModal === "function") {
     els.dialog.showModal();
     els.dialog.querySelector(".dialog-close")?.focus();
@@ -89,7 +173,7 @@ function renderCard(item) {
 
   const meta = document.createElement("div");
   meta.className = "card-meta";
-  for (const value of [item.category, item.releaseChannel]) {
+  for (const value of [item.category, releaseLabel(normalizeReleaseChannel(item.releaseChannel) ?? item.releaseChannel)]) {
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.textContent = value;
@@ -195,9 +279,14 @@ els.category.addEventListener("change", () => {
   render();
 });
 
+els.dialogReleaseChannel.addEventListener("change", () => {
+  if (dialogItem) updateReleaseStatus(dialogItem);
+});
+
 els.dialog.addEventListener("close", () => {
   if (dialogOpener?.isConnected) dialogOpener.focus();
   dialogOpener = null;
+  dialogItem = null;
 });
 
 loadCatalog()
