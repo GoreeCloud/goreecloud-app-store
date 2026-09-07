@@ -86,7 +86,7 @@ def assert_release_channel_boundaries(driver: webdriver.Chrome, wait: WebDriverW
     close_dialog(driver, wait)
 
     identity.select_by_value("developer")
-    wait_count(wait, "1 item")
+    wait_count(wait, "11 items")
     _, _ = open_first_details(driver, wait)
     if release_option_values(driver) != ["stable", "release-candidate", "beta", "debug"]:
         raise AssertionError("Developer fixture must expose Stable, RC, Beta, and Debug")
