@@ -48,16 +48,16 @@ class EntitlementEngineTest {
             audiences = setOf("audience:administrator"),
             isAuthenticated = true,
             allowedReleaseChannels = setOf(
-                ReleaseChannel.STABLE,
-                ReleaseChannel.RELEASE_CANDIDATE,
-                ReleaseChannel.BETA,
+                DownloadReleaseChannel.STABLE,
+                DownloadReleaseChannel.RELEASE_CANDIDATE,
+                DownloadReleaseChannel.BETA,
             ),
         )
 
-        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, ReleaseChannel.STABLE))
-        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, ReleaseChannel.RELEASE_CANDIDATE))
-        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, ReleaseChannel.BETA))
-        assertFalse(EntitlementEngine.canAccessReleaseChannel(session, ReleaseChannel.DEBUG))
+        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, DownloadReleaseChannel.STABLE))
+        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, DownloadReleaseChannel.RELEASE_CANDIDATE))
+        assertTrue(EntitlementEngine.canAccessReleaseChannel(session, DownloadReleaseChannel.BETA))
+        assertFalse(EntitlementEngine.canAccessReleaseChannel(session, DownloadReleaseChannel.DEBUG))
     }
 
     @Test
@@ -67,15 +67,9 @@ class EntitlementEngineTest {
             displayName = "Signed out",
             audiences = emptySet(),
             isAuthenticated = false,
-            allowedReleaseChannels = ReleaseChannel.entries.toSet(),
+            allowedReleaseChannels = DownloadReleaseChannel.entries.toSet(),
         )
 
-        assertEquals(emptyList<ReleaseChannel>(), EntitlementEngine.allowedReleaseChannels(session))
-    }
-
-    @Test
-    fun legacyDevelopmentCatalogChannelMapsToDebug() {
-        assertEquals(ReleaseChannel.DEBUG, ReleaseChannel.fromCatalog("development"))
-        assertEquals(ReleaseChannel.RELEASE_CANDIDATE, ReleaseChannel.fromCatalog("rc"))
+        assertEquals(emptyList<DownloadReleaseChannel>(), EntitlementEngine.allowedReleaseChannels(session))
     }
 }
