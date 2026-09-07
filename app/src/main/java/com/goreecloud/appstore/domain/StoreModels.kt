@@ -7,24 +7,20 @@ enum class StoreItemType {
 
 enum class ReleaseChannel {
     STABLE,
+    BETA,
+    DEVELOPMENT,
+}
+
+/**
+ * Download-track authorization is separate from the legacy Development catalog lifecycle label.
+ * This lets the App Store gate Stable, RC, Beta, and Debug artifacts per login without treating
+ * the current non-authoritative Development catalog as a production release manifest.
+ */
+enum class DownloadReleaseChannel {
+    STABLE,
     RELEASE_CANDIDATE,
     BETA,
     DEBUG,
-    ;
-
-    companion object {
-        /**
-         * The shared Development catalog still uses the legacy `development` token.
-         * Treat it as the Debug channel without changing the non-authoritative fixture in place.
-         */
-        fun fromCatalog(value: String): ReleaseChannel = when (value.lowercase()) {
-            "stable" -> STABLE
-            "release-candidate", "release_candidate", "rc" -> RELEASE_CANDIDATE
-            "beta" -> BETA
-            "debug", "development" -> DEBUG
-            else -> throw IllegalArgumentException("Unknown release channel: $value")
-        }
-    }
 }
 
 data class AccessRule(
@@ -54,5 +50,5 @@ data class IdentitySession(
      * Development-only fixture grants. Production values must be supplied from an approved
      * GoreeCloud Identity / App Store authorization contract and re-authorized by delivery.
      */
-    val allowedReleaseChannels: Set<ReleaseChannel> = emptySet(),
+    val allowedReleaseChannels: Set<DownloadReleaseChannel> = emptySet(),
 )
