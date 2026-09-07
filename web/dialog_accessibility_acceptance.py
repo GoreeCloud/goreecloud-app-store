@@ -100,11 +100,11 @@ def assert_release_channel_boundaries(driver: webdriver.Chrome, wait: WebDriverW
         raise AssertionError("Administrator fixture leaked unauthorized Debug channel metadata")
     close_dialog(driver, wait)
 
-    identity.select_by_value("developer")
+    identity.select_by_value("release-tester")
     wait_count(wait, "11 items")
     _, _ = open_first_details(driver, wait)
     if release_option_values(driver) != ["stable", "release-candidate", "beta", "debug"]:
-        raise AssertionError("Developer fixture must expose Stable, RC, Beta, and Debug")
+        raise AssertionError("Release tester fixture must expose Stable, RC, Beta, and Debug")
     close_dialog(driver, wait)
 
     identity.select_by_value("signed-out")
@@ -190,7 +190,7 @@ def main() -> None:
             "releaseChannelConcealment": True,
             "standardReleaseChannels": ["stable"],
             "administratorReleaseChannels": ["stable", "release-candidate", "beta"],
-            "developerReleaseChannels": ["stable", "release-candidate", "beta", "debug"],
+            "releaseTesterReleaseChannels": ["stable", "release-candidate", "beta", "debug"],
             "signedOutReleaseChannels": [],
             "screenReaderAcceptance": False,
             "assistiveTechnologyAcceptance": False,
