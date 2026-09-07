@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Bounded keyboard/modal acceptance for GoreeCloud App Store Web Development.
 
-This verifies browser-level focus behavior only. It is not screen-reader or other
-assistive-technology acceptance and does not establish production acceptance.
+This verifies browser-level focus and Development release-channel concealment only.
+It is not screen-reader or other assistive-technology acceptance and does not
+establish production acceptance.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 BASE_URL = os.environ.get("GOREECLOUD_APP_STORE_WEB_URL", "http://127.0.0.1:8766").rstrip("/")
@@ -30,8 +32,23 @@ def make_driver() -> webdriver.Chrome:
     return webdriver.Chrome(options=options)
 
 
-def wait_catalog(wait: WebDriverWait) -> None:
-    wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == "10 items")
+def wait_count(wait: WebDriverWait, expected: str) -> None:
+    wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == expected)
+
+
+def active_snapshot(driver: webdriver.Chrome) -> dict[str, object]:
+    return driver.execute_script(
+        """
+        const e = document.activeElement;
+        return {
+          tag: e?.tagName ?? null,
+          id: e?.id ?? null,
+          className: e?.className ?? null,
+          text: (e?.textContent ?? '').trim().slice(0, 120),
+          disabled: Boolean(e?.disabled),
+        };
+        """
+    )
 
 
 def assert_inside_dialog(driver: webdriver.Chrome, dialog, context: str) -> None:
@@ -41,14 +58,75 @@ def assert_inside_dialog(driver: webdriver.Chrome, dialog, context: str) -> None
         raise AssertionError(f"{context}: keyboard focus escaped the open modal dialog")
 
 
+def release_option_values(driver: webdriver.Chrome) -> list[str]:
+    select = driver.find_element(By.ID, "dialogReleaseChannel")
+    return [option.get_attribute("value") for option in select.find_elements(By.TAG_NAME, "option")]
+
+
+def open_first_details(driver: webdriver.Chrome, wait: WebDriverWait):
+    first_card = driver.find_element(By.CSS_SELECTOR, ".store-card")
+    opener = first_card.find_element(By.CSS_SELECTOR, ".details-button")
+    opener.click()
+    return opener, wait.until(EC.visibility_of_element_located((By.ID, "productDialog")))
+
+
+def close_dialog(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
+    driver.find_element(By.CSS_SELECTOR, "#productDialog .dialog-close").click()
+    wait.until(EC.invisibility_of_element_located((By.ID, "productDialog")))
+
+
+def assert_release_channel_boundaries(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
+    identity = Select(driver.find_element(By.ID, "identitySelect"))
+
+    identity.select_by_value("standard")
+    wait_count(wait, "10 items")
+    _, dialog = open_first_details(driver, wait)
+    if release_option_values(driver) != ["stable"]:
+        raise AssertionError("Standard fixture must expose only Stable in the release-channel selector")
+    if driver.find_element(By.ID, "dialogChannel").text.strip() != "Development":
+        raise AssertionError("legacy catalog lifecycle must remain Development fixture metadata")
+    dialog_text = dialog.text.lower()
+    for concealed in ("debug", "beta", "release candidate"):
+        if concealed in dialog_text:
+            raise AssertionError(f"Standard fixture leaked unauthorized release channel name: {concealed}")
+    close_dialog(driver, wait)
+
+    identity.select_by_value("administrator")
+    wait_count(wait, "12 items")
+    _, dialog = open_first_details(driver, wait)
+    if release_option_values(driver) != ["stable", "release-candidate", "beta"]:
+        raise AssertionError("Administrator fixture must expose Stable, RC, and Beta only")
+    if "debug" in dialog.text.lower():
+        raise AssertionError("Administrator fixture leaked unauthorized Debug channel metadata")
+    close_dialog(driver, wait)
+
+    identity.select_by_value("release-tester")
+    wait_count(wait, "11 items")
+    _, _ = open_first_details(driver, wait)
+    if release_option_values(driver) != ["stable", "release-candidate", "beta", "debug"]:
+        raise AssertionError("Release tester fixture must expose Stable, RC, Beta, and Debug")
+    close_dialog(driver, wait)
+
+    identity.select_by_value("signed-out")
+    wait_count(wait, "0 items")
+    if driver.find_elements(By.CSS_SELECTOR, ".details-button"):
+        raise AssertionError("Signed-out fixture must not expose product details or release selectors")
+
+    identity.select_by_value("standard")
+    wait_count(wait, "10 items")
+
+
 def main() -> None:
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
     driver = make_driver()
+    stage = "driver-created"
     try:
+        stage = "load-page"
         driver.get(f"{BASE_URL}/index.html")
         wait = WebDriverWait(driver, 15)
-        wait_catalog(wait)
+        wait_count(wait, "10 items")
 
+        stage = "verify-opener-name"
         first_card = driver.find_element(By.CSS_SELECTOR, ".store-card")
         product_name = first_card.find_element(By.TAG_NAME, "h3").text.strip()
         opener = first_card.find_element(By.CSS_SELECTOR, ".details-button")
@@ -58,6 +136,7 @@ def main() -> None:
                 f"details button accessible name mismatch: {opener.get_attribute('aria-label')!r}; expected {expected_name!r}"
             )
 
+        stage = "keyboard-open"
         opener.send_keys(Keys.ENTER)
         dialog = wait.until(EC.visibility_of_element_located((By.ID, "productDialog")))
         if dialog.get_attribute("aria-describedby") != "dialogSummary":
@@ -66,27 +145,35 @@ def main() -> None:
         if not summary:
             raise AssertionError("product dialog summary must be populated")
 
+        stage = "initial-focus"
         active = driver.switch_to.active_element
         if "dialog-close" not in (active.get_attribute("class") or ""):
             raise AssertionError("opening product details must move focus to the dialog close control")
 
+        stage = "tab-containment"
         for step in range(6):
             driver.switch_to.active_element.send_keys(Keys.TAB)
             assert_inside_dialog(driver, dialog, f"tab step {step + 1}")
 
+        stage = "escape-close-focus-return"
         driver.switch_to.active_element.send_keys(Keys.ESCAPE)
         wait.until(EC.invisibility_of_element_located((By.ID, "productDialog")))
-        if driver.switch_to.active_element != opener:
+        if not driver.execute_script("return document.activeElement === arguments[0];", opener):
             raise AssertionError("Escape-closing product details must restore focus to the invoking details button")
 
+        stage = "close-button-focus-return"
         opener.send_keys(Keys.ENTER)
         wait.until(EC.visibility_of_element_located((By.ID, "productDialog")))
         close = driver.find_element(By.CSS_SELECTOR, "#productDialog .dialog-close")
         close.click()
         wait.until(EC.invisibility_of_element_located((By.ID, "productDialog")))
-        if driver.switch_to.active_element != opener:
+        if not driver.execute_script("return document.activeElement === arguments[0];", opener):
             raise AssertionError("close-button dismissal must restore focus to the invoking details button")
 
+        stage = "release-channel-boundaries"
+        assert_release_channel_boundaries(driver, wait)
+
+        stage = "write-success-evidence"
         report = {
             "application": "goreecloud-app-store",
             "lifecycle": "development",
@@ -100,13 +187,37 @@ def main() -> None:
             "modalFocusContainment": True,
             "escapeClosesDialog": True,
             "focusRestoredToOpener": True,
+            "releaseChannelConcealment": True,
+            "standardReleaseChannels": ["stable"],
+            "administratorReleaseChannels": ["stable", "release-candidate", "beta"],
+            "releaseTesterReleaseChannels": ["stable", "release-candidate", "beta", "debug"],
+            "signedOutReleaseChannels": [],
             "screenReaderAcceptance": False,
             "assistiveTechnologyAcceptance": False,
         }
         (EVIDENCE_DIR / "dialog-keyboard-acceptance.json").write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
-        print("Web Development dialog keyboard/focus acceptance passed")
+        print("Web Development dialog keyboard/focus and release-channel concealment acceptance passed")
+    except Exception as error:
+        failure = {
+            "application": "goreecloud-app-store",
+            "lifecycle": "development",
+            "productionAcceptance": False,
+            "stage": stage,
+            "errorType": type(error).__name__,
+            "error": str(error),
+            "activeElement": active_snapshot(driver),
+            "dialogOpen": bool(driver.execute_script("return Boolean(document.querySelector('#productDialog')?.open);")),
+            "identity": driver.execute_script("return document.querySelector('#identitySelect')?.value ?? null;"),
+            "releaseOptions": driver.execute_script(
+                "return [...(document.querySelector('#dialogReleaseChannel')?.options ?? [])].map(option => option.value);"
+            ),
+        }
+        (EVIDENCE_DIR / "dialog-keyboard-failure.json").write_text(
+            json.dumps(failure, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        raise
     finally:
         driver.quit()
 
