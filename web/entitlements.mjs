@@ -1,9 +1,50 @@
+export const RELEASE_CHANNELS = Object.freeze(["stable", "release-candidate", "beta", "debug"]);
+
 export const IDENTITIES = Object.freeze({
-  standard: Object.freeze({ id: "standard", signedIn: true, audiences: Object.freeze(["audience:standard"]) }),
-  administrator: Object.freeze({ id: "administrator", signedIn: true, audiences: Object.freeze(["audience:administrator"]) }),
-  developer: Object.freeze({ id: "developer", signedIn: true, audiences: Object.freeze(["audience:developer"]) }),
-  "signed-out": Object.freeze({ id: "signed-out", signedIn: false, audiences: Object.freeze([]) }),
+  standard: Object.freeze({
+    id: "standard",
+    signedIn: true,
+    audiences: Object.freeze(["audience:standard"]),
+    releaseChannels: Object.freeze(["stable"]),
+  }),
+  administrator: Object.freeze({
+    id: "administrator",
+    signedIn: true,
+    audiences: Object.freeze(["audience:administrator"]),
+    releaseChannels: Object.freeze(["stable", "release-candidate", "beta"]),
+  }),
+  developer: Object.freeze({
+    id: "developer",
+    signedIn: true,
+    audiences: Object.freeze(["audience:developer"]),
+    releaseChannels: RELEASE_CHANNELS,
+  }),
+  "signed-out": Object.freeze({
+    id: "signed-out",
+    signedIn: false,
+    audiences: Object.freeze([]),
+    releaseChannels: Object.freeze([]),
+  }),
 });
+
+export function normalizeReleaseChannel(value) {
+  const normalized = String(value ?? "").trim().toLocaleLowerCase();
+  if (normalized === "development") return "debug";
+  if (normalized === "rc" || normalized === "release_candidate") return "release-candidate";
+  return RELEASE_CHANNELS.includes(normalized) ? normalized : null;
+}
+
+export function canUseReleaseChannel(identity, channel) {
+  if (!identity?.signedIn) return false;
+  const normalized = normalizeReleaseChannel(channel);
+  if (!normalized) return false;
+  const allowed = new Set(Array.isArray(identity.releaseChannels) ? identity.releaseChannels : []);
+  return allowed.has(normalized);
+}
+
+export function allowedReleaseChannels(identity) {
+  return RELEASE_CHANNELS.filter((channel) => canUseReleaseChannel(identity, channel));
+}
 
 export function isItemEntitled(item, identity) {
   const access = item?.access ?? {};
