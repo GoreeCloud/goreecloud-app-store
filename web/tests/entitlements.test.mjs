@@ -28,9 +28,11 @@ test("administrator fixture sees all twelve explicitly authorized entries", () =
   assert.equal(visibleItems(catalog, IDENTITIES.administrator).length, 12);
 });
 
-test("developer fixture receives only Mesh Center and no administrator bypass", () => {
+test("developer fixture receives Standard apps plus Developer-only Mesh Center without administrator bypass", () => {
   const items = visibleItems(catalog, IDENTITIES.developer);
-  assert.deepEqual(items.map((item) => item.id), ["goreecloud.mesh-center"]);
+  assert.equal(items.length, 11);
+  assert.equal(items.some((item) => item.id === "goreecloud.mesh-center"), true);
+  assert.equal(items.some((item) => item.id === "goreecloud.manager"), false);
 });
 
 test("release channels are granted explicitly by login", () => {
@@ -51,7 +53,7 @@ test("administrator status does not implicitly grant Debug", () => {
   assert.equal(canUseReleaseChannel(IDENTITIES.developer, "debug"), true);
 });
 
-test("legacy Development catalog token maps to Debug", () => {
+test("legacy Development catalog token maps to Debug only for authorized download-track interpretation", () => {
   assert.equal(normalizeReleaseChannel("development"), "debug");
 });
 
