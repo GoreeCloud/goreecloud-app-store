@@ -9,11 +9,11 @@ The branding repository remains authoritative. Consumer copies in this repositor
 The approved canonical App Store product identity is:
 
 - canonical asset: `products/app-store/app-icon.svg`
-- canonical Git blob: `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
+- canonical Git blob: `1e86041de7cbde9f92ae2ddb9a813b2585b5f788`
 - Android derivative: `app/src/main/res/drawable/goreecloud_app_store_icon.xml`
 - Android manifest consumer: `android:icon="@drawable/goreecloud_app_store_icon"`
 
-The identity uses a software-catalog portal with an acquisition path. It remains distinct from GoreeCloud Launcher and GoreeCloud Search and must not be replaced by Apple App Store, Google Play, F-Droid, shopping-bag, physical-storefront, generic package-manager, framework, or emoji artwork.
+The current mobile identity uses the GoreeCloud blue/deep-blue family with a frosted software-acquisition bag/download glyph. It remains distinct from GoreeCloud Launcher and GoreeCloud Search and must not be replaced by Apple App Store, Google Play, F-Droid, shopping-cart, physical-storefront, generic package-manager, framework, or emoji artwork.
 
 Branding does not establish entitlement, package authorization, artifact verification, successful download/install, security, privacy, continuity, or release truth.
 
