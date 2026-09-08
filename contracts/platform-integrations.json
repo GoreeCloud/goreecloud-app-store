@@ -5,9 +5,12 @@
   "nativeApplication": true,
   "integrations": {
     "glazeUi": {
-      "target": "1.1.0",
-      "stableReleaseTag": "v1.1.0",
-      "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
+      "target": "1.2.0",
+      "stableReleaseTag": "v1.2.0",
+      "stableReleaseRevision": "f285b9145e27e6e7027b075c37299d101945c272",
+      "sourceQualificationAnchor": "b0eadf9a60f73d45caffb62ffc7e9e0334cddc97",
+      "materialRule": "Neutral glass is the material. Color is an accent.",
+      "systemShellScope": "Application",
       "adoptionStatus": "adoption-candidate",
       "automatedContract": true,
       "conformanceAccepted": false
