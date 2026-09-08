@@ -59,6 +59,40 @@ function setText(element, value) {
   element.textContent = value ?? "";
 }
 
+function dialogFocusableElements() {
+  return [...els.dialog.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+}
+
+function keepDialogFocusContained(event) {
+  if (event.key !== "Tab" || !els.dialog.open) return;
+
+  const focusable = dialogFocusableElements();
+  if (focusable.length === 0) {
+    event.preventDefault();
+    els.dialog.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+
+  if (event.shiftKey) {
+    if (active === first || !els.dialog.contains(active)) {
+      event.preventDefault();
+      last.focus();
+    }
+    return;
+  }
+
+  if (active === last || !els.dialog.contains(active)) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 function openDetails(item, trigger) {
   dialogOpener = trigger;
   setText(els.dialogType, item.type === "service" ? "Service" : "Application");
@@ -194,6 +228,8 @@ els.category.addEventListener("change", () => {
   state.category = els.category.value;
   render();
 });
+
+els.dialog.addEventListener("keydown", keepDialogFocusContained);
 
 els.dialog.addEventListener("close", () => {
   if (dialogOpener?.isConnected) dialogOpener.focus();
