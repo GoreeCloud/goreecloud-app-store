@@ -923,8 +923,10 @@ private fun StoreItemType.label(): String = when (this) {
 
 private fun ReleaseChannel.label(): String = when (this) {
     ReleaseChannel.STABLE -> "Stable"
+    ReleaseChannel.RC -> "RC"
     ReleaseChannel.BETA -> "Beta"
     ReleaseChannel.DEVELOPMENT -> "Development"
+    ReleaseChannel.DEBUG -> "Debug"
 }
 
 private fun IntegrationState.label(): String = when (this) {
