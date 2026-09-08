@@ -15,6 +15,7 @@ const els = {
   unavailableTitle: document.querySelector("#unavailableTitle"),
   unavailableText: document.querySelector("#unavailableText"),
   dialog: document.querySelector("#productDialog"),
+  dialogClose: document.querySelector("#productDialog .dialog-close"),
   dialogType: document.querySelector("#dialogType"),
   dialogTitle: document.querySelector("#dialogTitle"),
   dialogSummary: document.querySelector("#dialogSummary"),
@@ -69,7 +70,7 @@ function openDetails(item, trigger) {
   setText(els.dialogChannel, item.releaseChannel);
   if (typeof els.dialog.showModal === "function") {
     els.dialog.showModal();
-    els.dialog.querySelector(".dialog-close")?.focus();
+    els.dialogClose?.focus();
   }
 }
 
@@ -193,6 +194,10 @@ els.search.addEventListener("input", () => {
 els.category.addEventListener("change", () => {
   state.category = els.category.value;
   render();
+});
+
+els.dialogClose?.addEventListener("click", () => {
+  if (els.dialog.open) els.dialog.close("close");
 });
 
 els.dialog.addEventListener("close", () => {
