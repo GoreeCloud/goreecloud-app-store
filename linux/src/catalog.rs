@@ -284,7 +284,9 @@ mod tests {
         let developer = &sessions[3];
         let visible = catalog.visible_items(developer);
         assert!(visible.iter().any(|item| item.id == "goreecloud.browser"));
-        assert!(visible.iter().any(|item| item.id == "goreecloud.mesh-center"));
+        assert!(visible
+            .iter()
+            .any(|item| item.id == "goreecloud.mesh-center"));
         assert!(!visible.iter().any(|item| item.id == "goreecloud.manager"));
     }
 
