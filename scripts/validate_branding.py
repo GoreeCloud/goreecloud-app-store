@@ -25,7 +25,7 @@ branding = BRANDING.read_text(encoding="utf-8")
 for required in [
     "GoreeCloud/goreecloud-branding-assets",
     "products/app-store/app-icon.svg",
-    "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef",
+    "1e86041de7cbde9f92ae2ddb9a813b2585b5f788",
     "services/identity-center/service-icon.svg",
     "36922e5a747817267a27f640bb4234b8d59ab2a5",
     "services/mesh-center/service-icon.svg",
@@ -72,9 +72,10 @@ if (DRAWABLE / "goreecloud_identity_icon.xml").exists():
 
 app_store = required_files["App Store launcher derivative"].read_text(encoding="utf-8")
 for token in [
-    '#8B5CF6', '#2563EB',
-    'M23,14H41C45.97,14 50,18.03 50,23V41',
-    'M32,31V41M27,36L32,41L37,36M24,45H40',
+    '#3B82F6', '#174EA6',
+    'M18,23H46C48.76,23 51,25.24 51,28V45',
+    'M24,23V19C24,14.58 27.58,11 32,11',
+    'M32,30V40M27.5,35.5L32,40L36.5,35.5M24,45H40',
 ]:
     if token not in app_store:
         raise SystemExit(f"App Store derivative drifted from reviewed canonical geometry/color: {token}")
