@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / ".artifacts" / "web" / "site"
 ICON = ROOT / "linux" / "resources" / "com.goreecloud.AppStore.Development.svg"
-EXPECTED_ICON_BLOB = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+EXPECTED_ICON_BLOB = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
 STATIC_FILES = ("index.html", "styles.css", "app.mjs", "entitlements.mjs")
 
 

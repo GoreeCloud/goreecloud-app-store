@@ -1,0 +1,5 @@
+channel:stable
+channel:rc
+channel:beta
+channel:development
+channel:debug

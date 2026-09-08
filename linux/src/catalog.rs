@@ -88,6 +88,23 @@ pub struct IdentitySession {
     pub authenticated: bool,
 }
 
+impl IdentitySession {
+    pub fn can_access_release_channel(&self, release_channel: &str) -> bool {
+        if !self.authenticated {
+            return false;
+        }
+        let claim = match release_channel.to_ascii_lowercase().as_str() {
+            "stable" => "channel:stable",
+            "rc" => "channel:rc",
+            "beta" => "channel:beta",
+            "development" => "channel:development",
+            "debug" => "channel:debug",
+            _ => return false,
+        };
+        self.audiences.contains(claim)
+    }
+}
+
 impl Catalog {
     pub fn embedded() -> Result<Self, serde_json::Error> {
         serde_json::from_str(EMBEDDED_CATALOG)
@@ -106,13 +123,13 @@ impl StoreItem {
         if self.access.require_signed_in && !session.authenticated {
             return false;
         }
-        if self.access.any_audience.is_empty() {
-            return true;
-        }
-        self.access
-            .any_audience
-            .iter()
-            .any(|audience| session.audiences.contains(audience.as_str()))
+        let audience_allowed = self.access.any_audience.is_empty()
+            || self
+                .access
+                .any_audience
+                .iter()
+                .any(|audience| session.audiences.contains(audience.as_str()));
+        audience_allowed && session.can_access_release_channel(&self.release_channel)
     }
 
     pub fn matches_query(&self, query: &str) -> bool {
@@ -159,17 +176,39 @@ pub fn development_sessions() -> Vec<IdentitySession> {
     vec![
         IdentitySession {
             display_name: "Standard demo",
-            audiences: HashSet::from(["audience:standard"]),
+            audiences: HashSet::from(["audience:standard", "channel:stable"]),
+            authenticated: true,
+        },
+        IdentitySession {
+            display_name: "Preview tester demo",
+            audiences: HashSet::from([
+                "audience:standard",
+                "channel:stable",
+                "channel:beta",
+                "channel:rc",
+            ]),
             authenticated: true,
         },
         IdentitySession {
             display_name: "Administrator demo",
-            audiences: HashSet::from(["audience:administrator"]),
+            audiences: HashSet::from([
+                "audience:standard",
+                "audience:administrator",
+                "channel:stable",
+            ]),
             authenticated: true,
         },
         IdentitySession {
             display_name: "Developer demo",
-            audiences: HashSet::from(["audience:developer"]),
+            audiences: HashSet::from([
+                "audience:standard",
+                "audience:developer",
+                "channel:stable",
+                "channel:rc",
+                "channel:beta",
+                "channel:development",
+                "channel:debug",
+            ]),
             authenticated: true,
         },
         IdentitySession {
@@ -193,16 +232,31 @@ mod tests {
     }
 
     #[test]
-    fn administrator_has_no_implicit_bypass() {
+    fn release_channel_claims_are_explicit_and_fail_closed() {
+        let sessions = development_sessions();
+        let standard = &sessions[0];
+        let preview = &sessions[1];
+        let developer = &sessions[3];
+        assert!(standard.can_access_release_channel("stable"));
+        assert!(!standard.can_access_release_channel("development"));
+        assert!(preview.can_access_release_channel("beta"));
+        assert!(preview.can_access_release_channel("rc"));
+        assert!(!preview.can_access_release_channel("debug"));
+        assert!(developer.can_access_release_channel("debug"));
+        assert!(!developer.can_access_release_channel("unknown"));
+    }
+
+    #[test]
+    fn administrator_has_no_implicit_channel_or_audience_bypass() {
         let catalog = Catalog::embedded().expect("embedded catalog should parse");
         let sessions = development_sessions();
-        let administrator = &sessions[1];
-        let mesh = catalog
+        let administrator = &sessions[2];
+        let manager = catalog
             .items
             .iter()
-            .find(|item| item.id == "goreecloud.mesh-center")
-            .expect("mesh fixture exists");
-        assert!(mesh.is_visible_to(administrator));
+            .find(|item| item.id == "goreecloud.manager")
+            .expect("manager fixture exists");
+        assert!(!manager.is_visible_to(administrator));
 
         let developer_only = StoreItem {
             id: "test.developer-only".into(),
@@ -211,7 +265,7 @@ mod tests {
             item_type: StoreItemType::Application,
             category: "Test".into(),
             version: "development".into(),
-            release_channel: "development".into(),
+            release_channel: "stable".into(),
             package_name: String::new(),
             service_url: String::new(),
             artifacts: ArtifactSet { linux: vec![] },
@@ -221,6 +275,17 @@ mod tests {
             },
         };
         assert!(!developer_only.is_visible_to(administrator));
+    }
+
+    #[test]
+    fn developer_sees_development_entries_permitted_by_audience() {
+        let catalog = Catalog::embedded().expect("embedded catalog should parse");
+        let sessions = development_sessions();
+        let developer = &sessions[3];
+        let visible = catalog.visible_items(developer);
+        assert!(visible.iter().any(|item| item.id == "goreecloud.browser"));
+        assert!(visible.iter().any(|item| item.id == "goreecloud.mesh-center"));
+        assert!(!visible.iter().any(|item| item.id == "goreecloud.manager"));
     }
 
     #[test]

@@ -1,19 +1,61 @@
 export const IDENTITIES = Object.freeze({
-  standard: Object.freeze({ id: "standard", signedIn: true, audiences: Object.freeze(["audience:standard"]) }),
-  administrator: Object.freeze({ id: "administrator", signedIn: true, audiences: Object.freeze(["audience:administrator"]) }),
-  developer: Object.freeze({ id: "developer", signedIn: true, audiences: Object.freeze(["audience:developer"]) }),
+  standard: Object.freeze({
+    id: "standard",
+    signedIn: true,
+    audiences: Object.freeze(["audience:standard", "channel:stable"]),
+  }),
+  preview: Object.freeze({
+    id: "preview",
+    signedIn: true,
+    audiences: Object.freeze(["audience:standard", "channel:stable", "channel:beta", "channel:rc"]),
+  }),
+  administrator: Object.freeze({
+    id: "administrator",
+    signedIn: true,
+    audiences: Object.freeze(["audience:standard", "audience:administrator", "channel:stable"]),
+  }),
+  developer: Object.freeze({
+    id: "developer",
+    signedIn: true,
+    audiences: Object.freeze([
+      "audience:standard",
+      "audience:developer",
+      "channel:stable",
+      "channel:rc",
+      "channel:beta",
+      "channel:development",
+      "channel:debug",
+    ]),
+  }),
   "signed-out": Object.freeze({ id: "signed-out", signedIn: false, audiences: Object.freeze([]) }),
 });
+
+const CHANNEL_CLAIMS = Object.freeze({
+  stable: "channel:stable",
+  rc: "channel:rc",
+  beta: "channel:beta",
+  development: "channel:development",
+  debug: "channel:debug",
+});
+
+export function canAccessReleaseChannel(identity, releaseChannel) {
+  if (!identity?.signedIn) return false;
+  const claim = CHANNEL_CLAIMS[String(releaseChannel ?? "").toLocaleLowerCase()];
+  if (!claim) return false;
+  const held = new Set(Array.isArray(identity?.audiences) ? identity.audiences : []);
+  return held.has(claim);
+}
 
 export function isItemEntitled(item, identity) {
   const access = item?.access ?? {};
   if (access.requireSignedIn && !identity?.signedIn) return false;
 
   const allowed = Array.isArray(access.anyAudience) ? access.anyAudience : [];
-  if (allowed.length === 0) return true;
-
   const held = new Set(Array.isArray(identity?.audiences) ? identity.audiences : []);
-  return allowed.some((audience) => held.has(audience));
+  const audienceAllowed = allowed.length === 0 || allowed.some((audience) => held.has(audience));
+  if (!audienceAllowed) return false;
+
+  return canAccessReleaseChannel(identity, item?.releaseChannel);
 }
 
 export function visibleItems(catalog, identity) {

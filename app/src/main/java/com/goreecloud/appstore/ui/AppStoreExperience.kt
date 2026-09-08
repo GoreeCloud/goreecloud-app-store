@@ -345,7 +345,7 @@ private fun DevelopmentNotice(onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
                 Text(
-                    "Entitlements are simulated and installation remains disabled.",
+                    "Audience and release-channel entitlements are simulated; installation remains disabled.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     maxLines = 2,
@@ -383,7 +383,7 @@ private fun ExperienceHero(visibleCount: Int) {
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
-                    "Browse applications and services authorized for this development identity.",
+                    "Browse applications and services authorized for this development identity and release channel.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
@@ -503,7 +503,7 @@ private fun EmptyState(authenticated: Boolean, hasActiveFilter: Boolean) {
     }
     val body = when {
         hasActiveFilter -> "Change the search term or category filter within the catalog available to this identity."
-        authenticated -> "This development identity has no entries in this section."
+        authenticated -> "This identity has no catalog entries permitted by both its audience and release-channel claims."
         else -> "Production sign-in will be provided by GoreeCloud Identity."
     }
     Surface(modifier = Modifier.fillMaxWidth(), shape = GlazeCardShape, color = MaterialTheme.colorScheme.surfaceVariant) {
@@ -565,7 +565,7 @@ private fun ExperienceItemSheet(item: StoreItem, onDismiss: () -> Unit) {
                     DetailField("Category", item.category)
                     DetailField("Channel", channelLabel(item.releaseChannel))
                     DetailField("Version", item.version ?: "Not provided")
-                    DetailField("Access", "Available to the active development identity")
+                    DetailField("Access", "Available to the active development identity and release-channel claims")
                 }
             }
             Text(
@@ -713,6 +713,7 @@ private fun ExperienceNavigation(selected: ExperienceTab, onSelected: (Experienc
 
 private fun sessionLabel(session: IdentitySession): String = when (session.subjectId) {
     "dev:standard" -> "Standard"
+    "dev:preview" -> "Preview"
     "dev:administrator" -> "Administrator"
     "dev:developer" -> "Developer"
     "dev:signed-out" -> "Signed out"
@@ -724,6 +725,8 @@ private fun countLabel(count: Int) = if (count == 1) "1 item in this development
 private fun typeLabel(type: StoreItemType) = if (type == StoreItemType.APPLICATION) "Application" else "Service"
 private fun channelLabel(channel: ReleaseChannel): String = when (channel) {
     ReleaseChannel.STABLE -> "Stable"
+    ReleaseChannel.RC -> "RC"
     ReleaseChannel.BETA -> "Beta"
     ReleaseChannel.DEVELOPMENT -> "Development"
+    ReleaseChannel.DEBUG -> "Debug"
 }

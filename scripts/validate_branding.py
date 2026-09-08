@@ -12,7 +12,7 @@ DRAWABLE = ROOT / "app/src/main/res/drawable"
 LINUX_ICON = ROOT / "linux/resources/com.goreecloud.AppStore.Development.svg"
 LINUX_DESKTOP = ROOT / "linux/resources/com.goreecloud.AppStore.Development.desktop"
 LINUX_METAINFO = ROOT / "linux/resources/com.goreecloud.AppStore.Development.metainfo.xml"
-APP_STORE_CANONICAL_BLOB = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+APP_STORE_CANONICAL_BLOB = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
 LINUX_ICON_ID = "com.goreecloud.AppStore.Development"
 LINUX_DESKTOP_ID = f"{LINUX_ICON_ID}.desktop"
 
@@ -56,6 +56,17 @@ if 'android:icon="@drawable/goreecloud_app_store_icon"' not in manifest:
     raise SystemExit("Manifest is not wired to the approved App Store identity")
 if "R.drawable.goreecloud_app_store_icon" not in ui:
     raise SystemExit("Discover hero is not wired to the approved App Store identity")
+
+app_store_drawable = (DRAWABLE / "goreecloud_app_store_icon.xml").read_text(encoding="utf-8")
+for token in (
+    "#3B82F6",
+    "#174EA6",
+    "M18,23H46C48.76,23 51,25.24 51,28V45",
+    "M24,23V19C24,14.58 27.58,11 32,11",
+    "M32,30V40M27.5,35.5L32,40L36.5,35.5M24,45H40",
+):
+    if token not in app_store_drawable:
+        raise SystemExit(f"App Store Android derivative drifted from approved mobile identity: {token}")
 
 linux_icon_bytes = LINUX_ICON.read_bytes()
 linux_icon_git_blob = hashlib.sha1(

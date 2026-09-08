@@ -4,14 +4,14 @@ GoreeCloud App Store consumes product and service identity from `GoreeCloud/gore
 
 ## App Store identity
 
-- `products/app-store/app-icon.svg` — `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
+- `products/app-store/app-icon.svg` — `1e86041de7cbde9f92ae2ddb9a813b2585b5f788`
 - Android derivative: `app/src/main/res/drawable/goreecloud_app_store_icon.xml`
 - Android manifest mapping: `android:icon="@drawable/goreecloud_app_store_icon"`
-- Linux canonical copy: `linux/resources/com.goreecloud.AppStore.Development.svg` — byte-identical Git blob `05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef`
+- Linux canonical copy: `linux/resources/com.goreecloud.AppStore.Development.svg` — byte-identical Git blob `1e86041de7cbde9f92ae2ddb9a813b2585b5f788`
 - Linux desktop icon ID: `com.goreecloud.AppStore.Development`
 - Linux package path: `share/icons/hicolor/scalable/apps/com.goreecloud.AppStore.Development.svg`
 
-The App Store identity remains distinct from GoreeCloud Launcher, GoreeCloud Search, Google Play, Apple App Store, F-Droid, generic storefronts, shopping bags, and package-manager glyphs.
+The current mobile identity uses the GoreeCloud blue/deep-blue family with a frosted software-acquisition bag/download glyph. It remains distinct from GoreeCloud Launcher, GoreeCloud Search, Google Play, Apple App Store, F-Droid, generic storefronts, physical-storefront glyphs, shopping carts, and package-manager glyphs.
 
 ## Catalog identity provenance
 

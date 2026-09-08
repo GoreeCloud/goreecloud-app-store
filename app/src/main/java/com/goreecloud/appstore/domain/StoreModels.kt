@@ -7,8 +7,10 @@ enum class StoreItemType {
 
 enum class ReleaseChannel {
     STABLE,
+    RC,
     BETA,
     DEVELOPMENT,
+    DEBUG,
 }
 
 data class AccessRule(
