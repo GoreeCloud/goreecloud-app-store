@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_ICON_BLOB = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+EXPECTED_ICON_BLOB = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
 
 
 def require(value: bool, message: str) -> None:
@@ -66,6 +66,7 @@ def main() -> None:
 
     require(catalog["schemaVersion"] == 2 and catalog["authoritative"] is False, "shared Development catalog mismatch")
     require(len(catalog["items"]) == 12, "reviewed Development catalog must contain 12 entries")
+    require(contract["branding"]["canonicalBlob"] == EXPECTED_ICON_BLOB, "Web contract canonical App Store identity mismatch")
     require(git_blob_sha(contract["branding"]["repositorySource"]) == EXPECTED_ICON_BLOB, "approved App Store SVG provenance mismatch")
 
     html = read("web/index.html")
@@ -80,6 +81,7 @@ def main() -> None:
     require("textContent" in app, "catalog presentation must use text-safe DOM assignment")
     require("visibleItems(state.catalog, state.identity)" in app, "entitlement filtering must precede discovery filtering")
     require("allowed.some" in entitlements, "explicit audience matching missing")
+    require("canAccessReleaseChannel" in entitlements and "CHANNEL_CLAIMS" in entitlements, "explicit release-channel claim enforcement missing")
     require("--target-min: 48px" in styles, "48px interaction floor missing")
     require(":focus-visible" in styles, "keyboard focus styling missing")
     require("prefers-reduced-motion: reduce" in styles, "Reduced Motion mapping missing")
@@ -98,7 +100,7 @@ def main() -> None:
     require(web_mapping.get("platform") == "Web", "GLAZE adoption web mapping missing")
     require(web_mapping.get("externalRuntimeDependencies") is False, "GLAZE web mapping must remain dependency-light")
     require(web_mapping.get("generalTargetFloorPx") == 48, "GLAZE web target floor mismatch")
-    print("Web Development source contract validated: shared 12-item entitlement-safe catalog, local runtime, GLAZE UI V1.1 source mapping, expanded automated Chrome resilience evidence recorded, production=false")
+    print("Web Development source contract validated: shared 12-item audience+release-channel entitlement-safe catalog, current canonical App Store identity, local runtime, GLAZE UI V1.1 source mapping, expanded automated Chrome resilience evidence recorded, production=false")
 
 
 if __name__ == "__main__":
