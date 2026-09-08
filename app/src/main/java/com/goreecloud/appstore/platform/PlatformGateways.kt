@@ -9,18 +9,21 @@ data class PlatformIntegrationStatus(
 )
 
 object GlazeUiContract {
-    const val VERSION = "1.1.0"
-    const val RELEASE_TAG = "v1.1.0"
-    const val RELEASE_REVISION = "15cc76d2bcd4065552dc31c77145b63f34d9e7b2"
+    const val VERSION = "1.2.0"
+    const val RELEASE_TAG = "v1.2.0"
+    const val RELEASE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
+    const val SOURCE_QUALIFICATION_ANCHOR = "b0eadf9a60f73d45caffb62ffc7e9e0334cddc97"
+    const val MATERIAL_RULE = "Neutral glass is the material. Color is an accent."
+    const val SYSTEM_SHELL_SCOPE = "Application"
     const val CONFORMANCE_ACCEPTED = false
 }
 
 object PlatformIntegrationRegistry {
     val current = listOf(
         PlatformIntegrationStatus(
-            system = "GLAZE UI V1.1",
+            system = "GLAZE UI V1.2",
             state = IntegrationState.TARGETED,
-            detail = "Source mapping targets current Stable 1.1.0; application-specific rendered, accessibility, physical-device, and production acceptance remain pending.",
+            detail = "Source mapping targets current Stable 1.2.0 with neutral material and bounded accent; application-specific rendered, accessibility, physical-device, and production acceptance remain pending.",
         ),
         PlatformIntegrationStatus(
             system = "GoreeCloud Identity",
