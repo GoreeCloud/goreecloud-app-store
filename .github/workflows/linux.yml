@@ -93,7 +93,7 @@ jobs:
           assert contract["catalog"]["itemCount"] == 12
           assert contract["branding"]["canonicalRepository"] == "GoreeCloud/goreecloud-branding-assets"
           assert contract["branding"]["canonicalAsset"] == "products/app-store/app-icon.svg"
-          assert contract["branding"]["canonicalBlob"] == "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          assert contract["branding"]["canonicalBlob"] == "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
           assert contract["branding"]["linuxIcon"] == "linux/resources/com.goreecloud.AppStore.Development.svg"
           assert contract["branding"]["desktopIconId"] == "com.goreecloud.AppStore.Development"
           derivative = contract["branding"]["flatpakRasterDerivative"]
@@ -107,7 +107,7 @@ jobs:
           assert contract["glazeUi"]["conformanceAccepted"] is False
           assert contract["productionAcceptance"] is False
           assert contract["security"]["automaticPackageInstallationEnabled"] is False
-          print("Linux distribution contract validated: native client 0.1.0-dev, shared 12-item catalog, approved App Store identity with build-time Flatpak raster derivative, GLAZE UI V1.1, productionAcceptance=false")
+          print("Linux distribution contract validated: native client 0.1.0-dev, shared 12-item catalog, current approved App Store identity with build-time Flatpak raster derivative, GLAZE UI V1.1, productionAcceptance=false")
           PY
 
       - name: Verify pinned Rust dependency graph
@@ -150,7 +150,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
           grep -Fx 'Icon=com.goreecloud.AppStore.Development' linux/resources/com.goreecloud.AppStore.Development.desktop
           grep -F '<launchable type="desktop-id">com.goreecloud.AppStore.Development.desktop</launchable>' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml
           if grep -F '<icon type="stock">' linux/resources/com.goreecloud.AppStore.Development.metainfo.xml; then
@@ -178,7 +178,7 @@ jobs:
           cp linux/resources/com.goreecloud.AppStore.Development.svg "$STAGE/"
           cp catalog/development-catalog.json "$STAGE/development-catalog.json"
 
-          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "05c66a2a4c8edcc194183bb8ffb10ca90d8eaeef"
+          test "$(git hash-object linux/resources/com.goreecloud.AppStore.Development.svg)" = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
           rsvg-convert --width 256 --height 256 \
             --output "$RASTER" \
             linux/resources/com.goreecloud.AppStore.Development.svg
