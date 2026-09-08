@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Bounded keyboard/modal acceptance for GoreeCloud App Store Web Development.
 
-This verifies browser-level focus behavior only. It is not screen-reader or other
-assistive-technology acceptance and does not establish production acceptance.
+This verifies browser-level focus behavior under an explicitly authorized
+Development-channel fixture only. It is not screen-reader or other assistive-
+technology acceptance and does not establish production acceptance.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 BASE_URL = os.environ.get("GOREECLOUD_APP_STORE_WEB_URL", "http://127.0.0.1:8766").rstrip("/")
@@ -30,8 +32,8 @@ def make_driver() -> webdriver.Chrome:
     return webdriver.Chrome(options=options)
 
 
-def wait_catalog(wait: WebDriverWait) -> None:
-    wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == "10 items")
+def wait_count(wait: WebDriverWait, expected: str) -> None:
+    wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == expected)
 
 
 def assert_inside_dialog(driver: webdriver.Chrome, dialog, context: str) -> None:
@@ -47,7 +49,9 @@ def main() -> None:
     try:
         driver.get(f"{BASE_URL}/index.html")
         wait = WebDriverWait(driver, 15)
-        wait_catalog(wait)
+        wait_count(wait, "0 items")
+        Select(driver.find_element(By.ID, "identitySelect")).select_by_value("developer")
+        wait_count(wait, "11 items")
 
         first_card = driver.find_element(By.CSS_SELECTOR, ".store-card")
         product_name = first_card.find_element(By.TAG_NAME, "h3").text.strip()
@@ -93,6 +97,8 @@ def main() -> None:
             "productionAcceptance": False,
             "browser": str(driver.capabilities.get("browserName", "unknown")),
             "browserVersion": str(driver.capabilities.get("browserVersion", "unknown")),
+            "authorizedFixture": "developer",
+            "releaseChannel": "development",
             "productSpecificDetailsName": True,
             "dialogDescriptionRelationship": True,
             "keyboardEnterOpensDialog": True,
@@ -106,7 +112,7 @@ def main() -> None:
         (EVIDENCE_DIR / "dialog-keyboard-acceptance.json").write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
-        print("Web Development dialog keyboard/focus acceptance passed")
+        print("Web Development dialog keyboard/focus acceptance passed for authorized Developer fixture")
     finally:
         driver.quit()
 
