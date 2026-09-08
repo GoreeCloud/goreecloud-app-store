@@ -73,8 +73,8 @@
   </main>
 
   <dialog id="productDialog" aria-labelledby="dialogTitle" aria-describedby="dialogSummary">
-    <form method="dialog" class="dialog-shell">
-      <button class="dialog-close" value="close" aria-label="Close details">×</button>
+    <div class="dialog-shell">
+      <button class="dialog-close" type="button" aria-label="Close details">×</button>
       <p id="dialogType" class="eyebrow"></p>
       <h2 id="dialogTitle"></h2>
       <p id="dialogSummary"></p>
@@ -84,7 +84,7 @@
         <div><dt>Channel</dt><dd id="dialogChannel"></dd></div>
       </dl>
       <button class="primary-action" type="button" disabled>Install / Open unavailable in Development</button>
-    </form>
+    </div>
   </dialog>
 
   <noscript>This Development client requires JavaScript to apply entitlement filtering before presenting the local fixture catalog.</noscript>

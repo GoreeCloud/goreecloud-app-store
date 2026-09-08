@@ -15,6 +15,7 @@ const els = {
   unavailableTitle: document.querySelector("#unavailableTitle"),
   unavailableText: document.querySelector("#unavailableText"),
   dialog: document.querySelector("#productDialog"),
+  dialogClose: document.querySelector("#productDialog .dialog-close"),
   dialogType: document.querySelector("#dialogType"),
   dialogTitle: document.querySelector("#dialogTitle"),
   dialogSummary: document.querySelector("#dialogSummary"),
@@ -59,6 +60,11 @@ function setText(element, value) {
   element.textContent = value ?? "";
 }
 
+function enabledDialogFocusTargets() {
+  return [...els.dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter((element) => !element.disabled && !element.hidden && element.getAttribute("aria-hidden") !== "true");
+}
+
 function openDetails(item, trigger) {
   dialogOpener = trigger;
   setText(els.dialogType, item.type === "service" ? "Service" : "Application");
@@ -69,7 +75,7 @@ function openDetails(item, trigger) {
   setText(els.dialogChannel, item.releaseChannel);
   if (typeof els.dialog.showModal === "function") {
     els.dialog.showModal();
-    els.dialog.querySelector(".dialog-close")?.focus();
+    els.dialogClose?.focus();
   }
 }
 
@@ -193,6 +199,27 @@ els.search.addEventListener("input", () => {
 els.category.addEventListener("change", () => {
   state.category = els.category.value;
   render();
+});
+
+els.dialog.addEventListener("keydown", (event) => {
+  if (event.key !== "Tab" || !els.dialog.open) return;
+  const targets = enabledDialogFocusTargets();
+  if (targets.length === 0) {
+    event.preventDefault();
+    els.dialog.focus();
+    return;
+  }
+  const first = targets[0];
+  const last = targets[targets.length - 1];
+  const active = document.activeElement;
+  if (targets.length === 1 || (!event.shiftKey && active === last) || (event.shiftKey && active === first)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  }
+});
+
+els.dialogClose?.addEventListener("click", () => {
+  if (els.dialog.open) els.dialog.close("close");
 });
 
 els.dialog.addEventListener("close", () => {

@@ -45,8 +45,8 @@ VIEWPORTS = (
     Viewport("expanded", 1280, 900),
 )
 APPEARANCES = (
-    Appearance("light", "light", "rgb(244, 248, 248)"),
-    Appearance("dark", "dark", "rgb(16, 26, 32)"),
+    Appearance("light", "light", "rgb(247, 249, 252)"),
+    Appearance("dark", "dark", "rgb(11, 13, 17)"),
 )
 
 
