@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Bounded actual-browser acceptance for GoreeCloud App Store Web Development.
 
-This is Development evidence only. It validates durable rendered behavior in a
-GitHub-hosted Chrome environment without claiming screen-reader, human visual,
-production-hosting, cross-browser, localization, or representative physical-device acceptance.
+This is Development evidence only. It validates rendered entitlement isolation,
+accessibility-tree naming, keyboard access, layout resilience, Reduced Motion,
+Forced Colors, RTL structure, and 200% text behavior in GitHub-hosted Chrome.
+It does not claim screen-reader, human visual, production-hosting, cross-browser,
+localization, or representative physical-device acceptance.
 """
 
 from __future__ import annotations
@@ -24,6 +26,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 BASE_URL = os.environ.get("GOREECLOUD_APP_STORE_WEB_URL", "http://127.0.0.1:8766").rstrip("/")
 EVIDENCE_DIR = Path(os.environ.get("GOREECLOUD_APP_STORE_WEB_EVIDENCE", ".artifacts/web-rendered/evidence"))
 MIN_TARGET_PX = 48
+DEVELOPER_TOTAL = "11 items"
+DEVELOPER_APPS = "9 items"
+DEVELOPER_SERVICES = "2 items"
 
 
 @dataclass(frozen=True)
@@ -87,13 +92,7 @@ def set_media(
     ]
     if forced_colors:
         features.append({"name": "forced-colors", "value": "active"})
-    driver.execute_cdp_cmd(
-        "Emulation.setEmulatedMedia",
-        {
-            "media": "screen",
-            "features": features,
-        },
-    )
+    driver.execute_cdp_cmd("Emulation.setEmulatedMedia", {"media": "screen", "features": features})
 
 
 def capture(driver: webdriver.Chrome, name: str) -> None:
@@ -118,8 +117,16 @@ def wait_count(wait: WebDriverWait, expected: str) -> None:
     wait.until(lambda driver: driver.find_element(By.ID, "resultCount").text.strip() == expected)
 
 
+def select_identity(driver: webdriver.Chrome, wait: WebDriverWait, identity: str, expected: str) -> None:
+    Select(driver.find_element(By.ID, "identitySelect")).select_by_value(identity)
+    wait_count(wait, expected)
+
+
+def select_developer(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
+    select_identity(driver, wait, "developer", DEVELOPER_TOTAL)
+
+
 def clear_search(driver: webdriver.Chrome, element) -> None:
-    """Clear the search control through the same input event consumed by app.mjs."""
     driver.execute_script(
         """
         const input = arguments[0];
@@ -151,14 +158,13 @@ def assert_target(element, context: str) -> None:
 
 
 def assert_visible_targets(driver: webdriver.Chrome, context: str) -> None:
-    selectors = (
+    for selector in (
         ".tabs button",
         "#identitySelect",
         "#searchInput",
         "#categorySelect",
         ".details-button",
-    )
-    for selector in selectors:
+    ):
         for element in driver.find_elements(By.CSS_SELECTOR, selector):
             if element.is_displayed():
                 assert_target(element, f"{context} {selector}")
@@ -194,37 +200,38 @@ def assert_ax_names(
 def click_tab(driver: webdriver.Chrome, wait: WebDriverWait, tab: str, count: str) -> None:
     button = driver.find_element(By.CSS_SELECTOR, f'[data-tab="{tab}"]')
     button.click()
-    wait.until(lambda d: button.get_attribute("aria-current") == "page")
+    wait.until(lambda _driver: button.get_attribute("aria-current") == "page")
     wait_count(wait, count)
 
 
 def assert_identity_boundaries(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
-    identity = Select(driver.find_element(By.ID, "identitySelect"))
-
-    identity.select_by_value("signed-out")
-    wait_count(wait, "0 items")
+    select_identity(driver, wait, "signed-out", "0 items")
     if driver.find_elements(By.CSS_SELECTOR, ".store-card"):
         raise AssertionError(f"{context}: signed-out fixture leaked protected catalog cards")
     if "concealed" not in driver.find_element(By.ID, "statusMessage").text.lower():
         raise AssertionError(f"{context}: signed-out concealment state is not explicit")
 
-    identity.select_by_value("developer")
-    wait_count(wait, "1 item")
-    cards = driver.find_elements(By.CSS_SELECTOR, ".store-card h3")
-    if [card.text for card in cards] != ["Mesh Center"]:
-        raise AssertionError(f"{context}: developer fixture received unexpected catalog: {[card.text for card in cards]}")
+    # The fixture catalog is Development-only. Stable/Preview/Admin sessions must
+    # not receive those entries merely because their audience membership matches.
+    for identity in ("standard", "preview", "administrator"):
+        select_identity(driver, wait, identity, "0 items")
+        if driver.find_elements(By.CSS_SELECTOR, ".store-card"):
+            raise AssertionError(f"{context}: {identity} fixture bypassed release-channel claims")
 
-    identity.select_by_value("administrator")
-    wait_count(wait, "12 items")
-
-    identity.select_by_value("standard")
-    wait_count(wait, "10 items")
+    select_developer(driver, wait)
+    names = [card.text for card in driver.find_elements(By.CSS_SELECTOR, ".store-card h3")]
+    if len(names) != 11:
+        raise AssertionError(f"{context}: developer fixture expected 11 entries, received {names}")
+    if "GoreeCloud Manager" in names:
+        raise AssertionError(f"{context}: developer audience improperly received administrator-only Manager")
+    if "Mesh Center" not in names or "GoreeCloud Browser" not in names:
+        raise AssertionError(f"{context}: developer fixture is missing expected standard/developer entries: {names}")
 
 
 def assert_discovery_interactions(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
-    click_tab(driver, wait, "applications", "9 items")
-    click_tab(driver, wait, "services", "1 item")
-    click_tab(driver, wait, "discover", "10 items")
+    click_tab(driver, wait, "applications", DEVELOPER_APPS)
+    click_tab(driver, wait, "services", DEVELOPER_SERVICES)
+    click_tab(driver, wait, "discover", DEVELOPER_TOTAL)
 
     search = driver.find_element(By.ID, "searchInput")
     clear_search(driver, search)
@@ -235,7 +242,7 @@ def assert_discovery_interactions(driver: webdriver.Chrome, wait: WebDriverWait,
         raise AssertionError(f"{context}: search returned unexpected entries: {names}")
 
     clear_search(driver, search)
-    wait_count(wait, "10 items")
+    wait_count(wait, DEVELOPER_TOTAL)
     category = Select(driver.find_element(By.ID, "categorySelect"))
     category.select_by_value("Productivity")
     wait.until(lambda d: d.find_element(By.ID, "resultCount").text.strip().endswith(("item", "items")))
@@ -248,7 +255,7 @@ def assert_discovery_interactions(driver: webdriver.Chrome, wait: WebDriverWait,
             raise AssertionError(f"{context}: category filter widened outside Productivity")
 
     category.select_by_value("all")
-    wait_count(wait, "10 items")
+    wait_count(wait, DEVELOPER_TOTAL)
 
 
 def assert_dialog_and_unavailable_states(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
@@ -275,12 +282,12 @@ def assert_dialog_and_unavailable_states(driver: webdriver.Chrome, wait: WebDriv
     if not driver.find_element(By.ID, "unavailablePanel").is_displayed():
         raise AssertionError(f"{context}: Library did not remain fail-closed")
 
-    click_tab(driver, wait, "discover", "10 items")
+    click_tab(driver, wait, "discover", DEVELOPER_TOTAL)
 
 
 def assert_keyboard_and_text_resilience(driver: webdriver.Chrome, wait: WebDriverWait, context: str) -> None:
     driver.get(f"{BASE_URL}/index.html")
-    wait_count(wait, "10 items")
+    wait_count(wait, "0 items")
     body = driver.find_element(By.TAG_NAME, "body")
     body.send_keys(Keys.TAB)
     active = driver.switch_to.active_element
@@ -289,12 +296,13 @@ def assert_keyboard_and_text_resilience(driver: webdriver.Chrome, wait: WebDrive
     if "skip to catalog" not in (active.text or "").lower():
         raise AssertionError(f"{context}: skip link lacks a stable accessible name")
 
+    select_developer(driver, wait)
     driver.execute_script("document.documentElement.style.fontSize = '200%';")
     assert_no_document_overflow(driver, f"{context} 200%-text")
     assert_visible_targets(driver, f"{context} 200%-text")
     assert_ax_names(driver, f"{context} 200%-text")
-    click_tab(driver, wait, "applications", "9 items")
-    click_tab(driver, wait, "discover", "10 items")
+    click_tab(driver, wait, "applications", DEVELOPER_APPS)
+    click_tab(driver, wait, "discover", DEVELOPER_TOTAL)
     capture(driver, f"{context}-200pct-text")
     driver.execute_script("document.documentElement.style.fontSize = ''; if (document.activeElement) document.activeElement.blur();")
 
@@ -308,15 +316,16 @@ def assert_forced_colors_resilience(
     context = f"{viewport.name}-forced-colors"
     set_media(driver, appearance, forced_colors=True)
     driver.get(f"{BASE_URL}/index.html")
-    wait_count(wait, "10 items")
+    wait_count(wait, "0 items")
+    select_developer(driver, wait)
     if not driver.execute_script("return matchMedia('(forced-colors: active)').matches;"):
         raise AssertionError(f"{context}: Forced Colors media emulation did not activate")
     assert_no_document_overflow(driver, context)
     assert_visible_targets(driver, context)
     assert_ax_names(driver, context)
-    click_tab(driver, wait, "applications", "9 items")
-    click_tab(driver, wait, "services", "1 item")
-    click_tab(driver, wait, "discover", "10 items")
+    click_tab(driver, wait, "applications", DEVELOPER_APPS)
+    click_tab(driver, wait, "services", DEVELOPER_SERVICES)
+    click_tab(driver, wait, "discover", DEVELOPER_TOTAL)
     capture(driver, context)
     set_media(driver, appearance)
 
@@ -330,7 +339,8 @@ def assert_rtl_structural_resilience(
     context = f"{viewport.name}-rtl-structural"
     set_media(driver, appearance)
     driver.get(f"{BASE_URL}/index.html")
-    wait_count(wait, "10 items")
+    wait_count(wait, "0 items")
+    select_developer(driver, wait)
     driver.execute_script("document.documentElement.dir = 'rtl'; document.body.dir = 'rtl';")
     direction = driver.execute_script("return getComputedStyle(document.documentElement).direction;")
     if direction != "rtl":
@@ -338,14 +348,14 @@ def assert_rtl_structural_resilience(
     assert_no_document_overflow(driver, context)
     assert_visible_targets(driver, context)
     assert_ax_names(driver, context)
-    click_tab(driver, wait, "applications", "9 items")
-    click_tab(driver, wait, "services", "1 item")
-    click_tab(driver, wait, "discover", "10 items")
+    click_tab(driver, wait, "applications", DEVELOPER_APPS)
+    click_tab(driver, wait, "services", DEVELOPER_SERVICES)
+    click_tab(driver, wait, "discover", DEVELOPER_TOTAL)
     search = driver.find_element(By.ID, "searchInput")
     search.send_keys("Notes")
     wait_count(wait, "1 item")
     clear_search(driver, search)
-    wait_count(wait, "10 items")
+    wait_count(wait, DEVELOPER_TOTAL)
     assert_no_document_overflow(driver, context)
     capture(driver, context)
     driver.execute_script("document.documentElement.dir = ''; document.body.dir = '';")
@@ -358,7 +368,7 @@ def run_case(viewport: Viewport, appearance: Appearance) -> dict[str, str]:
         set_media(driver, appearance)
         driver.get(f"{BASE_URL}/index.html")
         wait = WebDriverWait(driver, 15)
-        wait_count(wait, "10 items")
+        wait_count(wait, "0 items")
 
         canvas = driver.execute_script("return getComputedStyle(document.documentElement).backgroundColor;")
         if canvas != appearance.expected_canvas:
@@ -388,7 +398,8 @@ def run_case(viewport: Viewport, appearance: Appearance) -> dict[str, str]:
 
         set_media(driver, appearance)
         driver.get(f"{BASE_URL}/index.html")
-        wait_count(wait, "10 items")
+        wait_count(wait, "0 items")
+        select_developer(driver, wait)
         capture(driver, f"{context}-discover")
         return {
             "case": context,
@@ -430,6 +441,7 @@ def main() -> None:
             "allViewports200PercentTextReflow": True,
             "forcedColorsAutomation": True,
             "rtlStructuralAutomation": True,
+            "releaseChannelEntitlementIsolation": True,
             "screenReaderAcceptance": False,
             "humanVisualExcellence": False,
             "productionHostingAcceptance": False,
@@ -441,7 +453,10 @@ def main() -> None:
     (EVIDENCE_DIR / "acceptance-report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"Web rendered Development acceptance passed across {len(results)} browser cases plus Forced Colors and RTL structural checks")
+    print(
+        f"Web rendered Development acceptance passed across {len(results)} browser cases, "
+        "explicit release-channel isolation, Forced Colors, and RTL structural checks"
+    )
 
 
 if __name__ == "__main__":
