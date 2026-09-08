@@ -19,7 +19,21 @@ object DevelopmentIdentityGateway : IdentityGateway {
         IdentitySession(
             subjectId = "dev:standard",
             displayName = "Standard demo",
-            audiences = setOf("audience:standard"),
+            audiences = setOf(
+                "audience:standard",
+                "channel:stable",
+            ),
+            isAuthenticated = true,
+        ),
+        IdentitySession(
+            subjectId = "dev:preview",
+            displayName = "Preview tester demo",
+            audiences = setOf(
+                "audience:standard",
+                "channel:stable",
+                "channel:beta",
+                "channel:rc",
+            ),
             isAuthenticated = true,
         ),
         IdentitySession(
@@ -28,13 +42,21 @@ object DevelopmentIdentityGateway : IdentityGateway {
             audiences = setOf(
                 "audience:standard",
                 "audience:administrator",
+                "channel:stable",
             ),
             isAuthenticated = true,
         ),
         IdentitySession(
             subjectId = "dev:developer",
             displayName = "Developer demo",
-            audiences = setOf("audience:developer"),
+            audiences = setOf(
+                "audience:developer",
+                "channel:stable",
+                "channel:rc",
+                "channel:beta",
+                "channel:development",
+                "channel:debug",
+            ),
             isAuthenticated = true,
         ),
         IdentitySession(
