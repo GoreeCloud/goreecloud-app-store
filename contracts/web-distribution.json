@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "application": "goreecloud-app-store",
   "platform": "web",
   "lifecycle": "development",
@@ -44,11 +44,17 @@
     "privacyShieldProductionConnected": false
   },
   "glazeUi": {
-    "target": "1.1.0",
-    "stableReleaseTag": "v1.1.0",
-    "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
+    "target": "1.3.0",
+    "stableReleaseTag": "v1.3.0",
+    "stableReleaseRevision": "ff34f232f295c9dcb07e4c681f66d4104d0b9323",
+    "sourceQualificationAnchor": "fc7cc91d2eace8da2371371c2855c24cbcb326a1",
+    "rollbackVersion": "1.2.0",
+    "materialRule": "Neutral glass remains the material foundation. Adaptive expression is contextual, bounded, and subordinate to meaning, accessibility, and task completion.",
+    "systemShellScope": "Application",
     "mapping": "web/styles.css",
     "deepDarkRuntimeSelection": "pending-policy",
+    "environmentalSampling": false,
+    "adaptiveColorCarriesSemanticAuthority": false,
     "conformanceAccepted": false
   },
   "acceptance": {
@@ -56,23 +62,19 @@
     "unitTests": "candidate",
     "staticBuild": "candidate",
     "httpSmoke": "candidate",
-    "renderedBrowser": "candidate",
-    "renderedBrowserEvidence": {
-      "revision": "5692a2f4274117d4601873216783c31ea762fd8b",
-      "workflowRun": 33942155630,
-      "artifactId": 9962183774,
-      "artifactDigest": "sha256:bda95c8ed3adbbb60aec141b72d464f4a03de83b3c724af0c2f63d0f49822ca6"
-    },
-    "accessibilityTreeNames": "candidate",
-    "forcedColorsAutomation": "candidate",
-    "rtlStructuralResilience": "candidate",
-    "allViewports200PercentTextReflow": "candidate",
+    "renderedBrowser": "pending-v1.3-revalidation",
+    "renderedBrowserEvidence": null,
+    "accessibilityTreeNames": "pending-v1.3-revalidation",
+    "forcedColorsAutomation": "pending-v1.3-revalidation",
+    "rtlStructuralResilience": "pending-v1.3-revalidation",
+    "allViewports200PercentTextReflow": "pending-v1.3-revalidation",
     "localizationAcceptance": "pending",
     "accessibilityAssistiveTechnology": "pending",
     "crossBrowserAcceptance": "pending",
     "humanVisualExcellence": "pending",
     "representativeTargetEnvironment": "pending",
-    "productionHostingHeaders": "pending"
+    "productionHostingHeaders": "pending",
+    "rollbackAcceptance": "pending"
   },
   "productionAcceptance": false
 }
