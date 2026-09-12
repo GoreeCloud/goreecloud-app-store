@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onParent
@@ -75,10 +76,15 @@ class AppStoreNavigationSemanticsTest {
         val density = InstrumentationRegistry.getInstrumentation()
             .targetContext.resources.displayMetrics.density
 
-        // The category controls live in a horizontal LazyRow. On compact viewports,
-        // later categories are intentionally not composed until that collection is
-        // scrolled. Exercise the same semantics-backed scroll a user performs instead
-        // of assuming every lazy item is present in the initial semantics tree.
+        // The category controls are nested: a horizontally lazy category row lives inside
+        // the vertically lazy catalog. On the compact rendered viewport the category item
+        // itself may not be composed at test start, and later category chips may not be
+        // composed until the row is scrolled. Exercise both semantic scroll boundaries in
+        // the same order a compact-screen user reaches the controls.
+        val catalog = composeRule.onNode(hasScrollAction())
+        catalog.performScrollToNode(hasText("Categories"))
+        composeRule.waitForIdle()
+
         val all = composeRule.onNode(hasText("All") and hasClickAction())
         all.assertExists().assertIsDisplayed().assertHasClickAction()
         all.onParent().performScrollToNode(hasText("Communication") and hasClickAction())
