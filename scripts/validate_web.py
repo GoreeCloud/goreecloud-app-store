@@ -7,6 +7,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ICON_BLOB = "1e86041de7cbde9f92ae2ddb9a813b2585b5f788"
+GLAZE_VERSION = "1.3.0"
+GLAZE_TAG = "v1.3.0"
+GLAZE_REVISION = "ff34f232f295c9dcb07e4c681f66d4104d0b9323"
+GLAZE_SOURCE_ANCHOR = "fc7cc91d2eace8da2371371c2855c24cbcb326a1"
 
 
 def require(value: bool, message: str) -> None:
@@ -28,7 +32,7 @@ def main() -> None:
     catalog = json.loads(read("catalog/development-catalog.json"))
     adoption = json.loads(read("contracts/glaze-ui-adoption.json"))
 
-    require(contract["schemaVersion"] == 1, "contract schemaVersion mismatch")
+    require(contract["schemaVersion"] == 2, "contract schemaVersion mismatch")
     require(contract["application"] == "goreecloud-app-store", "application mismatch")
     require(contract["platform"] == "web", "platform mismatch")
     require(contract["lifecycle"] == "development", "lifecycle must remain development")
@@ -42,27 +46,35 @@ def main() -> None:
     require(contract["security"]["packageInstallationEnabled"] is False, "package installation must remain disabled")
     require(contract["security"]["serviceLaunchEnabled"] is False, "service launch must remain disabled")
     require(contract["productionAcceptance"] is False, "productionAcceptance must remain false")
-    require(contract["glazeUi"]["target"] == "1.1.0", "GLAZE target mismatch")
-    require(contract["glazeUi"]["conformanceAccepted"] is False, "GLAZE conformance must remain unaccepted")
+
+    glaze = contract["glazeUi"]
+    require(glaze["target"] == GLAZE_VERSION, "GLAZE target mismatch")
+    require(glaze["stableReleaseTag"] == GLAZE_TAG, "GLAZE release tag mismatch")
+    require(glaze["stableReleaseRevision"] == GLAZE_REVISION, "GLAZE release revision mismatch")
+    require(glaze["sourceQualificationAnchor"] == GLAZE_SOURCE_ANCHOR, "GLAZE source qualification anchor mismatch")
+    require(glaze["rollbackVersion"] == "1.2.0", "GLAZE rollback version mismatch")
+    require(glaze["systemShellScope"] == "Application", "GLAZE shell scope mismatch")
+    require(glaze["environmentalSampling"] is False, "environmental sampling must remain disabled")
+    require(glaze["adaptiveColorCarriesSemanticAuthority"] is False, "adaptive color must not carry semantic authority")
+    require(glaze["conformanceAccepted"] is False, "GLAZE conformance must remain unaccepted")
 
     acceptance = contract["acceptance"]
-    require(acceptance["renderedBrowser"] == "candidate", "verified rendered-browser Development evidence must remain recorded")
-    require(acceptance["accessibilityTreeNames"] == "candidate", "automated accessibility-tree name evidence must remain recorded")
-    require(acceptance["forcedColorsAutomation"] == "candidate", "Forced Colors browser automation evidence must remain recorded")
-    require(acceptance["rtlStructuralResilience"] == "candidate", "RTL structural resilience evidence must remain recorded")
-    require(acceptance["allViewports200PercentTextReflow"] == "candidate", "all-viewport 200% text evidence must remain recorded")
+    for key in (
+        "renderedBrowser",
+        "accessibilityTreeNames",
+        "forcedColorsAutomation",
+        "rtlStructuralResilience",
+        "allViewports200PercentTextReflow",
+    ):
+        require(acceptance[key] == "pending-v1.3-revalidation", f"{key} must require fresh V1.3 revalidation")
+    require(acceptance["renderedBrowserEvidence"] is None, "historical V1.1 rendered evidence must not transfer to V1.3")
     require(acceptance["localizationAcceptance"] == "pending", "RTL structure automation must not be represented as localization acceptance")
     require(acceptance["accessibilityAssistiveTechnology"] == "pending", "assistive-technology acceptance must not be inferred from browser automation")
     require(acceptance["crossBrowserAcceptance"] == "pending", "Chrome automation must not be represented as cross-browser acceptance")
     require(acceptance["humanVisualExcellence"] == "pending", "Human Visual Excellence must remain pending")
     require(acceptance["representativeTargetEnvironment"] == "pending", "representative Web target acceptance must remain pending")
     require(acceptance["productionHostingHeaders"] == "pending", "production hosting/header acceptance must remain pending")
-
-    evidence = acceptance.get("renderedBrowserEvidence", {})
-    require(evidence.get("revision") == "5692a2f4274117d4601873216783c31ea762fd8b", "rendered-browser evidence revision mismatch")
-    require(evidence.get("workflowRun") == 33942155630, "rendered-browser workflow evidence mismatch")
-    require(evidence.get("artifactId") == 9962183774, "rendered-browser artifact evidence mismatch")
-    require(evidence.get("artifactDigest") == "sha256:bda95c8ed3adbbb60aec141b72d464f4a03de83b3c724af0c2f63d0f49822ca6", "rendered-browser artifact digest mismatch")
+    require(acceptance["rollbackAcceptance"] == "pending", "rollback acceptance must remain pending")
 
     require(catalog["schemaVersion"] == 2 and catalog["authoritative"] is False, "shared Development catalog mismatch")
     require(len(catalog["items"]) == 12, "reviewed Development catalog must contain 12 entries")
@@ -87,20 +99,35 @@ def main() -> None:
     require("prefers-reduced-motion: reduce" in styles, "Reduced Motion mapping missing")
     require("forced-colors: active" in styles, "Forced Colors mapping missing")
     require(".topbar { position: static;" in styles, "compact topbar must remain non-sticky so navigation cannot be obscured after scrolling")
+    require("backdrop-filter: blur(4px)" not in styles, "nested dialog backdrop blur must remain absent")
     require("forcedColorsAutomation" in rendered, "rendered browser report must retain Forced Colors evidence")
     require("rtlStructuralAutomation" in rendered, "rendered browser report must retain RTL structural evidence")
     require("allViewports200PercentTextReflow" in rendered, "rendered browser report must retain all-viewport 200% text evidence")
     require('"localizationAcceptance": False' in rendered, "rendered browser report must explicitly reject localization acceptance")
     require('"screenReaderAcceptance": False' in rendered, "rendered browser report must explicitly reject screen-reader acceptance")
     require('"crossBrowserAcceptance": False' in rendered, "rendered browser report must explicitly reject cross-browser acceptance")
-    for literal in ("#0F6B6F", "#D9A35F", "#05070A"):
-        require(literal in styles, f"GLAZE V1.1 source primitive missing: {literal}")
+    for literal in (
+        "--gc-frost-white: #F7F9FC",
+        "--gc-pearl: #EFF2F6",
+        "--gc-ice-blue: #8DB5FF",
+        "--gc-development-amber: #D9A35F",
+        "--gc-deep-dark-canvas: #05070A",
+    ):
+        require(literal in styles, f"GLAZE V1.3 source primitive missing: {literal}")
+    require("--gc-deep-teal" not in styles, "historical Deep Teal substrate mapping must remain absent")
 
     web_mapping = adoption.get("webMapping", {})
+    require(adoption.get("targetVersion") == GLAZE_VERSION, "GLAZE adoption version mismatch")
+    require(adoption.get("stableReleaseRevision") == GLAZE_REVISION, "GLAZE adoption release revision mismatch")
     require(web_mapping.get("platform") == "Web", "GLAZE adoption web mapping missing")
     require(web_mapping.get("externalRuntimeDependencies") is False, "GLAZE web mapping must remain dependency-light")
     require(web_mapping.get("generalTargetFloorPx") == 48, "GLAZE web target floor mismatch")
-    print("Web Development source contract validated: shared 12-item audience+release-channel entitlement-safe catalog, current canonical App Store identity, local runtime, GLAZE UI V1.1 source mapping, expanded automated Chrome resilience evidence recorded, production=false")
+    require(web_mapping.get("neutralMaterial") is True, "GLAZE V1.3 Web neutral material mapping missing")
+    require(web_mapping.get("adaptiveColorCarriesSemanticAuthority") is False, "GLAZE V1.3 Web color authority boundary missing")
+    print(
+        "Web Development source contract validated: shared 12-item audience+release-channel entitlement-safe catalog, "
+        "current canonical App Store identity, local runtime, GLAZE UI V1.3 source mapping, fresh rendered revalidation required, production=false"
+    )
 
 
 if __name__ == "__main__":

@@ -9,18 +9,27 @@ data class PlatformIntegrationStatus(
 )
 
 object GlazeUiContract {
-    const val VERSION = "1.1.0"
-    const val RELEASE_TAG = "v1.1.0"
-    const val RELEASE_REVISION = "15cc76d2bcd4065552dc31c77145b63f34d9e7b2"
+    const val VERSION = "1.3.0"
+    const val RELEASE_TAG = "v1.3.0"
+    const val RELEASE_REVISION = "ff34f232f295c9dcb07e4c681f66d4104d0b9323"
+    const val SOURCE_QUALIFICATION_ANCHOR = "fc7cc91d2eace8da2371371c2855c24cbcb326a1"
+    const val ROLLBACK_VERSION = "1.2.0"
+    const val MATERIAL_RULE = "Neutral glass remains the material foundation. Adaptive expression is contextual, bounded, and subordinate to meaning, accessibility, and task completion."
+    const val SYSTEM_SHELL_SCOPE = "Application"
     const val CONFORMANCE_ACCEPTED = false
 }
 
 object PlatformIntegrationRegistry {
     val current = listOf(
         PlatformIntegrationStatus(
-            system = "GLAZE UI V1.1",
+            system = "GLAZE UI V1.3 — Adaptive Resonance",
             state = IntegrationState.TARGETED,
-            detail = "Source mapping targets current Stable 1.1.0; application-specific rendered, accessibility, physical-device, and production acceptance remain pending.",
+            detail = "Android, Linux, and Web source mappings target current Stable 1.3.0. Consumer-local rendered, accessibility, representative-target, performance, rollback, and production acceptance remain pending.",
+        ),
+        PlatformIntegrationStatus(
+            system = "GoreeCloud Manager",
+            state = IntegrationState.NOT_CONNECTED,
+            detail = "Manager registration, operational visibility, and administrative integration are not established.",
         ),
         PlatformIntegrationStatus(
             system = "GoreeCloud Identity",
@@ -35,7 +44,7 @@ object PlatformIntegrationRegistry {
         PlatformIntegrationStatus(
             system = "Privacy Shield",
             state = IntegrationState.SOURCE_BOUNDARY,
-            detail = "The development client collects no analytics; production privacy-policy acceptance remains pending.",
+            detail = "The Development client collects no analytics; production privacy-policy and runtime acceptance remain pending.",
         ),
         PlatformIntegrationStatus(
             system = "Everkeep",

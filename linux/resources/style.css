@@ -1,10 +1,11 @@
-@define-color goreecloud_deep_teal #0F6B6F;
-@define-color goreecloud_soft_amber #D9A35F;
+@define-color goreecloud_ice_blue #8DB5FF;
+@define-color goreecloud_development_amber #D9A35F;
 
-/* GLAZE UI V1.1 Development mapping.
- * Host-theme semantic colors retain authority. Deep Teal and Soft Amber are
- * restrained non-semantic atmosphere only and never encode trust, entitlement,
- * installation, privacy, security, or availability state.
+/* GLAZE UI V1.3 — Adaptive Resonance Development mapping.
+ * Host-theme semantic colors retain authority. Neutral host material is the
+ * substrate; Ice Blue is bounded interaction accent and Development amber is
+ * status-only. Neither color may encode trust, entitlement, installation,
+ * privacy, security, or availability authority.
  */
 .glaze-header {
   background-color: alpha(@window_bg_color, 0.96);
@@ -12,8 +13,8 @@
 }
 
 .glaze-navigation {
-  background-color: alpha(@goreecloud_deep_teal, 0.07);
-  border: 1px solid alpha(@goreecloud_deep_teal, 0.14);
+  background-color: alpha(@card_bg_color, 0.92);
+  border: 1px solid alpha(@borders, 0.55);
   border-radius: 24px;
   padding: 16px;
 }
@@ -31,7 +32,8 @@
 }
 
 .artifact-row {
-  background-color: alpha(@goreecloud_deep_teal, 0.05);
+  background-color: alpha(@card_bg_color, 0.78);
+  border: 1px solid alpha(@borders, 0.35);
   border-radius: 16px;
   padding: 10px 12px;
 }
@@ -46,8 +48,8 @@
 }
 
 .development-notice {
-  background-color: alpha(@goreecloud_soft_amber, 0.07);
-  border: 1px solid alpha(@goreecloud_soft_amber, 0.16);
+  background-color: alpha(@goreecloud_development_amber, 0.07);
+  border: 1px solid alpha(@goreecloud_development_amber, 0.16);
   border-radius: 16px;
   padding: 12px 14px;
 }
@@ -66,5 +68,5 @@
 }
 
 .navigation-sidebar row:selected {
-  background-color: alpha(@goreecloud_deep_teal, 0.12);
+  background-color: alpha(@goreecloud_ice_blue, 0.16);
 }
