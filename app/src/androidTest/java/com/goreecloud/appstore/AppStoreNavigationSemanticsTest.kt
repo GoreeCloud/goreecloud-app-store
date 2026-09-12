@@ -6,7 +6,9 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -72,8 +74,17 @@ class AppStoreNavigationSemanticsTest {
     fun categoryFiltersAreTouchSizedAndNarrowOnlyTheEntitledCatalog() {
         val density = InstrumentationRegistry.getInstrumentation()
             .targetContext.resources.displayMetrics.density
-        val communication = composeRule.onNode(hasText("Communication") and hasClickAction())
 
+        // The category controls live in a horizontal LazyRow. On compact viewports,
+        // later categories are intentionally not composed until that collection is
+        // scrolled. Exercise the same semantics-backed scroll a user performs instead
+        // of assuming every lazy item is present in the initial semantics tree.
+        val all = composeRule.onNode(hasText("All") and hasClickAction())
+        all.assertExists().assertIsDisplayed().assertHasClickAction()
+        all.onParent().performScrollToNode(hasText("Communication") and hasClickAction())
+        composeRule.waitForIdle()
+
+        val communication = composeRule.onNode(hasText("Communication") and hasClickAction())
         communication.assertExists().assertIsDisplayed().assertHasClickAction()
         val bounds = communication.fetchSemanticsNode().boundsInRoot
         assertTrue(bounds.width / density >= 48.0f)
@@ -85,7 +96,10 @@ class AppStoreNavigationSemanticsTest {
             .assertExists()
             .assertIsDisplayed()
 
-        composeRule.onNode(hasText("All") and hasClickAction()).performClick()
+        val visibleAll = composeRule.onNode(hasText("All") and hasClickAction())
+        visibleAll.onParent().performScrollToNode(hasText("All") and hasClickAction())
+        composeRule.waitForIdle()
+        visibleAll.performClick()
         composeRule.waitForIdle()
         composeRule.onNode(hasText("10 items in this development catalog"))
             .assertExists()
