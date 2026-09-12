@@ -8,3 +8,6 @@
 .externalNativeBuild/
 .cxx/
 **/build/
+linux/target/
+.artifacts/
+linux/packaging/flatpak/files/

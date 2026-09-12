@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "application": "goreecloud-app-store",
+  "lifecycle": "development",
+  "status": "adoption-candidate",
+  "targetVersion": "1.1.0",
+  "requiredTargetVersion": "1.1.0",
+  "canonicalRepository": "GoreeCloud/goreecloud-glaze-ui",
+  "stableReleaseTag": "v1.1.0",
+  "stableReleaseRevision": "15cc76d2bcd4065552dc31c77145b63f34d9e7b2",
+  "stableContract": "GLAZE_UI_V1_1.md",
+  "nativeMapping": {
+    "platform": "Android",
+    "framework": "Jetpack Compose Material 3",
+    "generalTargetFloorDp": 48,
+    "touchAssistanceTargetFloorDp": 56,
+    "implementedAppearanceProfiles": ["Light", "Dark"],
+    "deepDarkSourceMapping": true,
+    "deepDarkRuntimeSelection": "pending-policy",
+    "atmosphere": "bounded-non-semantic-source-only",
+    "environmentalSampling": false,
+    "glazeMotion": "not-consumed"
+  },
+  "webMapping": {
+    "platform": "Web",
+    "framework": "standards-html-css-es-modules",
+    "generalTargetFloorPx": 48,
+    "implementedAppearanceProfiles": ["Light", "Dark"],
+    "deepDarkSourceMapping": true,
+    "deepDarkRuntimeSelection": "pending-policy",
+    "atmosphere": "bounded-non-semantic-source-only",
+    "environmentalSampling": false,
+    "externalRuntimeDependencies": false,
+    "glazeMotion": "not-consumed"
+  },
+  "acceptance": {
+    "automatedContract": true,
+    "renderedAcceptance": "pending",
+    "nativeAccessibilityAcceptance": "pending",
+    "representativePhysicalDeviceAcceptance": "pending",
+    "supportedFormFactorAcceptance": "pending",
+    "humanVisualExcellence": "pending",
+    "webRenderedAcceptance": "pending",
+    "webAccessibilityAcceptance": "pending",
+    "webRepresentativeTargetAcceptance": "pending",
+    "productionEligible": false,
+    "conformanceAccepted": false
+  }
+}

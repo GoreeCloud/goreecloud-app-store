@@ -9,52 +9,74 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+enum class GlazeThemeMode { SYSTEM, LIGHT, DARK, DEEP_DARK }
+
+/** GLAZE UI V1.1 source mapping. Atmosphere never carries semantic state. */
+object GlazeAtmosphere {
+    val DeepTeal = Color(0xFF0F6B6F)
+    val MineralTeal = Color(0xFF1C8A8D)
+    val SoftAqua = Color(0xFF8FD6D2)
+    val SoftAmber = Color(0xFFD9A35F)
+    val ChampagneGold = Color(0xFFE7C78A)
+}
+
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF315DA8),
+    primary = Color(0xFF3478F6),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFE6EEFF),
-    onPrimaryContainer = Color(0xFF0D2B5B),
-    secondary = Color(0xFF62527A),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFF0E9FA),
-    onSecondaryContainer = Color(0xFF2B1F3D),
-    background = Color(0xFFF7F8FC),
-    onBackground = Color(0xFF191C20),
+    primaryContainer = Color(0x1F3478F6),
+    onPrimaryContainer = Color(0xFF151A23),
+    secondary = Color(0xFF7657F6),
+    background = Color(0xFFF5F7FA),
+    onBackground = Color(0xFF151A23),
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF191C20),
-    surfaceVariant = Color(0xFFEEF1F7),
-    onSurfaceVariant = Color(0xFF454A53),
-    outline = Color(0xFF747981),
+    onSurface = Color(0xFF151A23),
+    surfaceVariant = Color(0xE0FFFFFF),
+    onSurfaceVariant = Color(0xFF5D6675),
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFFAAC7FF),
-    onPrimary = Color(0xFF003061),
-    primaryContainer = Color(0xFF17477E),
-    onPrimaryContainer = Color(0xFFD7E2FF),
-    secondary = Color(0xFFD2BFE8),
-    onSecondary = Color(0xFF382D49),
-    secondaryContainer = Color(0xFF4F435F),
-    onSecondaryContainer = Color(0xFFEEDBFF),
-    background = Color(0xFF101319),
-    onBackground = Color(0xFFE2E2E8),
-    surface = Color(0xFF171A21),
-    onSurface = Color(0xFFE2E2E8),
-    surfaceVariant = Color(0xFF242A35),
-    onSurfaceVariant = Color(0xFFC5C8D0),
-    outline = Color(0xFF8F939C),
+    primary = Color(0xFF8DB5FF),
+    onPrimary = Color(0xFF0B0D11),
+    primaryContainer = Color(0x1F8DB5FF),
+    onPrimaryContainer = Color(0xFFF5F7FA),
+    secondary = Color(0xFFA990FF),
+    background = Color(0xFF0B0D11),
+    onBackground = Color(0xFFF5F7FA),
+    surface = Color(0xFF12151B),
+    onSurface = Color(0xFFF5F7FA),
+    surfaceVariant = Color(0xDB181D26),
+    onSurfaceVariant = Color(0xFFB0B7C3),
 )
 
-val GlazeCardShape = RoundedCornerShape(28.dp)
-val GlazeSmallCardShape = RoundedCornerShape(20.dp)
-val GlazeArtworkShape = RoundedCornerShape(18.dp)
+private val DeepDarkColors = darkColorScheme(
+    primary = Color(0xFF8DB5FF),
+    onPrimary = Color(0xFF05070A),
+    primaryContainer = Color(0x1F8DB5FF),
+    onPrimaryContainer = Color(0xFFF5F7FA),
+    secondary = Color(0xFFA990FF),
+    background = Color(0xFF05070A),
+    onBackground = Color(0xFFF5F7FA),
+    surface = Color(0xFF0D1015),
+    onSurface = Color(0xFFF5F7FA),
+    surfaceVariant = Color(0xE612161D),
+    onSurfaceVariant = Color(0xFFABB4C2),
+)
+
+val GlazeCardShape = RoundedCornerShape(24.dp)
+val GlazeSmallCardShape = RoundedCornerShape(16.dp)
+val GlazeArtworkShape = RoundedCornerShape(16.dp)
 val GlazeCapsuleShape = RoundedCornerShape(999.dp)
 
 @Composable
-fun GlazeTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
-        typography = MaterialTheme.typography,
-        content = content,
-    )
+fun GlazeTheme(
+    mode: GlazeThemeMode = GlazeThemeMode.SYSTEM,
+    content: @Composable () -> Unit,
+) {
+    val scheme = when (mode) {
+        GlazeThemeMode.SYSTEM -> if (isSystemInDarkTheme()) DarkColors else LightColors
+        GlazeThemeMode.LIGHT -> LightColors
+        GlazeThemeMode.DARK -> DarkColors
+        GlazeThemeMode.DEEP_DARK -> DeepDarkColors
+    }
+    MaterialTheme(colorScheme = scheme, content = content)
 }

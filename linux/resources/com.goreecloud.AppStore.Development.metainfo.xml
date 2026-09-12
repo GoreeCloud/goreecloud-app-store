@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.goreecloud.AppStore.Development</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <name>GoreeCloud App Store Dev</name>
+  <summary>Browse development GoreeCloud applications, services, and Linux package availability</summary>
+  <description>
+    <p>GoreeCloud App Store Dev is the development Linux client for the GoreeCloud first-party application and service catalog.</p>
+    <p>Package download actions remain unavailable unless exact release metadata, integrity evidence, signing/provenance, and Wardveil acceptance are present.</p>
+  </description>
+  <launchable type="desktop-id">com.goreecloud.AppStore.Development.desktop</launchable>
+  <developer id="com.goreecloud">
+    <name>GoreeCloud</name>
+  </developer>
+  <url type="homepage">https://github.com/GoreeCloud/goreecloud-app-store</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0-dev" date="2026-08-31">
+      <description><p>Initial native Linux development bootstrap.</p></description>
+    </release>
+  </releases>
+</component>

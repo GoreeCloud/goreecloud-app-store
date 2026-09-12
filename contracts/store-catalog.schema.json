@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://goreecloud.example/contracts/store-catalog.schema.json",
+  "title": "GoreeCloud App Store catalog",
+  "type": "object",
+  "required": ["schemaVersion", "environment", "authoritative", "shareUrl", "notice", "items"],
+  "properties": {
+    "schemaVersion": {"const": 2},
+    "environment": {"type": "string", "minLength": 1},
+    "authoritative": {"type": "boolean"},
+    "shareUrl": {"type": "string"},
+    "notice": {"type": "string", "minLength": 1},
+    "items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/item"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "name", "summary", "type", "category", "version", "releaseChannel", "packageName", "serviceUrl", "artifacts", "access"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]+$"},
+        "name": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "type": {"enum": ["application", "service"]},
+        "category": {"type": "string", "minLength": 1},
+        "version": {"type": "string"},
+        "releaseChannel": {"enum": ["stable", "beta", "development"]},
+        "packageName": {"type": "string"},
+        "serviceUrl": {"type": "string"},
+        "artifacts": {
+          "type": "object",
+          "required": ["linux"],
+          "properties": {
+            "linux": {
+              "type": "array",
+              "minItems": 2,
+              "items": {"$ref": "#/$defs/linuxArtifact"}
+            }
+          },
+          "additionalProperties": false
+        },
+        "access": {
+          "type": "object",
+          "required": ["requireSignedIn", "anyAudience"],
+          "properties": {
+            "requireSignedIn": {"type": "boolean"},
+            "anyAudience": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "linuxArtifact": {
+      "type": "object",
+      "required": ["format", "role", "status", "architecture", "packageId", "downloadUrl", "sha256", "sourceRevision", "signed", "wardveilAccepted"],
+      "properties": {
+        "format": {"enum": ["deb", "flatpak"]},
+        "role": {"enum": ["application", "service-client"]},
+        "status": {"enum": ["unpublished", "published", "blocked", "withdrawn"]},
+        "architecture": {"type": "string", "minLength": 1},
+        "packageId": {"type": "string"},
+        "downloadUrl": {"type": "string"},
+        "sha256": {"type": "string"},
+        "sourceRevision": {"type": "string"},
+        "signed": {"type": "boolean"},
+        "wardveilAccepted": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

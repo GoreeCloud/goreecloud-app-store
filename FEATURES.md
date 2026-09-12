@@ -1,37 +1,36 @@
 # GoreeCloud App Store Features
 
-## Implemented in the native bootstrap
+## Implemented Development capabilities
 
-- Native Android application shell using Kotlin and Jetpack Compose.
-- Glaze-oriented tangible cards/surfaces, capsule-shaped search/account controls, adaptive Compose layout, and accessible 48dp-class controls.
+- Native Kotlin / Jetpack Compose Android client.
+- Entitlement-first catalog filtering before presentation and search.
+- Development identity fixture switching with no implicit administrator bypass.
 - Discover, Apps, Services, Updates, and Library navigation.
-- Search constrained to the already-entitled client catalog.
-- Application and service item models.
-- Development JSON catalog loader.
-- Multi-user development session switcher.
-- Explicit entitlement filtering with no implicit administrator bypass.
-- Product-detail dialog with deliberately unavailable install/open action until delivery is trusted.
-- Platform-integration checkpoint for Glaze UI, Identity, Wardveil, Privacy Shield, Everkeep, and Mesh.
-- Unit tests and Android CI.
+- Contextual search over the already-authorized catalog.
+- Product/service details with explicit Development state.
+- Twelve-item first-party catalog fixture: Browser, Messenger, Location, Contacts, Tasks, Notes, Memos, Launcher, Keyboard, Manager, Identity Center, and Mesh Center.
+- Explicit canonical branding provenance and Android artwork mapping for every current catalog item.
+- Current GLAZE UI V1.1 / 1.1.0 source mapping with Light/Dark structure, Deep Dark source support, optical geometry, and bounded non-semantic atmosphere primitives.
+- Development status surface for integral-platform boundaries.
+- Stable Development package/signing lineage under `com.goreecloud.appstore.dev`.
+- Exact-source CI with branding, design-system contract, tests, lint, build, package/version, signing, and SHA-256 evidence checks.
+- No analytics in the Development client.
+- Package installation authority intentionally disabled.
 
-## Next functional milestones
+## Planned / acceptance-gated
 
-- Production GoreeCloud Identity OIDC/session adapter.
-- Server-authoritative entitlement/catalog API.
-- Authenticated/signed catalog snapshots and rollback/revocation semantics.
-- GoreeCloud application release ingestion pipeline.
-- Package provenance, digest, signing-certificate, and Wardveil verification.
-- Secure APK download and Android package installation.
-- Update detection, staged download, user-visible release notes, and rollback-safe state.
-- Installed Library scoped by identity and device.
-- Service endpoint/deep-link launch with allowlisting and service-side reauthorization.
-- Privacy Shield policies for search/history/recommendations/diagnostics.
-- Everkeep protection contract and recovery evidence for library/history/catalog configuration.
-- GoreeCloud Mesh lifecycle/capability events.
-- Rich app pages: screenshots, changelog, source/license, permissions, compatibility, privacy, security, continuity, support.
-- Categories, collections, editorial surfaces, recommendations, wish/save-for-later, and notification preferences where privacy policy permits.
-- Multiple release channels with per-user/channel entitlements.
-- Device compatibility and architecture filtering.
-- Download/install queue and resilient retry state.
-- Per-account update policy and optional automatic-update controls where Android policy permits.
-- Accessibility, tablet, foldable, keyboard/mouse, and large-window acceptance.
+- Production GoreeCloud Identity/OIDC application integration.
+- Server-authoritative personalized catalog delivery.
+- Authenticated/versioned catalog snapshots and rollback.
+- Approved package/release metadata ingestion.
+- Wardveil artifact verification and quarantine/rejection handoff.
+- Secure APK download and Android installation/update flow.
+- Installed-package and Library reconciliation.
+- Approved service endpoint opening and re-authorization.
+- Privacy Shield runtime policy/consent acceptance.
+- Everkeep protection, export, and recovery acceptance.
+- GoreeCloud Mesh production lifecycle/update transport.
+- GLAZE UI V1.1 rendered, accessibility, form-factor, representative-device, and Human Visual Excellence acceptance.
+- Runtime Deep Dark selection policy and accessibility fallbacks.
+- Controlled production signing and key recovery.
+- Release/deployment/rollback acceptance and Stable qualification.

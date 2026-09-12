@@ -10,7 +10,7 @@ import org.json.JSONObject
 object CatalogJsonLoader {
     fun load(context: Context): List<StoreItem> {
         val source = context.assets
-            .open("catalog/development-catalog.json")
+            .open("development-catalog.json")
             .bufferedReader()
             .use { it.readText() }
 
