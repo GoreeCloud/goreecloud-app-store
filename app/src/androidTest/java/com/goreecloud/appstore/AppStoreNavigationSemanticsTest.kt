@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertTrue
@@ -76,13 +77,13 @@ class AppStoreNavigationSemanticsTest {
         val density = InstrumentationRegistry.getInstrumentation()
             .targetContext.resources.displayMetrics.density
 
-        // The category controls are nested: a horizontally lazy category row lives inside
-        // the vertically lazy catalog. On the compact rendered viewport the category item
-        // itself may not be composed at test start, and later category chips may not be
-        // composed until the row is scrolled. Exercise both semantic scroll boundaries in
-        // the same order a compact-screen user reaches the controls.
+        // Discover owns the category controls as its fourth LazyColumn item (index 3):
+        // development notice, hero, search, then category filters. The compact rendered
+        // viewport can start with that item outside the composed semantics tree, so use
+        // LazyColumn's own ScrollToIndex authority instead of depending on text discovery
+        // for an item that does not exist in semantics until it is materialized.
         val catalog = composeRule.onNode(hasScrollAction())
-        catalog.performScrollToNode(hasText("Categories"))
+        catalog.performScrollToIndex(3)
         composeRule.waitForIdle()
 
         val all = composeRule.onNode(hasText("All") and hasClickAction())
@@ -102,10 +103,18 @@ class AppStoreNavigationSemanticsTest {
             .assertExists()
             .assertIsDisplayed()
 
-        val visibleAll = composeRule.onNode(hasText("All") and hasClickAction())
-        visibleAll.onParent().performScrollToNode(hasText("All") and hasClickAction())
+        // Communication remains materialized after selection, so use its category-row
+        // parent as the stable scroll authority to return to All. Do not try to resolve
+        // an off-screen All child before scrolling the horizontal LazyRow back to it.
+        composeRule.onNode(hasText("Communication") and hasClickAction())
+            .onParent()
+            .performScrollToNode(hasText("All") and hasClickAction())
         composeRule.waitForIdle()
-        visibleAll.performClick()
+
+        composeRule.onNode(hasText("All") and hasClickAction())
+            .assertExists()
+            .assertIsDisplayed()
+            .performClick()
         composeRule.waitForIdle()
         composeRule.onNode(hasText("10 items in this development catalog"))
             .assertExists()
