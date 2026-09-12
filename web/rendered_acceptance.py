@@ -50,8 +50,8 @@ VIEWPORTS = (
     Viewport("expanded", 1280, 900),
 )
 APPEARANCES = (
-    Appearance("light", "light", "rgb(244, 248, 248)"),
-    Appearance("dark", "dark", "rgb(16, 26, 32)"),
+    Appearance("light", "light", "rgb(247, 249, 252)"),
+    Appearance("dark", "dark", "rgb(11, 13, 17)"),
 )
 
 
@@ -429,6 +429,7 @@ def main() -> None:
         "application": "goreecloud-app-store",
         "clientVersion": "0.1.0-dev",
         "lifecycle": "development",
+        "glazeUiVersion": "1.3.0",
         "productionAcceptance": False,
         "scope": {
             "actualBrowser": "GitHub-hosted Chrome headless",
@@ -454,7 +455,7 @@ def main() -> None:
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(
-        f"Web rendered Development acceptance passed across {len(results)} browser cases, "
+        f"Web rendered GLAZE UI V1.3 Development acceptance passed across {len(results)} browser cases, "
         "explicit release-channel isolation, Forced Colors, and RTL structural checks"
     )
 
